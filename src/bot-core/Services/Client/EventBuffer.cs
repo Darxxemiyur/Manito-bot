@@ -29,10 +29,10 @@ namespace Manito.Discord.Client
         }
         public EventBuffer(EventInline client)
         {
-            Message = new(x => client.OnMessage += x);
-            Interact = new(x => client.OnInteraction += x);
-            CompInteract = new(x => client.OnComponentInteraction += x);
-            MsgAddReact = new(x => client.OnReactAdd += x);
+            Message = new(client.MessageBuffer);
+            Interact = new(client.InteractionBuffer);
+            CompInteract = new(client.CompInteractBuffer);
+            MsgAddReact = new(client.ReactAddBuffer);
         }
         private IEnumerable<Task> GetLoops()
         {
@@ -57,10 +57,10 @@ namespace Manito.Discord.Client
             CreateEventBuffer();
             linker(_eventBuffer.Handle);
         }
-        public SingleEventBuffer(Action<Func<DiscordClient, TEvent, Task>> linker)
+        public SingleEventBuffer(PerEventInline<TEvent> linker)
         {
             CreateEventBuffer();
-            linker(_eventBuffer.Handle);
+            linker.OnFail += _eventBuffer.Handle;
         }
 
         public async Task Loop()

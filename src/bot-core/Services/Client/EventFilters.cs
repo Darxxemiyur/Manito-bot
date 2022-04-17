@@ -15,12 +15,12 @@ namespace Manito.Discord.Client
     {
         private MyService _service;
         private EventBuffer _eventBuffer;
-        public EventBuffer MyEventBuffer => _eventBuffer;
         private ShopFilter _shopFilter;
-        public ShopFilter Shop => _shopFilter;
         private NoiseFilter _noiseFilter;
-        public NoiseFilter Noise => _noiseFilter;
         private EconomyFilter _economyFilter;
+        public EventBuffer MyEventBuffer => _eventBuffer;
+        public ShopFilter Shop => _shopFilter;
+        public NoiseFilter Noise => _noiseFilter;
         public EconomyFilter Economy => _economyFilter;
         public EventFilters(MyService service, EventBuffer eventBuffer)
         {

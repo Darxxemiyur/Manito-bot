@@ -14,6 +14,7 @@ using DSharpPlus.EventArgs;
 using Cyriller;
 
 using Manito.Discord.Client;
+using System.Collections.Generic;
 
 namespace Manito.Discord.Shop
 {
@@ -24,14 +25,17 @@ namespace Manito.Discord.Shop
         public DiscordUser Customer => _customer;
         private ShopCashRegister _cashRegister;
         private MyDiscordClient _client;
-        public ShopSession(MyDiscordClient client, DiscordUser customer, ShopCashRegister cashRegister)
+        private Action<ShopSession> _onExit;
+        public ShopSession(MyDiscordClient client, DiscordUser customer,
+         ShopCashRegister cashRegister, Action<ShopSession> onExit)
         {
             _client = client;
             _cashRegister = cashRegister;
             _customer = customer;
+            _onExit = onExit;
         }
         private DiscordEmbedBuilder BaseContent() =>
-        new DiscordEmbedBuilder().WithTitle("~Магазин Манито~");
+        new DiscordEmbedBuilder().WithTitle("~Магазин Манито~").WithColor(DiscordColor.Blurple);
         private DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
         {
 
@@ -44,25 +48,32 @@ namespace Manito.Discord.Shop
             return new DiscordInteractionResponseBuilder(GetDResponse(builder));
 
         }
+        private void StopSession()
+        {
+            _onExit(this);
+            throw new Exception();
+        }
+
         private DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null)
         {
-            var emb = prev ?? new DiscordEmbedBuilder();
+            var emb = prev ?? BaseContent();
 
             var items = _cashRegister.GetShopItems();
+            var emj = "<:964951871435468810:964951871435468810>";
 
-            var str = items.Aggregate<ShopItem, String>("", (x, y) =>
+            var str = items.Aggregate(emb, (x, y) =>
             {
-                var price = y.Price;
-                return x += "\n\n**Название:** " + y.Name + "\n**Категория:** "
-                + y.Category.ToString() + "\n**Цена за единицу:** " + price.ToString();
+                var price = emj + " " + y.Price.ToString();
+                return x.AddField(y.Name, "**Цена за 1 ед:** " + price, true);
             });
 
 
-            return emb.WithDescription(emb.Description + str);
+            return emb;
 
         }
-        public async Task EnterMenu(DiscordInteraction args)
+        private async Task HandleMenu(DiscordInteraction args)
         {
+
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
              GetResponse(GetShopItems()));
             var origMsg = await args.GetOriginalResponseAsync();
@@ -72,8 +83,24 @@ namespace Manito.Discord.Shop
             {
                 var response = await _client.ActivityTools.WaitForMessage((x) =>
                     x.Channel.Id == args.Channel.Id && x.Author.Id == args.User.Id);
-            }
 
+                if (response.Message.Content.Contains("exit", StringComparison.OrdinalIgnoreCase))
+                    StopSession();
+
+                await response.Message.RespondAsync("Купи дарагой да");
+            }
+        }
+        public async Task EnterMenu(DiscordInteraction args)
+        {
+            try
+            {
+                await HandleMenu(args);
+
+            }
+            catch (Exception e)
+            {
+                return;
+            }
         }
     }
 

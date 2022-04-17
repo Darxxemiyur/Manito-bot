@@ -38,7 +38,7 @@ namespace Manito.Discord
         {
             await _myDiscordClient.Start();
             await _filters.PostInitialize();
-            await _myDiscordClient.AppCommands.UpdateCommands();
+            await _appCommands.UpdateCommands();
             await _myDiscordClient.StartLongTerm();
 
         }

@@ -12,12 +12,8 @@ namespace Manito.Discord
     public class DiscordEventProxy<T> : IDisposable
     {
         private TaskEventProxy<(DiscordClient, T)> _facade;
-        public DiscordEventProxy()
-        {
-            _facade = new();
-        }
-        public Task Handle(DiscordClient client, T stuff) => Handle((client, stuff));
-        public Task Handle((DiscordClient, T) data) => _facade.Handle(data);
+        public DiscordEventProxy() => _facade = new();
+        public Task Handle(DiscordClient client, T stuff) => _facade.Handle((client, stuff));
         public Task<Boolean> HasAny() => _facade.HasAny();
         public async Task Cancel() => await _facade.Cancel();
         public async Task<(DiscordClient, T)> GetData() => await _facade.GetData();

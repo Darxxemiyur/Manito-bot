@@ -39,7 +39,6 @@ namespace Manito.Discord.Client
             _client.UseInteractivity(new InteractivityConfiguration()
             {
                 PollBehaviour = PollBehaviour.KeepEmojis,
-
                 Timeout = TimeSpan.FromSeconds(30)
             });
 

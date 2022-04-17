@@ -51,7 +51,7 @@ namespace Manito.Discord.Client
             Func<ComponentInteractionCreateEventArgs, bool> checker, TimeSpan timeout)
         {
             var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker);
-            _evInline.Add(catcher);
+            _evInline.CompInteractBuffer.Add(catcher);
             var evnv = await catcher.GetEvent(timeout);
 
             return evnv.Item2;
@@ -60,7 +60,8 @@ namespace Manito.Discord.Client
             Func<MessageReactionAddEventArgs, bool> pred, TimeSpan timeout)
         {
             var catcher = new SingleEventCatcher<MessageReactionAddEventArgs>(pred);
-            _evInline.Add(catcher);
+            _evInline.ReactAddBuffer.Add(catcher);
+            Console.WriteLine(13);
             var evnv = await catcher.GetEvent(timeout);
 
             return evnv.Item2;
@@ -69,7 +70,7 @@ namespace Manito.Discord.Client
             Func<MessageCreateEventArgs, bool> pred, TimeSpan timeout)
         {
             var catcher = new SingleEventCatcher<MessageCreateEventArgs>(pred);
-            _evInline.Add(catcher);
+            _evInline.MessageBuffer.Add(catcher);
             var evnv = await catcher.GetEvent(timeout);
 
             return evnv.Item2;

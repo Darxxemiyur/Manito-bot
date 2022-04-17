@@ -64,7 +64,7 @@ namespace Manito.Discord.Shop
 
         public async Task Checkout()
         {
-
+            
         }
     }
 

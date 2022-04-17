@@ -11,13 +11,18 @@ using DSharpPlus.SlashCommands;
 using Emzi0767.Utilities;
 using DSharpPlus.Interactivity.EventHandling;
 
+using Manito.Discord.Client;
+
 namespace Manito.Discord.Chat
 {
     public class ChannelHook
     {
-        public ChannelHook()
+        private ulong _channelId;
+        private ulong _messageId;
+        private EventInline _catcher;
+        public ChannelHook(EventInline catcher)
         {
-
+            _catcher = catcher;
         }
     }
 }

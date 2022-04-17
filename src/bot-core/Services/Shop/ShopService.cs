@@ -32,7 +32,8 @@ namespace Manito.Discord.Shop
             if (_shopSessions.Any(x => x.Customer == customer))
                 return false;
 
-            _shopSessions.Add(new ShopSession(_client, customer, _cashRegister));
+            _shopSessions.Add(new ShopSession(_client, customer, _cashRegister,
+             (x) => _shopSessions.Remove(x)));
             return true;
         }
         public ShopSession GetSession(DiscordUser customer)
