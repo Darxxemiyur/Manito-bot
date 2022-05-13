@@ -11,7 +11,7 @@ namespace Manito
     {
         async static Task Main(string[] args)
         {
-            var service = await MyService.Create();
+            var service = await MyDomain.Create();
 	
 	var service1 = service;
             await service1.StartBot();

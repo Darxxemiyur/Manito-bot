@@ -10,6 +10,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Emzi0767.Utilities;
 using System.Linq;
+using System.Threading;
 
 namespace Manito.Discord.Client
 {
@@ -40,55 +41,63 @@ namespace Manito.Discord.Client
     {
         public static int DefaultOrder = 10;
         private Dictionary<int, List<Predictator<TEvent>>> _predictators;
+        private SemaphoreSlim _lock;
         public event Func<DiscordClient, TEvent, Task> OnFail;
         public PerEventInline(SingleEventBuffer<TEvent> buffer)
         {
+            _lock = new(1, 1);
             _predictators = new();
             buffer.OnMessage += Check;
         }
-        public void Add(int order, Predictator<TEvent> predictator)
+        public async Task Add(int order, Predictator<TEvent> predictator)
         {
+            await _lock.WaitAsync();
             if (!_predictators.ContainsKey(order))
                 _predictators[order] = new();
 
             _predictators[order].Add(predictator);
+            _lock.Release();
         }
-        public void Add(Predictator<TEvent> predictator)
-        {
-            Add(DefaultOrder, predictator);
-        }
+        public Task Add(Predictator<TEvent> predictator) => Add(DefaultOrder, predictator);
 
         private async Task Check(DiscordClient client, TEvent args)
         {
+            await _lock.WaitAsync();
             var handled = false;
-
-            foreach (var checkerLine in _predictators)
+            List<(int, Predictator<TEvent>)> toDelete = new();
+            foreach (var ch in _predictators.SelectMany(x => x.Value.Select(y => (x.Key, y))))
             {
-                var toDelete = new List<Predictator<TEvent>>();
-                foreach (var checker in checkerLine.Value)
+                var chk = ch.y;
+                if (await chk.IsREOL())
                 {
-                    if (await checker.IsREOL())
+                    toDelete.Add((ch.Key, chk));
+                }
+                else if (await chk.IsFitting(args) && (!handled || chk.RunIfHandled))
+                {
+                    handled = true;
+                    await chk.Handle(client, args);
+                    args.Handled = true;
+
+                    if (await chk.IsREOL())
                     {
-                        toDelete.Add(checker);
-                    }
-                    else if (await checker.IsFitting(args) && (!handled || checker.RunIfHandled))
-                    {
-                        handled = true;
-                        await checker.Handle(client, args);
-                        args.Handled = true;
+                        toDelete.Add((ch.Key, chk));
                     }
 
-                    if (await checker.IsREOL())
-                        toDelete.Add(checker);
                 }
-                foreach (var item in toDelete)
-                    checkerLine.Value.Remove(item);
             }
 
+            toDelete.ForEach(x =>
+            {
+                _predictators[x.Item1].Remove(x.Item2);
+                if (_predictators[x.Item1].Count <= 0)
+                    _predictators.Remove(x.Item1);
+            });
+            _lock.Release();
 
             if (!handled && OnFail != null)
                 await OnFail(client, args);
         }
+
     }
     public abstract class Predictator<TEvent> where TEvent : DiscordEventArgs
     {
@@ -96,31 +105,26 @@ namespace Manito.Discord.Client
         public abstract Task<bool> IsFitting(TEvent args);
         public abstract bool RunIfHandled { get; }
         public abstract Task<bool> IsREOL();
-        private readonly DiscordEventProxy<(Predictator<TEvent>, TEvent)> _eventProxy;
+        protected readonly DiscordEventProxy<(Predictator<TEvent>, TEvent)> _eventProxy;
         protected Predictator() => _eventProxy = new();
         public Task Handle(DiscordClient client, TEvent args) =>
             _eventProxy.Handle(client, (this, args));
-        public async Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout)
+        public virtual async Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout)
 
         {
             var timeoutTask = Task.Delay(timeout);
 
             var gettingData = _eventProxy.GetData();
 
-            Console.WriteLine(4);
             var either = await Task.WhenAny(timeoutTask, gettingData);
 
             if (either == timeoutTask)
-                return (null, null);
+                throw new TimeoutException($"Event awaiting for {timeout} has timed out!");
 
             var result = await gettingData;
-
-            Console.WriteLine(result.ToString());
 
             return (result.Item1, result.Item2.Item2);
 
         }
-
-        public Task HasEvents() => _eventProxy.HasAny();
     }
 }

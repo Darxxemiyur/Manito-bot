@@ -24,8 +24,8 @@ namespace Manito.Discord.Shop
         /// <summary>
         /// Price for unit of Item
         /// </summary>
-        public UInt64 Price => ShopItem.Price * Amount;
-        public UInt64 Amount;
+        public long Price => ShopItem.Price * Amount;
+        public long Amount;
 
         public CartItem(ShopItem item, uint amount)
         {

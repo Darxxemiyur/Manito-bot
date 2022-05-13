@@ -19,7 +19,7 @@ namespace Manito.Services.Inventory
             get => _realItem.Quantity;
             set => _realItem.Quantity = value;
         }
-        public int ItemType
+        public string ItemType
         {
             get => _realItem.ItemType;
             set => _realItem.ItemType = value;

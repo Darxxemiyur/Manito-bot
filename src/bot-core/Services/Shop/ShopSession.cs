@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -15,6 +16,10 @@ using Cyriller;
 
 using Manito.Discord.Client;
 using System.Collections.Generic;
+using DSharpPlus.CommandsNext.Converters;
+using Manito.Discord.FastJoin;
+using System.Net;
+using Manito.Discord.Economy;
 
 namespace Manito.Discord.Shop
 {
@@ -26,16 +31,21 @@ namespace Manito.Discord.Shop
         private ShopCashRegister _cashRegister;
         private MyDiscordClient _client;
         private Action<ShopSession> _onExit;
-        public ShopSession(MyDiscordClient client, DiscordUser customer,
+        private ServerEconomy _economy;
+        public ShopSession(MyDiscordClient client, DiscordUser customer, ServerEconomy economy,
          ShopCashRegister cashRegister, Action<ShopSession> onExit)
         {
             _client = client;
             _cashRegister = cashRegister;
             _customer = customer;
             _onExit = onExit;
+            _economy = economy;
         }
-        private DiscordEmbedBuilder BaseContent() =>
-        new DiscordEmbedBuilder().WithTitle("~Магазин Манито~").WithColor(DiscordColor.Blurple);
+        private DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
+            _cashRegister.Default(bld)
+            .WithFooter($"{_args.User.Mention}", $"{_args.User.AvatarUrl}")
+            .WithAuthor($"{_args.User.Username}#{_args.User.Discriminator}",
+             null, $"{_args.User.AvatarUrl}");
         private DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
         {
 
@@ -51,55 +61,145 @@ namespace Manito.Discord.Shop
         private void StopSession()
         {
             _onExit(this);
-            throw new Exception();
         }
 
         private DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null)
         {
             var emb = prev ?? BaseContent();
-
-            var items = _cashRegister.GetShopItems();
-            var emj = "<:964951871435468810:964951871435468810>";
-
-            var str = items.Aggregate(emb, (x, y) =>
+            var str = _cashRegister.GetShopItems().Aggregate(emb, (x, y) =>
             {
-                var price = emj + " " + y.Price.ToString();
-                return x.AddField(y.Name, "**Цена за 1 ед:** " + price, true);
+                var price = $"{_economy.CurrencyEmoji} {y.Price}";
+                return x.AddField($"**{y.Name}**", "**Цена за 1 ед:** " + price, true);
             });
-
-
             return emb;
 
         }
-        private async Task HandleMenu(DiscordInteraction args)
+        private DiscordSelectComponent GetSelector(IEnumerable<ShopItem> list = null)
         {
 
-            await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-             GetResponse(GetShopItems()));
-            var origMsg = await args.GetOriginalResponseAsync();
+            var items = (list ?? _cashRegister.GetShopItems())
+            .Select(x => new DiscordSelectComponentOption(x.Name, x.Name, $"{x.Price}",
+                false, new DiscordComponentEmoji(_economy.CurrencyEmojiId)));
+            return new DiscordSelectComponent("Selection", "Выберите товар", items);
 
+        }
+        private bool _irtt;
+        private InteractionResponseType GetIRT()
+        {
+            var irtt = _irtt;
+            _irtt = true;
+            return irtt ? InteractionResponseType.UpdateMessage
+             : InteractionResponseType.ChannelMessageWithSource;
+        }
+        private Task Respond(DiscordInteractionResponseBuilder bld = default) =>
+        _args.CreateResponseAsync(GetIRT(), bld?.AsEphemeral(false));
+
+        private async Task ItemSelected(string itemId, ulong chId)
+        {
+            var items = _cashRegister.GetShopItems();
+
+            var item = items.First(x => x.Name == itemId);
+
+            var amt = await SelectingQuantity(item.Name, chId);
+
+            await _economy.Withdraw(_args.User.Id, item.Price * amt);
+        }
+
+        private IEnumerable<DiscordButtonComponent> Generate(
+            int[] nums, int mul) => nums.Select(x => new DiscordButtonComponent(ButtonStyle.Secondary,
+             $"{(x > 0 ? "add" : "sub")}{Math.Abs(x * mul)}", (x > 0 ? "+" : "") + $"{x * mul}"));
+        private IEnumerable<IEnumerable<DiscordButtonComponent>> Generate(
+         int[] nums, int[] muls) => muls.Select(x => Generate(nums, x));
+        private async Task<int> SelectingQuantity(string itemName, ulong chId)
+        {
+            var amount = 0;
+
+            var btns = Generate(new[] { -5, 1, 2, 5 }, new[] { 1, 10, 100 });
 
             while (true)
             {
-                var response = await _client.ActivityTools.WaitForMessage((x) =>
-                    x.Channel.Id == args.Channel.Id && x.Author.Id == args.User.Id);
+                var ms1 = $"Выберите количество {itemName}";
+                var ms2 = $"Выбранное количество {amount} ед.";
+                var mg2 = GetResponse(BaseContent().WithDescription($"{ms1}\n{ms2}"));
 
-                if (response.Message.Content.Contains("exit", StringComparison.OrdinalIgnoreCase))
-                    StopSession();
+                foreach (var row in btns)
+                    mg2.AddComponents(row);
 
-                await response.Message.RespondAsync("Купи дарагой да");
+
+                mg2.AddComponents(
+                    new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Назад"),
+                    new DiscordButtonComponent(ButtonStyle.Success, "Submit", "Выбрать"));
+
+
+                await Respond(mg2);
+
+
+                _args = (await _client.ActivityTools.WaitForComponentInteraction(x =>
+                    x.Message.ChannelId == chId && x.User.Id == _args.User.Id &&
+                    mg2.Components.SelectMany(y => y.Components)
+                    .Any(y => x.Interaction.Data.CustomId == y.CustomId))).Interaction;
+
+                if (_args.Data.CustomId == "Exit")
+                {
+                    amount = 0;
+                    break;
+                }
+
+                if (_args.Data.CustomId == "Submit")
+                    break;
+
+                var pressed = btns.SelectMany(x => x).First(x => x.CustomId == _args.Data.CustomId);
+
+                var change = int.Parse(pressed.Label);
+
+                amount = Math.Clamp(amount + change, 0, int.MaxValue);
             }
+
+            return amount;
         }
-        public async Task EnterMenu(DiscordInteraction args)
+
+        private DiscordInteraction _args;
+        public async Task EnterMenu(DiscordInteraction args, ulong chId)
         {
+            _args = args;
             try
             {
-                await HandleMenu(args);
+                var items = GetSelector();
+                var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Выйти");
+                while (true)
+                {
+                    var mg = GetResponse(GetShopItems()).AddComponents(items).AddComponents(exbtn);
+                    await Respond(mg);
 
+                    var argv = await _client.ActivityTools.WaitForComponentInteraction(x =>
+                        x.Message.ChannelId == chId && x.User.Id == args.User.Id &&
+                        mg.Components.SelectMany(x => x.Components)
+                        .Any(y => x.Interaction.Data.CustomId == y.CustomId));
+
+                    _args = argv.Interaction;
+
+                    if (_args.Data.CustomId == exbtn.CustomId)
+                        break;
+
+                    await ItemSelected(argv.Values[0], chId);
+
+                }
+
+                await Respond(GetResponse(BaseContent().WithDescription("Сессия успешно завершена.")));
+                StopSession();
+
+                await Task.Delay(10000);
+                await _args.DeleteOriginalResponseAsync();
             }
-            catch (Exception e)
+            catch (TimeoutException)
             {
-                return;
+                var ms = "Сессия завершена по причине привешения времени ожидания взаимодействия.";
+                var gld = _client.Client;
+                var chnl = await gld.GetChannelAsync(chId);
+                await _args.DeleteOriginalResponseAsync();
+                var msgtd = await chnl.SendMessageAsync(GetDResponse(BaseContent().WithDescription(ms)));
+                StopSession();
+                await msgtd.DeleteAsync();
             }
         }
     }

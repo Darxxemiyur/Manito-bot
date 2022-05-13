@@ -62,10 +62,13 @@ namespace Manito.Discord.Shop
             };
         }
 
-        public async Task Checkout()
+        public async Task Checkout(ShopItem item, int quantity)
         {
-            
+
         }
+        public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
+            (bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~")
+            .WithColor(DiscordColor.Blurple);
     }
 
 }

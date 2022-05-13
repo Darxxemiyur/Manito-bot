@@ -13,7 +13,8 @@ namespace Manito.Discord.Economy
     {
         
         public UInt64 DiscordID;
-        public UInt64 Currency;
+        public long Currency;
+        
     }
 
 }

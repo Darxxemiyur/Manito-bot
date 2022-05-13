@@ -14,5 +14,9 @@ namespace Manito.Discord.Db
         IMyDb CreateMyDbContext();
         Task<IMyDb> CreateMyDbContextAsync();
     }
+    /// <inheritdoc/>
+    public interface IMyDbFactory : IDbFactory
+    {
 
+    }
 }

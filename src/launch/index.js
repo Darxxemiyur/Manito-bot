@@ -3,11 +3,19 @@ const child_process = require("child_process");
 
 var path = process.argv[2];
 
+var deleg = (x) => console.log(x.toString());
+var hookOut = (x) => x.on("data", deleg);
+var hookErr = (x) => hookOut(x.stderr) && hookOut(x.stdout);
+
 var build = child_process.spawn("dotnet", ["build", path]);
-build.stdout.on("data", (x) => console.log(x.toString()));
+hookErr(build);
 
 var UntilExit = new Promise((OnGood, OnBad) => {
   build.once("exit", (x) => (x == 0 ? OnGood : OnBad)(x));
+});
+
+UntilExit.catch((e) => {
+  throw e;
 });
 
 UntilExit.then((OnGood) => {
@@ -19,10 +27,7 @@ UntilExit.then((OnGood) => {
   ]);
 
   ///Log std err/out for data
-  run.stdout.on("data", (x) => console.log(x.toString()));
-  run.stdout.on("error", (x) => console.log(x.toString()));
-  run.stderr.on("data", (x) => console.log(x.toString()));
-  run.stderr.on("error", (x) => console.log(x.toString()));
+  hookErr(run);
 
   /// Add linking events to prevent leaving zombie processes
   run.once("exit", () => OnGood());

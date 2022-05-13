@@ -17,25 +17,35 @@ using Manito.Discord.Economy;
 namespace Manito.Discord.Economy
 {
 
-    public class EconomyFilter
+    public class EconomyFilter : IModule
     {
-        private EconomyCommands _commands;
-        private MyService _service;
-        private List<DiscordApplicationCommand> _commandList;
-        public EconomyFilter(MyService service, EventBuffer eventBuffer)
+
+        public Task RunModule() => HandleLoop();
+        private async Task HandleLoop()
         {
-            _service = service;
-            _commands = new EconomyCommands();
-            _commandList = _commands.GetCommands().Select(x => x.Item1).ToList();
+            while (true)
+            {
+                var data = await _queue.GetData();
+                await FilterMessage(data.Item1, data.Item2);
+            }
+        }
+        private EconomyCommands _commands;
+        private List<DiscordApplicationCommand> _commandList;
+        private DiscordEventProxy<InteractionCreateEventArgs> _queue;
+        public EconomyFilter(MyDomain service, EventBuffer eventBuffer)
+        {
+            _commands = new EconomyCommands(service.Economy);
+            _commandList = _commands.GetCommands().ToList();
             service.MyDiscordClient.AppCommands.Commands.Add("Economy", _commandList);
-            eventBuffer.Interact.OnMessage += FilterMessage;
+            _queue = new();
+            eventBuffer.Interact.OnMessage += _queue.Handle;
         }
         public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
         {
-            if (_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
+            var res = _commands.Search(args.Interaction);
+            if (res != null)
             {
-                await _commands.HandleCommands(args.Interaction);
-
+                await res(args.Interaction);
                 args.Handled = true;
             }
         }

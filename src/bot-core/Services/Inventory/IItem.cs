@@ -4,16 +4,21 @@ namespace Manito.Services.Inventory
 {
     public interface IItem
     {
-        ulong Owner { get; set; }
+        ulong Owner
+        {
+            get;
+            set;
+        }
         int Quantity
         {
             get;
             set;
         }
-        int ItemType
+        string ItemType
         {
             get;
             set;
         }
+
     }
 }

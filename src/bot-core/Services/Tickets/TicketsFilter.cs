@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,13 +13,10 @@ using DSharpPlus.SlashCommands.EventArgs;
 using DSharpPlus.SlashCommands.Attributes;
 
 using Manito.Discord.Client;
-using Manito.Discord.Economy;
-using System.Threading;
 
-namespace Manito.Discord.Shop
+namespace Manito.Discord.Tickets
 {
-
-    public class ShopFilter : IModule
+    public class TicketsFilter
     {
         public Task RunModule() => Task.WhenAll(HandleLoop(), RunHooked());
         private async Task HandleLoop()
@@ -27,7 +25,6 @@ namespace Manito.Discord.Shop
             {
                 var data = (await _queue.GetData()).Item2;
                 await HandleAsCommand(data.Item1, data.Item2);
-
             }
         }
         private async Task<ulong> CheckMessage(ulong chnlId, ulong msgId)
@@ -46,7 +43,10 @@ namespace Manito.Discord.Shop
 
             return msgId;
         }
-        private DiscordMessageBuilder GetMsg() => _shopService.GetEnterMessage();
+        private DiscordMessageBuilder GetMsg()
+        {
+            throw new NotImplementedException();
+        }
         private async Task RunHooked()
         {
             ulong chnlId = 965561900517716008;
@@ -61,14 +61,12 @@ namespace Manito.Discord.Shop
                 await _queue.Handle(_service.MyDiscordClient.Client, payload);
             }
         }
-        private ShopService _shopService;
         private MyDomain _service;
         private List<DiscordApplicationCommand> _commandList;
         private DiscordEventProxy<(DiscordInteraction, ulong)> _queue;
-        public ShopFilter(MyDomain service, EventBuffer eventBuffer)
+        public TicketsFilter(MyDomain service, EventBuffer eventBuffer)
         {
             _service = service;
-            _shopService = service.ShopService;
             _commandList = GetCommands().ToList();
             service.MyDiscordClient.AppCommands.Commands.Add("Shop", _commandList);
             _queue = new();
@@ -90,24 +88,7 @@ namespace Manito.Discord.Shop
         }
         private async Task HandleAsCommand(DiscordInteraction args, ulong channelId)
         {
-            var res = await _shopService.Atomary(async (x) =>
-            {
-                if (!x.SessionExists(args.User))
-                {
-                    await x.StartSession(args.User, args, channelId);
-                    return true;
-                }
-                return false;
-            });
-
-
-            if (!res)
-            {
-                await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().AddEmbed(_shopService.Default()
-                    .WithDescription("Вы уже открыли магазин!"))
-                    .AsEphemeral(true));
-            }
+            
         }
     }
 

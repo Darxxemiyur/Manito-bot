@@ -10,19 +10,14 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Emzi0767.Utilities;
 using DSharpPlus.Interactivity.EventHandling;
+using System.Threading;
 
-using Manito.Discord.Client;
+using System.Threading.Tasks;
 
-namespace Manito.Discord.Chat
+namespace Manito.Discord.Client
 {
-    public class ChannelHook
+    interface IModule
     {
-        private ulong _channelId;
-        private ulong _messageId;
-        private EventInline _catcher;
-        public ChannelHook(EventInline catcher)
-        {
-            _catcher = catcher;
-        }
+        Task RunModule();
     }
 }

@@ -26,7 +26,7 @@ namespace Manito.Discord.Client
         {
             var res = _predictator(args);
 
-            _hasRan |= res;
+            _hasRan = _hasRan || res;
 
             return Task.FromResult(res);
         }

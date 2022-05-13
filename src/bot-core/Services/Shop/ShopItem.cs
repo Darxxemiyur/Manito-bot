@@ -24,7 +24,7 @@ namespace Manito.Discord.Shop
         /// <summary>
         /// Price for unit of Item
         /// </summary>
-        public UInt64 Price;
+        public long Price;
     }
 
 }

@@ -14,7 +14,10 @@
             "program": "${workspaceFolder}/src/launch/index.js",
             "args": [
                 "${workspaceFolder}/src/"
-            ]
+            ],
+            "presentation": {
+                "clear": true                        // <-- this line
+            }
         }
     ]
 }
