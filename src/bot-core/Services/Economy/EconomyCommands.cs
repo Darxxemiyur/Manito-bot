@@ -8,7 +8,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
-
+using Manito.Discord.Client;
 
 namespace Manito.Discord.Economy
 {
@@ -33,55 +33,56 @@ namespace Manito.Discord.Economy
             }
             return null;
         }
+        private Dictionary<string, string> GetLoc(string trans) => new Dictionary<string, string>() { { Locale, trans } };
         private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
         {
             yield return (new DiscordApplicationCommandOption("account", "Show currency",
              ApplicationCommandOptionType.SubCommand, null, null, new[] {
                 new DiscordApplicationCommandOption("target", "Account", ApplicationCommandOptionType.User,
-                 false, name_localizations: new Dictionary<string, string>() { { Locale, "счёт" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Счёт" } })
+                 false, name_localizations: GetLoc( "счёт"),
+                 description_localizations: GetLoc( "Счёт"))
              },
-             name_localizations: new Dictionary<string, string>() { { Locale, "посмотреть" } },
-             description_localizations: new Dictionary<string, string>() { { Locale, "Посмотреть средства" } }),
+             name_localizations: GetLoc("посмотреть"),
+             description_localizations: GetLoc("Посмотреть средства")),
              GetAccountDeposit);
 
             yield return (new DiscordApplicationCommandOption("transfer", "Transfer funds",
              ApplicationCommandOptionType.SubCommand, null, null, new[] {
                 new DiscordApplicationCommandOption("target", "Recipient", ApplicationCommandOptionType.User,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "получатель" }},
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Получатель" } }),
+                 true, name_localizations: GetLoc("получатель"),
+                 description_localizations: GetLoc("Получатель")),
                 new DiscordApplicationCommandOption("amount", "Amount", ApplicationCommandOptionType.Integer,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "сумма" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Сумма" } })
+                 true, name_localizations: GetLoc("сумма"),
+                 description_localizations: GetLoc("Сумма"))
              },
-             name_localizations: new Dictionary<string, string>() { { Locale, "перевести" } },
-             description_localizations: new Dictionary<string, string>() { { Locale, "Перевести средства" } }),
+             name_localizations: GetLoc("перевести"),
+             description_localizations: GetLoc("Перевести средства")),
              TransferMoney);
 
             yield return (new DiscordApplicationCommandOption("give", "Add funds",
              ApplicationCommandOptionType.SubCommand, null, null, new[] {
                 new DiscordApplicationCommandOption("target", "Account", ApplicationCommandOptionType.User,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "счёт" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Счёт" } }),
+                 true, name_localizations: GetLoc("счёт"),
+                 description_localizations: GetLoc("Счёт")),
                 new DiscordApplicationCommandOption("amount", "Amount", ApplicationCommandOptionType.Integer,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "сумма" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Сумма" } })
+                 true, name_localizations: GetLoc("сумма"),
+                 description_localizations:  GetLoc("Сумма"))
              },
-             name_localizations: new Dictionary<string, string>() { { Locale, "добавить" } },
-             description_localizations: new Dictionary<string, string>() { { Locale, "Добавить средства" } }),
+             name_localizations: GetLoc("добавить"),
+             description_localizations: GetLoc("Добавить средства")),
              Deposit);
-             
+
             yield return (new DiscordApplicationCommandOption("take", "Remove funds",
              ApplicationCommandOptionType.SubCommand, null, null, new[] {
                 new DiscordApplicationCommandOption("target", "Account", ApplicationCommandOptionType.User,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "счёт" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Счёт" } }),
+                 true, name_localizations: GetLoc("счёт"),
+                 description_localizations: GetLoc("Счёт")),
                 new DiscordApplicationCommandOption("amount", "Amount", ApplicationCommandOptionType.Integer,
-                 true, name_localizations: new Dictionary<string, string>() { { Locale, "сумма" } },
-                 description_localizations: new Dictionary<string, string>() { { Locale, "Сумма" } })
+                 true, name_localizations:GetLoc("сумма"),
+                 description_localizations: GetLoc("Сумма"))
              },
-             name_localizations: new Dictionary<string, string>() { { Locale, "удалить" } },
-             description_localizations: new Dictionary<string, string>() { { Locale, "Удалить средства" } }),
+             name_localizations: GetLoc("удалить"),
+             description_localizations: GetLoc("Удалить средства")),
              Withdraw);
         }
         public IEnumerable<DiscordApplicationCommand> GetCommands()
@@ -89,8 +90,8 @@ namespace Manito.Discord.Economy
             yield return new DiscordApplicationCommand("bank", "Bank",
              GetSubCommands().Select(x => x.Item1), true,
              ApplicationCommandType.SlashCommand,
-             new Dictionary<string, string>() { { Locale, "banj" } },
-             new Dictionary<string, string>() { { Locale, "Banj" } });
+             GetLoc("банк"),
+             GetLoc("Банк"));
 
         }
         /// <summary>
@@ -109,47 +110,88 @@ namespace Manito.Discord.Economy
 
 
             var msg = new DiscordInteractionResponseBuilder(new DiscordMessageBuilder()
-            .WithEmbed(new DiscordEmbedBuilder()
-            .WithDescription(deposit.Currency + $" {_economy.CurrencyEmoji}")
-            .WithTitle("Валюта").WithAuthor($"<@{target}>")));
+             .WithEmbed(new DiscordEmbedBuilder()
+             .WithDescription(deposit.Currency + $" {_economy.CurrencyEmoji}")
+             .WithTitle("Валюта").WithAuthor($"<@{target}>")));
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
 
         }
 
-        public async Task TransferMoney(DiscordInteraction args)
+        private async Task TransferMoney(DiscordInteraction args)
         {
+            var argtools = new AppArgsTools(args);
+
+            var tgt = argtools.AddReqArg("target");
+            var amot = argtools.AddReqArg("amount");
+
+            var msg = new DiscordInteractionResponseBuilder();
+
+            if (!argtools.DoHaveReqArgs())
+            {
+                msg.WithContent($"Неправильно введены аргументы!");
+                await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+                return;
+            }
+
             var from = args.User.Id;
-            var to = (ulong)args.Data.Options.First().Options.First(x => x.Name == "target").Value;
-            var amt = (long)args.Data.Options.First().Options.First(x => x.Name == "amount").Value;
+            var to = (ulong)GetItem(argtools, tgt);
+            var amt = (long)GetItem(argtools, amot);
 
             amt = await _economy.TransferFunds(from, to, amt);
 
-            var msg = new DiscordInteractionResponseBuilder();
             msg.WithContent($"Успешно переведено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
         }
-        public async Task Withdraw(DiscordInteraction args)
+        private async Task Withdraw(DiscordInteraction args)
         {
-            var to = (ulong)args.Data.Options.First().Options.First(x => x.Name == "target").Value;
-            var amt = (long)args.Data.Options.First().Options.First(x => x.Name == "amount").Value;
+            var argtools = new AppArgsTools(args);
 
-            await _economy.Withdraw(to, amt);
+            var tgt = argtools.AddReqArg("target");
+            var amot = argtools.AddReqArg("amount");
 
             var msg = new DiscordInteractionResponseBuilder();
+
+            if (!argtools.DoHaveReqArgs())
+            {
+                msg.WithContent($"Неправильно введены аргументы!");
+                await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+                return;
+            }
+
+            var to = (ulong)GetItem(argtools, tgt);
+            var amt = (long)GetItem(argtools, amot);
+
+            amt = await _economy.Withdraw(to, amt);
+
             msg.WithContent($"Успешно удалено {amt} {_economy.CurrencyEmoji} со счёта <@{to}>");
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
         }
-        public async Task Deposit(DiscordInteraction args)
-        {
-            var to = (ulong)args.Data.Options.First().Options.First(x => x.Name == "target").Value;
-            var amt = (long)args.Data.Options.First().Options.First(x => x.Name == "amount").Value;
+        private Object GetItem(AppArgsTools args, string value) =>
+            args.GetReq().FirstOrDefault(x => x.Key == value).Value;
 
-            await _economy.Deposit(to, amt);
+        private async Task Deposit(DiscordInteraction args)
+        {
+            var argtools = new AppArgsTools(args);
+
+            var tgt = argtools.AddReqArg("target");
+            var amot = argtools.AddReqArg("amount");
 
             var msg = new DiscordInteractionResponseBuilder();
+
+            if (!argtools.DoHaveReqArgs())
+            {
+                msg.WithContent($"Неправильно введены аргументы!");
+                await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+                return;
+            }
+
+            var to = (ulong)GetItem(argtools, tgt);
+            var amt = (long)GetItem(argtools, amot);
+
+            amt = await _economy.Deposit(to, amt);
             msg.WithContent($"Успешно добавлено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
