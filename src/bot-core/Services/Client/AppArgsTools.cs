@@ -32,6 +32,12 @@ namespace Manito.Discord.Client
         public AppArgsTools(DiscordInteraction intArgs) : this(intArgs, Array.Empty<string>())
         {
         }
+        public AppArgsTools(DiscordInteraction intArgs, IEnumerable<(bool, string)> args)
+        : this(intArgs,
+         args.Where(x => x.Item1).Select(x => x.Item2),
+         args.Where(x => !x.Item1).Select(x => x.Item2))
+        {
+        }
         public string AddReqArg(string argName)
         {
             _reqArgs = _reqArgs.Contains(argName) ? _reqArgs : _reqArgs.Append(argName);
@@ -42,6 +48,7 @@ namespace Manito.Discord.Client
             _optArgs = _optArgs.Contains(argName) ? _optArgs : _optArgs.Append(argName);
             return argName;
         }
+        public string AddArg(bool required, string argName) => required ? AddReqArg(argName) : AddOptArg(argName);
         private bool Recur(DiscordInteractionDataOption option, string arg)
         {
             return option.Name == arg || Recur(option.Options, arg);

@@ -1,6 +1,6 @@
 using System;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public class InventoryItem : IItem
     {
@@ -9,6 +9,7 @@ namespace Manito.Services.Inventory
         {
             _realItem = realItem;
         }
+        public ulong Id => _realItem.Id;
         public ulong Owner
         {
             get => _realItem.Owner;
@@ -23,6 +24,16 @@ namespace Manito.Services.Inventory
         {
             get => _realItem.ItemType;
             set => _realItem.ItemType = value;
+        }
+        public static bool operator ==(InventoryItem item1, InventoryItem item2)
+        {
+            return item1.Id == item2.Id;
+
+        }
+        public static bool operator !=(InventoryItem item1, InventoryItem item2)
+        {
+            return !(item1 == item2);
+
         }
     }
 }

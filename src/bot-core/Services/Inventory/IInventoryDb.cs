@@ -1,7 +1,7 @@
 using Manito.Discord.Db;
 using Microsoft.EntityFrameworkCore;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public interface IInventoryDb : IMyDb
     {

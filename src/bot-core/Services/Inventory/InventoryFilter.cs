@@ -20,46 +20,35 @@ namespace Manito.Discord.Inventory
 {
     public class InventoryFilter : IModule
     {
+
         public Task RunModule() => HandleLoop();
         private async Task HandleLoop()
         {
             while (true)
             {
                 var data = await _queue.GetData();
-                await HandleAsCommand(data.Item2.Interaction);
+                await FilterMessage(data.Item1, data.Item2);
             }
         }
-        private ShopService _shopService;
-        private MyDomain _service;
+        private InventoryCommands _commands;
         private List<DiscordApplicationCommand> _commandList;
         private DiscordEventProxy<InteractionCreateEventArgs> _queue;
         public InventoryFilter(MyDomain service, EventBuffer eventBuffer)
         {
-            _service = service;
-            _shopService = new ShopService(service);
-            _commandList = GetCommands().ToList();
-            service.MyDiscordClient.AppCommands.Commands.Add("Inventory", _commandList);
+            _commands = new InventoryCommands(service.Inventory);
+            _commandList = _commands.GetCommands().ToList();
+            service.MyDiscordClient.AppCommands.Add("Inventory", _commandList);
             _queue = new();
-            eventBuffer.Interact.OnMessage += FilterMessage;
+            eventBuffer.Interact.OnMessage += _queue.Handle;
         }
-        private IEnumerable<DiscordApplicationCommand> GetCommands()
+        public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
         {
-            yield return new DiscordApplicationCommand("inventory", "Открыть инвентарь",
-            defaultPermission: true);
-        }
-
-        private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
-        {
-            if (_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
+            var res = _commands.Search(args.Interaction);
+            if (res != null)
             {
-                await _queue.Handle(client, args);
+                await res(args.Interaction);
                 args.Handled = true;
             }
         }
-        private async Task HandleAsCommand(DiscordInteraction args)
-        {
-            
-        }
     }
-
 }

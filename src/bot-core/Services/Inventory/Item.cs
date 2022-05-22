@@ -1,6 +1,6 @@
 using System;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public class Item : IItem
     {

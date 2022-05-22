@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DSharpPlus.Entities;
-using Manito.Services.Inventory;
+using Manito.Discord.Inventory;
 
 namespace Manito.Discord.Inventory
 {
@@ -19,11 +19,10 @@ namespace Manito.Discord.Inventory
         }
         private IEnumerable<Item> GenerateNewUserItems(ulong id)
         {
-            yield return new Item() { Owner = id };
-            yield return new Item() { Owner = id };
-            yield return new Item() { Owner = id };
-            yield return new Item() { Owner = id };
-            yield return new Item() { Owner = id };
+            for (var i = 0; i < 24 * 4; i++)
+            {
+                yield return new Item() { Id = (ulong)i, Owner = id, ItemType = $"Bonus{i + 1}" };
+            }
         }
         public IEnumerable<InventoryItem> GetPlayerItems(DiscordUser user)
         {
@@ -37,11 +36,23 @@ namespace Manito.Discord.Inventory
         {
             throw new NotImplementedException();
         }
+        public void TestAddItem(DiscordUser user, object item)
+        {
+            throw new NotImplementedException();
+        }
         public void RemoveItem(DiscordUser user, object item)
         {
             throw new NotImplementedException();
         }
+        public void TestRemoveItem(DiscordUser user, InventoryItem item)
+        {
+            _itemstest[user.Id].Remove(_itemstest[user.Id].First(x => new InventoryItem(x) == item));
+        }
         public void ApplyItem(DiscordUser user, object item)
+        {
+            throw new NotImplementedException();
+        }
+        public void TestApplyItem(DiscordUser user, object item)
         {
             throw new NotImplementedException();
         }

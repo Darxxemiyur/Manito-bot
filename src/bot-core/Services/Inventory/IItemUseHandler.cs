@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public interface IItemUseHandler
     {

@@ -3,7 +3,7 @@ using System.Linq;
 using DSharpPlus.Entities;
 using Manito.Discord.Inventory;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public class PlayerInventory
     {
@@ -14,10 +14,8 @@ namespace Manito.Services.Inventory
             _inventorySystem = inventorySystem;
             _player = player;
         }
-        public IEnumerable<InventoryItem> GetInventoryItems()
-        {
-            return _inventorySystem.GetPlayerItems(_player);
-        }
+        public IEnumerable<InventoryItem> GetInventoryItems() =>
+         _inventorySystem.GetPlayerItems(_player);
         public void AddItem(object item)
         {
             _inventorySystem.AddItem(_player, item);
@@ -25,6 +23,14 @@ namespace Manito.Services.Inventory
         public void RemoveItem(object item)
         {
             _inventorySystem.RemoveItem(_player, item);
+        }
+        public void TestAddItem(object item)
+        {
+            _inventorySystem.TestAddItem(_player, item);
+        }
+        public void TestRemoveItem(InventoryItem item)
+        {
+            _inventorySystem.TestRemoveItem(_player, item);
         }
     }
 }

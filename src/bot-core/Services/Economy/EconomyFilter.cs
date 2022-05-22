@@ -36,7 +36,7 @@ namespace Manito.Discord.Economy
         {
             _commands = new EconomyCommands(service.Economy);
             _commandList = _commands.GetCommands().ToList();
-            service.MyDiscordClient.AppCommands.Commands.Add("Economy", _commandList);
+            service.MyDiscordClient.AppCommands.Add("Economy", _commandList);
             _queue = new();
             eventBuffer.Interact.OnMessage += _queue.Handle;
         }

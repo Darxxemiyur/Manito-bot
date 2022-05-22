@@ -1,9 +1,13 @@
 using System;
 
-namespace Manito.Services.Inventory
+namespace Manito.Discord.Inventory
 {
     public interface IItem
     {
+        ulong Id
+        {
+            get;
+        }
         ulong Owner
         {
             get;
