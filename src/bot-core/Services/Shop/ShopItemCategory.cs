@@ -11,6 +11,7 @@ namespace Manito.Discord.Shop
     /// </summary>
     public enum ShopItemCategory
     {
+        SatiationCarcass,
         Carcass,
         Plant,
         Egg,

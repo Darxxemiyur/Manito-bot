@@ -2,7 +2,7 @@ using System;
 
 namespace Manito.Discord.Inventory
 {
-    public interface IItem
+    public interface IItem : IEquatable<IItem>
     {
         ulong Id
         {
@@ -23,6 +23,5 @@ namespace Manito.Discord.Inventory
             get;
             set;
         }
-
     }
 }

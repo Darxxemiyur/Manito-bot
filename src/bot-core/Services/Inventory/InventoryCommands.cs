@@ -74,16 +74,24 @@ namespace Manito.Discord.Inventory
             var target = args.User;
             var inventory = new PlayerInventory(_inventory, target);
 
-            var num = (int)Math.Clamp((long)tools.GetReq()[numArg], int.MinValue, int.MaxValue);
+            var num = tools.GetReq().GetIntArg(numArg);
 
-            var items = inventory.GetInventoryItems();
+            var items = inventory.GetInventoryItems().Select(x => x);
 
             var saNum = Math.Clamp(num, 1, items.Count());
 
             var emb = new DiscordEmbedBuilder();
 
-            inventory.TestRemoveItem(items.ElementAt(saNum - 1));
-            emb.WithDescription($"Использован предмет №{saNum}");
+            if (num != saNum)
+            {
+                emb.WithDescription("Предмет не использован!\nВы ввели неправильный id!");
+            }
+            else
+            {
+                var item = items.ElementAt(saNum - 1);
+                inventory.TestRemoveItem(item);
+                emb.WithDescription($"Использован предмет {item.ItemType} с id{item.Id}");
+            }
 
             var msg = new DiscordInteractionResponseBuilder();
             msg.AddEmbed(emb);
@@ -96,27 +104,26 @@ namespace Manito.Discord.Inventory
         /// <returns></returns>
         private async Task ShowInventory(DiscordInteraction args)
         {
-            var tools = new AppArgsTools(args, new[] { (false, "page") });
+            var tools = new AppArgsTools(args);
+            var numArg = tools.AddOptArg("page");
 
             var target = args.User;
             var inventory = new PlayerInventory(_inventory, target);
 
             var emb = new DiscordEmbedBuilder();
 
-            var items = inventory.GetInventoryItems();
+            var items = inventory.GetInventoryItems().Select((x, y) => (x, y));
             var itemsPaged = items.Chunk(25);
             var page = 1;
 
             var pages = itemsPaged.Count();
 
             if (tools.AnyOptArgs())
-                page = Math.Clamp((int)
-                    Math.Clamp((long)tools.GetOptional()["page"], 1, int.MaxValue),
-                 1, pages);
+                page = Math.Clamp(tools.GetOptional().GetIntArg(numArg), 1, pages);
 
-            foreach (var item in itemsPaged.ElementAt(page - 1).Select(x => x.ItemType))
+            foreach (var item in itemsPaged.ElementAt(page - 1))
             {
-                emb.AddField("Предмет", item, true);
+                emb.AddField($"Предмет №{item.y}", item.x.ItemType, true);
             }
 
             emb.WithFooter($"Всего предметов: {items.Count()}\nСтраница {page} из {pages}");

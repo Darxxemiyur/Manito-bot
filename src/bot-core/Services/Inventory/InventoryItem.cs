@@ -25,15 +25,14 @@ namespace Manito.Discord.Inventory
             get => _realItem.ItemType;
             set => _realItem.ItemType = value;
         }
-        public static bool operator ==(InventoryItem item1, InventoryItem item2)
-        {
-            return item1.Id == item2.Id;
 
-        }
-        public static bool operator !=(InventoryItem item1, InventoryItem item2)
-        {
-            return !(item1 == item2);
+        public bool Equals(IItem other) => Id == other.Id;
 
-        }
+        public override bool Equals(object obj) => (obj is IItem other) && Equals(other);
+
+        public override int GetHashCode() => HashCode.Combine(Id, Owner, Quantity, ItemType);
+
+        public static bool operator ==(InventoryItem item1, IItem item2) => item1.Equals(item2);
+        public static bool operator !=(InventoryItem item1, IItem item2) => !item1.Equals(item2);
     }
 }

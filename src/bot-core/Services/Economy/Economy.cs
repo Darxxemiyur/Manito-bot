@@ -39,18 +39,18 @@ namespace Manito.Discord.Economy
             DiscordID = id,
             Currency = 5000
         };
-
+private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Транзакция: {msg}");
         public async Task<long> TransferFunds(ulong from, ulong to, long amount)
         {
             amount = await DoWithdraw(from, amount);
             amount = await DoDeposit(to, amount);
-            await _logger.ReportTransaction($"Транзакция: Перевод {to} от {from} на сумму {amount} {_emoji}");
+            await ReportTransaction($"Перевод {to} от {from} на сумму {amount} {_emoji}");
             return amount;
         }
         public async Task<long> Withdraw(ulong from, long amount)
         {
             amount = await DoWithdraw(from, amount);
-            await _logger.ReportTransaction($"Транзакция: Снятие {amount} {_emoji} у {from}");
+            await ReportTransaction($"Снятие {amount} {_emoji} у {from}");
             return amount;
         }
         private async Task<long> DoWithdraw(ulong from, long amount)
@@ -59,10 +59,14 @@ namespace Manito.Discord.Economy
             GetDeposit(from).Currency -= amount;
             return amount;
         }
+        public async Task<bool> CanAfford(ulong who, long amount)
+        {
+            return GetDeposit(who).Currency >= amount;
+        }
         public async Task<long> Deposit(ulong to, long amount)
         {
             amount = await DoDeposit(to, amount);
-            await _logger.ReportTransaction($"Транзакция: Зачисление {amount} {_emoji} у {to}");
+            await ReportTransaction($"Зачисление {amount} {_emoji} у {to}");
             return amount;
         }
         private async Task<long> DoDeposit(ulong to, long amount)

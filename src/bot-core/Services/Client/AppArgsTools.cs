@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -69,9 +71,65 @@ namespace Manito.Discord.Client
         public bool AnyOptArgs() => _optArgs.Any(x => Recur(_intArgs.Data.Options, x));
         private IEnumerable<(string, object)> GetArgPairs(IEnumerable<string> tgt) =>
          tgt.Select(x => (x, GetArg(_intArgs.Data.Options, x))).Where(x => x.Item2 != null);
-        public IDictionary<string, object> GetOptional() => GetArgPairs(_optArgs)
-         .ToDictionary(x => x.Item1, x => x.Item2);
-        public IDictionary<string, object> GetReq() => GetArgPairs(_reqArgs)
-         .ToDictionary(x => x.Item1, x => x.Item2);
+        public ArgListTools GetOptional() => new(GetArgPairs(_optArgs)
+         .ToDictionary(x => x.Item1, x => x.Item2));
+        public ArgListTools GetReq() => new(GetArgPairs(_reqArgs)
+         .ToDictionary(x => x.Item1, x => x.Item2));
+
+
+    }
+
+    public class ArgListTools : IReadOnlyDictionary<string, object>
+    {
+        private readonly IReadOnlyDictionary<string, object> _list;
+
+        public ArgListTools(IReadOnlyDictionary<string, object> list)
+        {
+            _list = list;
+        }
+        public byte GetByteArg(string arg)
+        {
+            return (byte)Math.Clamp(GetLongArg(arg), byte.MinValue, byte.MaxValue);
+        }
+        public short GetShortArg(string arg)
+        {
+            return (short)Math.Clamp(GetLongArg(arg), short.MinValue, short.MaxValue);
+        }
+        public int GetIntArg(string arg)
+        {
+            return (int)Math.Clamp(GetLongArg(arg), int.MinValue, int.MaxValue);
+        }
+        public long GetLongArg(string arg)
+        {
+            return (long)GetArg(arg);
+        }
+        public string GetStringArg(string arg)
+        {
+            return (string)GetArg(arg);
+        }
+        public object GetArg(string arg)
+        {
+            return _list[arg];
+        }
+
+        #region LIST IMPOSING
+        public object this[string key] => _list[key];
+
+        public IEnumerable<string> Keys => _list.Keys;
+
+        public IEnumerable<object> Values => _list.Values;
+
+        public int Count => _list.Count;
+        public bool ContainsKey(string key) => _list.ContainsKey(key);
+
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value)
+        {
+            return _list.TryGetValue(key, out value);
+        }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
+        #endregion
     }
 }

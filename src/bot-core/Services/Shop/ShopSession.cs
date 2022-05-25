@@ -1,24 +1,12 @@
 using System;
-using System.Collections;
 using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.EventArgs;
-using DSharpPlus.Interactivity.Extensions;
-using DSharpPlus.EventArgs;
-
-using Cyriller;
 
 using Manito.Discord.Client;
 using System.Collections.Generic;
-using DSharpPlus.CommandsNext.Converters;
-using Manito.Discord.FastJoin;
-using System.Net;
 using Manito.Discord.Economy;
 
 namespace Manito.Discord.Shop
@@ -27,11 +15,21 @@ namespace Manito.Discord.Shop
     public class ShopSession
     {
         private DiscordUser _customer;
-        public DiscordUser Customer => _customer;
         private ShopCashRegister _cashRegister;
         private MyDiscordClient _client;
         private Action<ShopSession> _onExit;
         private ServerEconomy _economy;
+        private DiscordInteraction _args;
+        public DiscordUser Customer => _customer;
+        public ShopCashRegister CashRegister => _cashRegister;
+        public MyDiscordClient Client => _client;
+        public ServerEconomy Economy => _economy;
+        public DiscordInteraction Args
+        {
+            get => _args;
+            set => _args = value;
+        }
+
         public ShopSession(MyDiscordClient client, DiscordUser customer, ServerEconomy economy,
          ShopCashRegister cashRegister, Action<ShopSession> onExit)
         {
@@ -41,18 +39,18 @@ namespace Manito.Discord.Shop
             _onExit = onExit;
             _economy = economy;
         }
-        private DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
+        public DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
             _cashRegister.Default(bld)
             .WithFooter($"{_args.User.Mention}", $"{_args.User.AvatarUrl}")
             .WithAuthor($"{_args.User.Username}#{_args.User.Discriminator}",
              null, $"{_args.User.AvatarUrl}");
-        private DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
+        public DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
         {
 
             return new DiscordMessageBuilder().WithEmbed(builder ?? BaseContent());
 
         }
-        private DiscordInteractionResponseBuilder GetResponse(DiscordEmbedBuilder builder = null)
+        public DiscordInteractionResponseBuilder GetResponse(DiscordEmbedBuilder builder = null)
         {
 
             return new DiscordInteractionResponseBuilder(GetDResponse(builder));
@@ -63,10 +61,11 @@ namespace Manito.Discord.Shop
             _onExit(this);
         }
 
-        private DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null)
+        private DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null,
+         IEnumerable<ShopItem> list = null)
         {
             var emb = prev ?? BaseContent();
-            var str = _cashRegister.GetShopItems().Aggregate(emb, (x, y) =>
+            var str = (list ?? _cashRegister.GetShopItems()).Aggregate(emb, (x, y) =>
             {
                 var price = $"{_economy.CurrencyEmoji} {y.Price}";
                 return x.AddField($"**{y.Name}**", "**Цена за 1 ед:** " + price, true);
@@ -91,84 +90,40 @@ namespace Manito.Discord.Shop
             return irtt ? InteractionResponseType.UpdateMessage
              : InteractionResponseType.ChannelMessageWithSource;
         }
-        private Task Respond(DiscordInteractionResponseBuilder bld = default) =>
+        public Task Respond(DiscordInteractionResponseBuilder bld = default) =>
         _args.CreateResponseAsync(GetIRT(), bld?.AsEphemeral(false));
 
-        private async Task ItemSelected(string itemId, ulong chId)
+        private IBuyingSteps CallChain(ShopItem item)
         {
-            var items = _cashRegister.GetShopItems();
-
-            var item = items.First(x => x.Name == itemId);
-
-            var amt = await SelectingQuantity(item.Name, chId);
-
-            await _economy.Withdraw(_args.User.Id, item.Price * amt);
-        }
-
-        private IEnumerable<DiscordButtonComponent> Generate(
-            int[] nums, int mul) => nums.Select(x => new DiscordButtonComponent(ButtonStyle.Secondary,
-             $"{(x > 0 ? "add" : "sub")}{Math.Abs(x * mul)}", (x > 0 ? "+" : "") + $"{x * mul}"));
-        private IEnumerable<IEnumerable<DiscordButtonComponent>> Generate(
-         int[] nums, int[] muls) => muls.Select(x => Generate(nums, x));
-        private async Task<int> SelectingQuantity(string itemName, ulong chId)
-        {
-            var amount = 0;
-
-            var btns = Generate(new[] { -5, 1, 2, 5 }, new[] { 1, 10, 100 });
-
-            while (true)
+            switch (item.Category)
             {
-                var ms1 = $"Выберите количество {itemName}";
-                var ms2 = $"Выбранное количество {amount} ед.";
-                var mg2 = GetResponse(BaseContent().WithDescription($"{ms1}\n{ms2}"));
+                case ShopItemCategory.SatiationCarcass:
+                case ShopItemCategory.Carcass:
+                case ShopItemCategory.Plant:
+                    return new BuyingStepsForFood(this, item);
 
-                foreach (var row in btns)
-                    mg2.AddComponents(row);
-
-
-                mg2.AddComponents(
-                    new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Назад"),
-                    new DiscordButtonComponent(ButtonStyle.Success, "Submit", "Выбрать"));
-
-
-                await Respond(mg2);
-
-
-                _args = (await _client.ActivityTools.WaitForComponentInteraction(x =>
-                    x.Message.ChannelId == chId && x.User.Id == _args.User.Id &&
-                    mg2.Components.SelectMany(y => y.Components)
-                    .Any(y => x.Interaction.Data.CustomId == y.CustomId))).Interaction;
-
-                if (_args.Data.CustomId == "Exit")
-                {
-                    amount = 0;
-                    break;
-                }
-
-                if (_args.Data.CustomId == "Submit")
-                    break;
-
-                var pressed = btns.SelectMany(x => x).First(x => x.CustomId == _args.Data.CustomId);
-
-                var change = int.Parse(pressed.Label);
-
-                amount = Math.Clamp(amount + change, 0, int.MaxValue);
+                default:
+                    throw new NotImplementedException();
             }
-
-            return amount;
+        }
+        private async Task ItemSelected(ShopItem item, ulong chId)
+        {
+            var chain = CallChain(item);
+            await BuyingStepsCommon.RunChain(chain, x => Task.FromResult(x.NextAction != NextActions.Continue), chId);
         }
 
-        private DiscordInteraction _args;
         public async Task EnterMenu(DiscordInteraction args, ulong chId)
         {
             _args = args;
             try
             {
-                var items = GetSelector();
                 var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Выйти");
                 while (true)
                 {
-                    var mg = GetResponse(GetShopItems()).AddComponents(items).AddComponents(exbtn);
+                    var shopItems = _cashRegister.GetShopItems();
+                    var items = GetSelector(shopItems);
+                    var mg = GetResponse(GetShopItems(null, shopItems)).AddComponents(items)
+                    .AddComponents(exbtn);
                     await Respond(mg);
 
                     var argv = await _client.ActivityTools.WaitForComponentInteraction(x =>
@@ -181,7 +136,7 @@ namespace Manito.Discord.Shop
                     if (_args.Data.CustomId == exbtn.CustomId)
                         break;
 
-                    await ItemSelected(argv.Values[0], chId);
+                    await ItemSelected(shopItems.First(x => x.Name == argv.Values[0]), chId);
 
                 }
 

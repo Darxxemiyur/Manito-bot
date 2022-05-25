@@ -19,7 +19,7 @@ namespace Manito.Discord.Inventory
         }
         private IEnumerable<Item> GenerateNewUserItems(ulong id)
         {
-            for (var i = 0; i < 24 * 4; i++)
+            for (var i = 0; i < 0; i++)
             {
                 yield return new Item() { Id = (ulong)i, Owner = id, ItemType = $"Bonus{i + 1}" };
             }
@@ -32,29 +32,39 @@ namespace Manito.Discord.Inventory
             return _itemstest.FirstOrDefault(x => x.Key == user.Id).Value
                 .Select(x => new InventoryItem(x));
         }
-        public void AddItem(DiscordUser user, object item)
+        public void AddItem(DiscordUser user, IItem item)
         {
             throw new NotImplementedException();
         }
-        public void TestAddItem(DiscordUser user, object item)
+        public void RemoveItem(DiscordUser user, IItem item)
         {
             throw new NotImplementedException();
         }
-        public void RemoveItem(DiscordUser user, object item)
+        public void ApplyItem(DiscordUser user, IItem item)
         {
             throw new NotImplementedException();
         }
-        public void TestRemoveItem(DiscordUser user, InventoryItem item)
-        {
-            _itemstest[user.Id].Remove(_itemstest[user.Id].First(x => new InventoryItem(x) == item));
-        }
-        public void ApplyItem(DiscordUser user, object item)
+        public bool HasItem(DiscordUser user, IItem item)
         {
             throw new NotImplementedException();
         }
-        public void TestApplyItem(DiscordUser user, object item)
+        #region TEST
+        public void TestAddItem(DiscordUser user, IItem item)
         {
             throw new NotImplementedException();
         }
+        public void TestRemoveItem(DiscordUser user, IItem item)
+        {
+            _itemstest[user.Id].RemoveAll(x => x == item);
+        }
+        public void TestApplyItem(DiscordUser user, IItem item)
+        {
+            throw new NotImplementedException();
+        }
+        public bool TestHasItem(DiscordUser user, IItem item)
+        {
+            return _itemstest[user.Id].Any(x => x == item);
+        }
+        #endregion
     }
 }

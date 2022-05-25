@@ -28,37 +28,37 @@ namespace Manito.Discord.Shop
             {
                 Name = "Каркас без насыщения",
                 Category = ShopItemCategory.Carcass,
-                Price = 10,
+                Price = 1,
             };
             yield return new ShopItem
             {
                 Name = "Каркас c насыщением",
-                Category = ShopItemCategory.Carcass,
-                Price = 50,
+                Category = ShopItemCategory.SatiationCarcass,
+                Price = 4,
             };
             yield return new ShopItem
             {
                 Name = "Светляк",
                 Category = ShopItemCategory.Plant,
-                Price = 100,
+                Price = 40,
             };
             yield return new ShopItem
             {
                 Name = "Воскрешение",
                 Category = ShopItemCategory.Revive,
-                Price = 100000,
+                Price = 100,
             };
             yield return new ShopItem
             {
                 Name = "Яйцо",
                 Category = ShopItemCategory.Egg,
-                Price = 10000,
+                Price = 100,
             };
             yield return new ShopItem
             {
                 Name = "Телепорт",
                 Category = ShopItemCategory.Teleport,
-                Price = 10000,
+                Price = 100,
             };
         }
 

@@ -16,21 +16,29 @@ namespace Manito.Discord.Inventory
         }
         public IEnumerable<InventoryItem> GetInventoryItems() =>
          _inventorySystem.GetPlayerItems(_player);
-        public void AddItem(object item)
+        public void AddItem(InventoryItem item)
         {
             _inventorySystem.AddItem(_player, item);
         }
-        public void RemoveItem(object item)
+        public void RemoveItem(InventoryItem item)
         {
             _inventorySystem.RemoveItem(_player, item);
         }
-        public void TestAddItem(object item)
+        public bool HasItem(InventoryItem item)
+        {
+            return _inventorySystem.HasItem(_player, item);
+        }
+        public void TestAddItem(InventoryItem item)
         {
             _inventorySystem.TestAddItem(_player, item);
         }
         public void TestRemoveItem(InventoryItem item)
         {
             _inventorySystem.TestRemoveItem(_player, item);
+        }
+        public bool TestHasItem(InventoryItem item)
+        {
+            return _inventorySystem.TestHasItem(_player, item);
         }
     }
 }
