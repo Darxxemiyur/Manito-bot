@@ -1,2 +1,2 @@
 ###Do package autoupdate thing!!!
-like this `find . -maxdepth 1 -name "*" | sed -e "s|./||g" | xargs -n 1 dotnet add ../bot-core package`
+like this `xmllint --xpath "/Project/ItemGroup/*/@Include" ./Manito.csproj | sed -e "s|Include=||g" | sed -e "s|\"||g" | xargs -n 1 -P 4 dotnet add ../bot-core package`

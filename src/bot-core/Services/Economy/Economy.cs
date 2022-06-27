@@ -11,7 +11,25 @@ using Manito.Discord.Client;
 
 namespace Manito.Discord.Economy
 {
+    public class PlayerWallet
+    {
+        private readonly ServerEconomy _economy;
+        private readonly ulong _userId;
+        public ulong CurrencyEmojiId => _economy.CurrencyEmojiId;
+        public string CurrencyEmoji => _economy.CurrencyEmoji;
+        public PlayerWallet(ServerEconomy economy, ulong userId)
+        {
+            _economy = economy;
+            _userId = userId;
+        }
 
+        public PlayerEconomyDeposit GetDeposit() => _economy.GetDeposit(_userId);
+        public Task<long> TransferFunds(ulong to, long amount, string msg = null) =>
+         _economy.TransferFunds(_userId, to, amount, msg);
+        public Task<long> Withdraw(long amount, string msg = null) => _economy.Withdraw(_userId, amount, msg);
+        public Task<bool> CanAfford(long amount) => _economy.CanAfford(_userId, amount);
+        public Task<long> Deposit(long amount, string msg = null) => _economy.Deposit(_userId, amount, msg);
+    }
     public class ServerEconomy : IModule
     {
         private ulong _emojiId => 964951871435468810;
@@ -39,18 +57,20 @@ namespace Manito.Discord.Economy
             DiscordID = id,
             Currency = 5000
         };
-private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Транзакция: {msg}");
-        public async Task<long> TransferFunds(ulong from, ulong to, long amount)
+        public PlayerWallet GetPlayerWallet(ulong id) => new PlayerWallet(this, id);
+        public PlayerWallet GetPlayerWallet(DiscordUser user) => GetPlayerWallet(user.Id);
+        private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Транзакция: {msg}");
+        public async Task<long> TransferFunds(ulong from, ulong to, long amount, string msg = null)
         {
             amount = await DoWithdraw(from, amount);
             amount = await DoDeposit(to, amount);
-            await ReportTransaction($"Перевод {to} от {from} на сумму {amount} {_emoji}");
+            await ReportTransaction($"Перевод {to} от {from} на сумму {amount} {_emoji}\n{msg}");
             return amount;
         }
-        public async Task<long> Withdraw(ulong from, long amount)
+        public async Task<long> Withdraw(ulong from, long amount, string msg = null)
         {
             amount = await DoWithdraw(from, amount);
-            await ReportTransaction($"Снятие {amount} {_emoji} у {from}");
+            await ReportTransaction($"Снятие {amount} {_emoji} у {from}\n{msg}");
             return amount;
         }
         private async Task<long> DoWithdraw(ulong from, long amount)
@@ -63,10 +83,10 @@ private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Тра
         {
             return GetDeposit(who).Currency >= amount;
         }
-        public async Task<long> Deposit(ulong to, long amount)
+        public async Task<long> Deposit(ulong to, long amount, string msg = null)
         {
             amount = await DoDeposit(to, amount);
-            await ReportTransaction($"Зачисление {amount} {_emoji} у {to}");
+            await ReportTransaction($"Зачисление {amount} {_emoji} у {to}\n{msg}");
             return amount;
         }
         private async Task<long> DoDeposit(ulong to, long amount)

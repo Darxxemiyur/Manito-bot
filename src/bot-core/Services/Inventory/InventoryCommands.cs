@@ -16,8 +16,10 @@ namespace Manito.Discord.Inventory
     public class InventoryCommands
     {
         private const string Locale = "ru";
-        private InventorySystem _inventory;
-        public InventoryCommands(InventorySystem inventory) => _inventory = inventory;
+        private IInventorySystem _inventory;
+        private InventoryController _controller;
+        public InventoryCommands(InventoryController controller, IInventorySystem inventory) =>
+         (_controller, _inventory) = (controller, inventory);
         public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
         {
             foreach (var item in GetCommands())
@@ -44,15 +46,6 @@ namespace Manito.Discord.Inventory
              name_localizations: GetLoc("открыть"),
              description_localizations: GetLoc("Открыть инвентарь")),
              ShowInventory);
-
-            yield return (new DiscordApplicationCommandOption("use", "Use item",
-             ApplicationCommandOptionType.SubCommand, null, null, new[] {
-                 new DiscordApplicationCommandOption("number","Item number",
-                 ApplicationCommandOptionType.Integer, true),
-             },
-             name_localizations: GetLoc("использовать"),
-             description_localizations: GetLoc("Использовать предмет")),
-             UseItem);
         }
         public IEnumerable<DiscordApplicationCommand> GetCommands()
         {
@@ -62,77 +55,19 @@ namespace Manito.Discord.Inventory
              GetLoc("инвентарь"), GetLoc("Инвентарь"));
 
         }
-
-        private async Task UseItem(DiscordInteraction args)
-        {
-            var tools = new AppArgsTools(args);
-            var numArg = tools.AddReqArg("number");
-
-            if (!tools.DoHaveReqArgs())
-                return;
-
-            var target = args.User;
-            var inventory = new PlayerInventory(_inventory, target);
-
-            var num = tools.GetReq().GetIntArg(numArg);
-
-            var items = inventory.GetInventoryItems().Select(x => x);
-
-            var saNum = Math.Clamp(num, 1, items.Count());
-
-            var emb = new DiscordEmbedBuilder();
-
-            if (num != saNum)
-            {
-                emb.WithDescription("Предмет не использован!\nВы ввели неправильный id!");
-            }
-            else
-            {
-                var item = items.ElementAt(saNum - 1);
-                inventory.TestRemoveItem(item);
-                emb.WithDescription($"Использован предмет {item.ItemType} с id{item.Id}");
-            }
-
-            var msg = new DiscordInteractionResponseBuilder();
-            msg.AddEmbed(emb);
-            await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
-        }
-
         /// <summary>
         /// Show user's inventory
         /// </summary>
         /// <returns></returns>
         private async Task ShowInventory(DiscordInteraction args)
         {
-            var tools = new AppArgsTools(args);
+            var tools = new AppCommandArgsTools(args);
             var numArg = tools.AddOptArg("page");
+            var page = tools.GetIntArg(numArg, false) ?? 1;
 
-            var target = args.User;
-            var inventory = new PlayerInventory(_inventory, target);
-
-            var emb = new DiscordEmbedBuilder();
-
-            var items = inventory.GetInventoryItems().Select((x, y) => (x, y));
-            var itemsPaged = items.Chunk(25);
-            var page = 1;
-
-            var pages = itemsPaged.Count();
-
-            if (tools.AnyOptArgs())
-                page = Math.Clamp(tools.GetOptional().GetIntArg(numArg), 1, pages);
-
-            foreach (var item in itemsPaged.ElementAt(page - 1))
-            {
-                emb.AddField($"Предмет №{item.y}", item.x.ItemType, true);
-            }
-
-            emb.WithFooter($"Всего предметов: {items.Count()}\nСтраница {page} из {pages}");
-
-            var msg = new DiscordInteractionResponseBuilder();
-            msg.AddEmbed(emb);
-            await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
-
+            await _controller.StartSession(args, (x) => new ListItems(x, page - 1));
         }
+
     }
 
 }

@@ -14,23 +14,35 @@ using Manito.Discord.Chat.DialogueNet;
 
 namespace Manito.Discord.Shop
 {
-    public class BuyingStepsForFood : IDialogueNet
+    public class BuyingStepsForEgg : IDialogueNet
     {
         private ShopItem _food;
         private ShopSession _session;
         private int _quantity;
-        public NextNetInstruction GetStartingInstruction() => new(SelectQuantity, NextNetActions.Continue);
-        public BuyingStepsForFood(ShopSession session, ShopItem food)
+        public NextNetInstruction GetStartingInstruction() => new(ReturnBack, NextNetActions.Continue);
+        public BuyingStepsForEgg(ShopSession session, ShopItem egg)
         {
             _session = session;
-            _food = food;
+            _food = egg;
         }
+        private async Task<NextNetInstruction> ReturnBack(InstructionArguments args)
+        {
+            var msg = _session.GetResponse(_session.BaseContent().WithDescription($"Вi ни можитi купить яйца!"));
+            var accept = new DiscordButtonComponent(ButtonStyle.Danger, "Accept", "Ок.");
 
+            msg.AddComponents(accept);
+            await _session.Respond(msg);
+
+            var aw = await _session.GetInteraction(x => x.Interaction.Data.CustomId == accept.CustomId);
+
+            return new(null, NextNetActions.Success);
+
+        }
         private async Task<NextNetInstruction> SelectQuantity(InstructionArguments args)
         {
             while (true)
             {
-                var btns = Common.Generate(new[] { -5, 1, 2, 5 }, new[] { 1, 10, 100 });
+                var btns = Common.Generate(new[] { -1, 1, 2 }, new[] { 1 });
                 var ms1 = $"Выберите количество {_food.Name}";
                 var ms2 = $"Выбранное количество {_quantity} ед.";
                 var mg2 = _session.GetResponse(_session.BaseContent().WithDescription($"{ms1}\n{ms2}"));
@@ -44,7 +56,7 @@ namespace Manito.Discord.Shop
 
                 await _session.Respond(mg2);
 
-                await _session.GetInteraction(mg2.Components);
+                await _session.GetInteraction(x => x.AnyComponents(mg2.Components));
 
                 if (_session.IArgs.CompareButton(exbtn))
                     return new NextNetInstruction(null, NextNetActions.Success);
@@ -57,6 +69,7 @@ namespace Manito.Discord.Shop
                 _quantity = Math.Clamp(_quantity + change, 0, int.MaxValue);
 
             }
+
             return new NextNetInstruction(ExecuteTransaction, NextNetActions.Continue);
         }
         private async Task<NextNetInstruction> ExecuteTransaction(InstructionArguments args)
@@ -68,9 +81,8 @@ namespace Manito.Discord.Shop
             if (!await wallet.CanAfford(price))
                 return new NextNetInstruction(ForceChange, NextNetActions.Continue);
 
-            await wallet.Withdraw(price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {price}");
-            await inventory.AddItem(x => (x.ItemType, x.Owner, x.Quantity)
-             = (_food.Name, _session.Customer.Id, _quantity));
+            await wallet.Withdraw(price);
+            inventory.AddItem(x => x);
 
             return new NextNetInstruction(null, NextNetActions.Success);
         }
@@ -93,10 +105,8 @@ namespace Manito.Discord.Shop
 
             if (btn == "Back")
                 return new(SelectQuantity, NextNetActions.Continue);
-            else if (btn == "Cancel")
-                return new(null, NextNetActions.Success);
 
-            throw new Exception();
+            return new(null, NextNetActions.Success);
         }
         private async Task<NextNetInstruction> Buy(InstructionArguments args)
         {
@@ -119,10 +129,9 @@ namespace Manito.Discord.Shop
                 return new(ExecuteTransaction, NextNetActions.Continue);
             else if (btn == "Back")
                 return new(SelectQuantity, NextNetActions.Continue);
-            else if (btn == "Cancel")
-                return new(null, NextNetActions.Success);
 
-            throw new Exception();
+            return new(null, NextNetActions.Success);
+
         }
     }
 }

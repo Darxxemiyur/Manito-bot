@@ -120,7 +120,7 @@ namespace Manito.Discord.Economy
 
         private async Task TransferMoney(DiscordInteraction args)
         {
-            var argtools = new AppArgsTools(args);
+            var argtools = new AppCommandArgsTools(args);
 
             var tgt = argtools.AddReqArg("target");
             var amot = argtools.AddReqArg("amount");
@@ -146,7 +146,7 @@ namespace Manito.Discord.Economy
         }
         private async Task Withdraw(DiscordInteraction args)
         {
-            var argtools = new AppArgsTools(args);
+            var argtools = new AppCommandArgsTools(args);
 
             var tgt = argtools.AddReqArg("target");
             var amot = argtools.AddReqArg("amount");
@@ -169,12 +169,12 @@ namespace Manito.Discord.Economy
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
         }
-        private Object GetItem(AppArgsTools args, string value) =>
+        private Object GetItem(AppCommandArgsTools args, string value) =>
             args.GetReq().FirstOrDefault(x => x.Key == value).Value;
 
         private async Task Deposit(DiscordInteraction args)
         {
-            var argtools = new AppArgsTools(args);
+            var argtools = new AppCommandArgsTools(args);
 
             var tgt = argtools.AddReqArg("target");
             var amot = argtools.AddReqArg("amount");

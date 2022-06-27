@@ -16,12 +16,12 @@ namespace Manito.Discord
         private EventFilters _filters;
         private ExecThread _executionThread;
         private ServerEconomy _economy;
-        private InventorySystem _inventory;
+        private IInventorySystem _inventory;
         private ShopService _shopService;
         public MyDiscordClient MyDiscordClient => _myDiscordClient;
         public ExecThread ExecutionThread => _executionThread;
         public ServerEconomy Economy => _economy;
-        public InventorySystem Inventory => _inventory;
+        public IInventorySystem Inventory => _inventory;
         public ShopService ShopService => _shopService;
         public static async Task<MyDomain> Create()
         {
@@ -36,7 +36,7 @@ namespace Manito.Discord
         }
         private async Task Initialize()
         {
-            _inventory = new();
+            _inventory = new TestInventorySystem();
             _economy = new(this);
             _myDiscordClient = new MyDiscordClient(this);
             _shopService = new ShopService(this);

@@ -44,11 +44,12 @@ namespace Manito.Discord.Shop
             return res;
         }
         public async Task<ShopSession> StartSession(DiscordUser customer,
-            DiscordInteraction intr, ulong chid)
+            DiscordInteraction intr)
         {
-            var sess = new ShopSession(_client, customer, _service.Economy, _cashRegister, x => _shopSessions.Remove(x));
+            var sess = new ShopSession(_client, customer, _service.Economy.GetPlayerWallet(customer),
+             _service.Inventory.GetPlayerInventory(customer), _cashRegister, x => _shopSessions.Remove(x));
             _shopSessions.Add(sess);
-            await _service.ExecutionThread.AddNew(() => sess.EnterMenu(intr, chid));
+            await _service.ExecutionThread.AddNew(() => sess.EnterMenu(intr));
             return sess;
         }
         public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>

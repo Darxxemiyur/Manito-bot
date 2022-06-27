@@ -31,11 +31,14 @@ namespace Manito.Discord.Inventory
             }
         }
         private InventoryCommands _commands;
+        private InventoryController _controller;
+        public InventoryController Controller => _controller;
         private List<DiscordApplicationCommand> _commandList;
         private DiscordEventProxy<InteractionCreateEventArgs> _queue;
         public InventoryFilter(MyDomain service, EventBuffer eventBuffer)
         {
-            _commands = new InventoryCommands(service.Inventory);
+            _controller = new(service);
+            _commands = new InventoryCommands(_controller, service.Inventory);
             _commandList = _commands.GetCommands().ToList();
             service.MyDiscordClient.AppCommands.Add("Inventory", _commandList);
             _queue = new();

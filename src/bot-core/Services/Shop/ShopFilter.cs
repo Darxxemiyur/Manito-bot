@@ -26,7 +26,7 @@ namespace Manito.Discord.Shop
             while (true)
             {
                 var data = (await _queue.GetData()).Item2;
-                await HandleAsCommand(data.Item1, data.Item2);
+                await HandleAsCommand(data);
 
             }
         }
@@ -57,14 +57,14 @@ namespace Manito.Discord.Shop
                 var inter = await _service.MyDiscordClient.ActivityTools
                     .WaitForComponentInteraction(x => x.Message.Id == messageId, TimeSpan.FromDays(1));
 
-                var payload = (inter.Interaction, inter.Message.ChannelId);
+                var payload = inter.Interaction;
                 await _queue.Handle(_service.MyDiscordClient.Client, payload);
             }
         }
         private ShopService _shopService;
         private MyDomain _service;
         private List<DiscordApplicationCommand> _commandList;
-        private DiscordEventProxy<(DiscordInteraction, ulong)> _queue;
+        private DiscordEventProxy<DiscordInteraction> _queue;
         public ShopFilter(MyDomain service, EventBuffer eventBuffer)
         {
             _service = service;
@@ -84,17 +84,17 @@ namespace Manito.Discord.Shop
         {
             if (_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
             {
-                await _queue.Handle(client, (args.Interaction, args.Interaction.ChannelId));
+                await _queue.Handle(client, args.Interaction);
                 args.Handled = true;
             }
         }
-        private async Task HandleAsCommand(DiscordInteraction args, ulong channelId)
+        private async Task HandleAsCommand(DiscordInteraction args)
         {
             var res = await _shopService.Atomary(async (x) =>
             {
                 if (!x.SessionExists(args.User))
                 {
-                    await x.StartSession(args.User, args, channelId);
+                    await x.StartSession(args.User, args);
                     return true;
                 }
                 return false;
@@ -105,8 +105,7 @@ namespace Manito.Discord.Shop
             {
                 await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AddEmbed(_shopService.Default()
-                    .WithDescription("Вы уже открыли магазин!"))
-                    .AsEphemeral(true));
+                    .WithDescription("Вы уже открыли магазин!")).AsEphemeral(true));
             }
         }
     }

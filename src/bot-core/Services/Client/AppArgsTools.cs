@@ -15,26 +15,26 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Manito.Discord.Client
 {
 
-    public class AppArgsTools
+    public class AppCommandArgsTools
     {
-        private DiscordInteraction _intArgs;
+        private readonly DiscordInteraction _intArgs;
         private IEnumerable<string> _reqArgs;
         private IEnumerable<string> _optArgs;
-        public AppArgsTools(DiscordInteraction intArgs,
+        public AppCommandArgsTools(DiscordInteraction intArgs,
          IEnumerable<string> reqArgs, IEnumerable<string> optArgs)
         {
             _intArgs = intArgs;
             _reqArgs = reqArgs;
             _optArgs = optArgs;
         }
-        public AppArgsTools(DiscordInteraction intArgs,
+        public AppCommandArgsTools(DiscordInteraction intArgs,
          IEnumerable<string> reqArgs) : this(intArgs, reqArgs, Array.Empty<string>())
         {
         }
-        public AppArgsTools(DiscordInteraction intArgs) : this(intArgs, Array.Empty<string>())
+        public AppCommandArgsTools(DiscordInteraction intArgs) : this(intArgs, Array.Empty<string>())
         {
         }
-        public AppArgsTools(DiscordInteraction intArgs, IEnumerable<(bool, string)> args)
+        public AppCommandArgsTools(DiscordInteraction intArgs, IEnumerable<(bool, string)> args)
         : this(intArgs,
          args.Where(x => x.Item1).Select(x => x.Item2),
          args.Where(x => !x.Item1).Select(x => x.Item2))
@@ -76,9 +76,62 @@ namespace Manito.Discord.Client
         public ArgListTools GetReq() => new(GetArgPairs(_reqArgs)
          .ToDictionary(x => x.Item1, x => x.Item2));
 
+        public byte? GetByteArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetByteArg(arg);
+        }
+        public short? GetShortArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetShortArg(arg);
+        }
+        public int? GetIntArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetIntArg(arg);
+        }
+        public long? GetLongArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetLongArg(arg);
+        }
+        public string GetStringArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetStringArg(arg);
+        }
+        public object GetArg(string arg, bool required = true)
+        {
+            return (required ? GetReq() : GetOptional()).GetArg(arg);
+        }
+    }
+    /// <summary>
+    /// Tools that simplifies component interaction.
+    /// </summary>
+    /// <typeparam name="TBuilder"></typeparam>
+    public class AppInteractionTools<TBuilder>
+    {
+        private Func<DiscordComponent[], TBuilder> _addComponent;
+        private ActivitiesTools _tools;
+        private Func<ComponentInteractionCreateEventArgs, bool> _filter;
+        private List<DiscordComponent> _components;
+        public AppInteractionTools(ActivitiesTools tools,
+         Func<DiscordComponent[], TBuilder> addComponent,
+         Func<Task> postMessage,
+         Func<ComponentInteractionCreateEventArgs, bool> filter)
+        {
+            _tools = tools;
+            _addComponent = addComponent;
+            _filter = filter;
+            _components = new();
+        }
+        public TBuilder AddComponents(DiscordComponent[] components)
+        {
+            _components.AddRange(components);
+            return _addComponent(components);
+        }
+        public Task WaitForInteraction()
+        {
+            return _tools.WaitForComponentInteraction(x => _filter(x));
+        }
 
     }
-
     public class ArgListTools : IReadOnlyDictionary<string, object>
     {
         private readonly IReadOnlyDictionary<string, object> _list;
@@ -87,21 +140,24 @@ namespace Manito.Discord.Client
         {
             _list = list;
         }
-        public byte GetByteArg(string arg)
+        public byte? GetByteArg(string arg)
         {
-            return (byte)Math.Clamp(GetLongArg(arg), byte.MinValue, byte.MaxValue);
+            var higher = GetLongArg(arg);
+            return higher.HasValue ? (byte?)Math.Clamp(higher.Value, byte.MinValue, byte.MaxValue) : null;
         }
-        public short GetShortArg(string arg)
+        public short? GetShortArg(string arg)
         {
-            return (short)Math.Clamp(GetLongArg(arg), short.MinValue, short.MaxValue);
+            var higher = GetLongArg(arg);
+            return higher.HasValue ? (short?)Math.Clamp(higher.Value, short.MinValue, short.MaxValue) : null;
         }
-        public int GetIntArg(string arg)
+        public int? GetIntArg(string arg)
         {
-            return (int)Math.Clamp(GetLongArg(arg), int.MinValue, int.MaxValue);
+            var higher = GetLongArg(arg);
+            return higher.HasValue ? (int?)Math.Clamp(higher.Value, int.MinValue, int.MaxValue) : null;
         }
-        public long GetLongArg(string arg)
+        public long? GetLongArg(string arg)
         {
-            return (long)GetArg(arg);
+            return (long?)GetArg(arg);
         }
         public string GetStringArg(string arg)
         {
@@ -109,7 +165,7 @@ namespace Manito.Discord.Client
         }
         public object GetArg(string arg)
         {
-            return _list[arg];
+            return _list.ContainsKey(arg) ? _list[arg] : null;
         }
 
         #region LIST IMPOSING

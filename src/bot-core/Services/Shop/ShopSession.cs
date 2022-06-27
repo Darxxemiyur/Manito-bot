@@ -8,6 +8,9 @@ using DSharpPlus.Entities;
 using Manito.Discord.Client;
 using System.Collections.Generic;
 using Manito.Discord.Economy;
+using DSharpPlus.EventArgs;
+using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.Inventory;
 
 namespace Manito.Discord.Shop
 {
@@ -18,32 +21,35 @@ namespace Manito.Discord.Shop
         private ShopCashRegister _cashRegister;
         private MyDiscordClient _client;
         private Action<ShopSession> _onExit;
-        private ServerEconomy _economy;
-        private DiscordInteraction _args;
+        private PlayerWallet _wallet;
+        private PlayerInventory _inventory;
+        private InteractiveInteraction _iArgs;
+        private ulong _chId;
+        private ulong _msId;
         public DiscordUser Customer => _customer;
         public ShopCashRegister CashRegister => _cashRegister;
         public MyDiscordClient Client => _client;
-        public ServerEconomy Economy => _economy;
-        public DiscordInteraction Args
-        {
-            get => _args;
-            set => _args = value;
-        }
-
-        public ShopSession(MyDiscordClient client, DiscordUser customer, ServerEconomy economy,
-         ShopCashRegister cashRegister, Action<ShopSession> onExit)
+        public PlayerWallet Wallet => _wallet;
+        public PlayerInventory Inventory => _inventory;
+        public DiscordInteraction Args => IArgs.Interaction;
+        public InteractiveInteraction IArgs => _iArgs;
+        public ShopSession(MyDiscordClient client, DiscordUser customer, PlayerWallet wallet,
+         PlayerInventory inventory, ShopCashRegister cashRegister, Action<ShopSession> onExit)
         {
             _client = client;
             _cashRegister = cashRegister;
             _customer = customer;
             _onExit = onExit;
-            _economy = economy;
+            _wallet = wallet;
+            _inventory = inventory;
+            _chId = ulong.MinValue;
+            _msId = ulong.MinValue;
         }
         public DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
             _cashRegister.Default(bld)
-            .WithFooter($"{_args.User.Mention}", $"{_args.User.AvatarUrl}")
-            .WithAuthor($"{_args.User.Username}#{_args.User.Discriminator}",
-             null, $"{_args.User.AvatarUrl}");
+            .WithFooter($"{Args.User.Mention}", $"{Args.User.AvatarUrl}")
+            .WithAuthor($"{Args.User.Username}#{Args.User.Discriminator}",
+             null, $"{Args.User.AvatarUrl}");
         public DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
         {
 
@@ -67,7 +73,7 @@ namespace Manito.Discord.Shop
             var emb = prev ?? BaseContent();
             var str = (list ?? _cashRegister.GetShopItems()).Aggregate(emb, (x, y) =>
             {
-                var price = $"{_economy.CurrencyEmoji} {y.Price}";
+                var price = $"{_wallet.CurrencyEmoji} {y.Price}";
                 return x.AddField($"**{y.Name}**", "**Цена за 1 ед:** " + price, true);
             });
             return emb;
@@ -78,7 +84,7 @@ namespace Manito.Discord.Shop
 
             var items = (list ?? _cashRegister.GetShopItems())
             .Select(x => new DiscordSelectComponentOption(x.Name, x.Name, $"{x.Price}",
-                false, new DiscordComponentEmoji(_economy.CurrencyEmojiId)));
+                false, new DiscordComponentEmoji(_wallet.CurrencyEmojiId)));
             return new DiscordSelectComponent("Selection", "Выберите товар", items);
 
         }
@@ -90,31 +96,53 @@ namespace Manito.Discord.Shop
             return irtt ? InteractionResponseType.UpdateMessage
              : InteractionResponseType.ChannelMessageWithSource;
         }
-        public Task Respond(DiscordInteractionResponseBuilder bld = default) =>
-        _args.CreateResponseAsync(GetIRT(), bld?.AsEphemeral(false));
+        private const bool isEphemeral = false;
+        public async Task Respond(DiscordInteractionResponseBuilder bld = default)
+        {
+            await Args.CreateResponseAsync(GetIRT(), bld?.AsEphemeral(isEphemeral));
+            if (_chId == ulong.MinValue)
+                _chId = (await Args.GetOriginalResponseAsync()).ChannelId;
+            if (_msId == ulong.MinValue)
+                _msId = (await Args.GetOriginalResponseAsync()).Id;
+        }
 
-        private IBuyingSteps CallChain(ShopItem item)
+        private IDialogueNet DialogNetwork(ShopItem item)
         {
             switch (item.Category)
             {
+                case ShopItemCategory.Egg:
+                    return new BuyingStepsForEgg(this, item);
                 case ShopItemCategory.SatiationCarcass:
                 case ShopItemCategory.Carcass:
                 case ShopItemCategory.Plant:
+                default:
                     return new BuyingStepsForFood(this, item);
 
-                default:
-                    throw new NotImplementedException();
+                    //default:
+                    //    throw new NotImplementedException();
             }
         }
-        private async Task ItemSelected(ShopItem item, ulong chId)
+        private async Task ItemSelected(ShopItem item)
         {
-            var chain = CallChain(item);
-            await BuyingStepsCommon.RunChain(chain, x => Task.FromResult(x.NextAction != NextActions.Continue), chId);
+            var chain = DialogNetwork(item);
+            await Common.RunNetwork(chain);
         }
-
-        public async Task EnterMenu(DiscordInteraction args, ulong chId)
+        public Task<InteractiveInteraction> GetInteraction(
+         IEnumerable<DiscordActionRowComponent> components) => 
+         GetInteraction(x => x.AnyComponents(components));
+        public async Task<InteractiveInteraction> GetInteraction(
+         Func<InteractiveInteraction, bool> checker)
         {
-            _args = args;
+            var theEvent = await _client.ActivityTools.WaitForComponentInteraction(x =>
+                 x.User.Id == Args.User.Id && x.Message.ChannelId == _chId
+                 && (isEphemeral || x.Message.Id == _msId) && checker(new(x.Interaction)));
+
+            return _iArgs = new(theEvent.Interaction);
+        }
+        public Task<InteractiveInteraction> GetInteraction() => GetInteraction(_ => true);
+        public async Task EnterMenu(DiscordInteraction args)
+        {
+            _iArgs = new(args);
             try
             {
                 var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Выйти");
@@ -122,21 +150,18 @@ namespace Manito.Discord.Shop
                 {
                     var shopItems = _cashRegister.GetShopItems();
                     var items = GetSelector(shopItems);
-                    var mg = GetResponse(GetShopItems(null, shopItems)).AddComponents(items)
-                    .AddComponents(exbtn);
+                    var mg = GetResponse(GetShopItems(null, shopItems))
+                        .AddComponents(items).AddComponents(exbtn);
                     await Respond(mg);
 
-                    var argv = await _client.ActivityTools.WaitForComponentInteraction(x =>
-                        x.Message.ChannelId == chId && x.User.Id == args.User.Id &&
-                        mg.Components.SelectMany(x => x.Components)
-                        .Any(y => x.Interaction.Data.CustomId == y.CustomId));
 
-                    _args = argv.Interaction;
+                    var argv = await GetInteraction(x => x.AnyComponents(mg.Components));
 
-                    if (_args.Data.CustomId == exbtn.CustomId)
+                    if (_iArgs.CompareButton(exbtn))
                         break;
 
-                    await ItemSelected(shopItems.First(x => x.Name == argv.Values[0]), chId);
+
+                    await ItemSelected(_iArgs.GetOption(shopItems.ToDictionary(x => x.Name)));
 
                 }
 
@@ -144,14 +169,14 @@ namespace Manito.Discord.Shop
                 StopSession();
 
                 await Task.Delay(10000);
-                await _args.DeleteOriginalResponseAsync();
+                await Args.DeleteOriginalResponseAsync();
             }
             catch (TimeoutException)
             {
                 var ms = "Сессия завершена по причине привешения времени ожидания взаимодействия.";
                 var gld = _client.Client;
-                var chnl = await gld.GetChannelAsync(chId);
-                await _args.DeleteOriginalResponseAsync();
+                var chnl = await gld.GetChannelAsync(_chId);
+                await Args.DeleteOriginalResponseAsync();
                 var msgtd = await chnl.SendMessageAsync(GetDResponse(BaseContent().WithDescription(ms)));
                 StopSession();
                 await msgtd.DeleteAsync();

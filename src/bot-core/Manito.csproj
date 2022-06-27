@@ -15,10 +15,10 @@
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0" />
     <PackageReference Include="DSharpPlus.VoiceNext" Version="4.2.0" />
     <PackageReference Include="DSharpPlus.VoiceNext.Natives" Version="1.0.0" />
-    <PackageReference Include="emzi0767.common" Version="2.6.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.4" />
-    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.4" />
-    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.4" />
+    <PackageReference Include="emzi0767.common" Version="2.6.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.6" />
+    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.6" />
     <PackageReference Include="microsoft.extensions.caching.abstractions" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.caching.memory" Version="6.0.1" />
     <PackageReference Include="microsoft.extensions.dependencyinjection" Version="6.0.0" />
@@ -27,7 +27,7 @@
     <PackageReference Include="microsoft.extensions.logging.abstractions" Version="6.0.1" />
     <PackageReference Include="microsoft.extensions.options" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.primitives" Version="6.0.0" />
-    <PackageReference Include="microsoft.netcore.platforms" Version="6.0.3" />
+    <PackageReference Include="microsoft.netcore.platforms" Version="6.0.4" />
     <PackageReference Include="Miyconst.Cyriller" Version="0.1.1" />
     <PackageReference Include="Newtonsoft.JSON" Version="13.0.1" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
@@ -52,7 +52,7 @@
     <PackageReference Include="runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl" Version="4.3.3" />
     <PackageReference Include="system.collections.immutable" Version="6.0.0" />
     <PackageReference Include="system.diagnostics.diagnosticsource" Version="6.0.0" />
-    <PackageReference Include="system.memory" Version="4.5.4" />
+    <PackageReference Include="system.memory" Version="4.5.5" />
     <PackageReference Include="system.net.http" Version="4.3.4" />
     <PackageReference Include="system.net.webheadercollection" Version="4.3.0" />
     <PackageReference Include="system.net.websockets" Version="4.3.0" />

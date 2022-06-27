@@ -34,7 +34,7 @@ namespace Manito.Discord.Tickets
                 .Deny(Permissions.AccessChannels));
 
             overrids = overrids.Append(new DiscordOverwriteBuilder(_user)
-            .Allow(Permissions.AccessChannels));
+                .Allow(Permissions.AccessChannels));
 
             _channel = await gld.CreateChannelAsync($"тикет-{_user.Id}",
                 ChannelType.Text, _category, overwrites: overrids);

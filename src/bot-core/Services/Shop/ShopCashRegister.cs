@@ -61,11 +61,6 @@ namespace Manito.Discord.Shop
                 Price = 100,
             };
         }
-
-        public async Task Checkout(ShopItem item, int quantity)
-        {
-
-        }
         public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
             (bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~")
             .WithColor(DiscordColor.Blurple);
