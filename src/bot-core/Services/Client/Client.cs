@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using DSharpPlus;
@@ -17,7 +18,7 @@ namespace Manito.Discord.Client
     public class MyDiscordClient
     {
         private MyDomain _collection;
-        public MyDomain Service => _collection;
+        public MyDomain Domain => _collection;
         private EventBuffer _eventBuffer;
         public EventBuffer EventsBuffer => _eventBuffer;
         private ApplicationCommands _appCommands;
@@ -31,17 +32,14 @@ namespace Manito.Discord.Client
         public ActivitiesTools ActivityTools => _activitiesTools;
         public MyDiscordClient(MyDomain collection)
         {
-            var config = new DiscordConfiguration();
-            config.Token = "OTU4MDk4NDIzMzgxMzY0NzQ2.YkIYsA.P-D1NMIwuFwpiveg5TJXVHAcUUM";
-            config.Intents = DiscordIntents.All;
+            var config = new DiscordConfiguration
+            {
+                Token = "OTU4MDk4NDIzMzgxMzY0NzQ2.YkIYsA.P-D1NMIwuFwpiveg5TJXVHAcUUM",
+                Intents = DiscordIntents.All
+            };
             _client = new DiscordClient(config);
             _appCommands = new ApplicationCommands(collection);
             _collection = collection;
-            //_client.UseInteractivity(new InteractivityConfiguration()
-            //{
-            //    PollBehaviour = PollBehaviour.KeepEmojis,
-            //    Timeout = TimeSpan.FromSeconds(30)
-            //});
 
             _eventInliner = new EventInline(new EventBuffer(_client));
 

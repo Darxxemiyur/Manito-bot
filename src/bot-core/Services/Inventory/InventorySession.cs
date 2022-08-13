@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Manito.Discord.Inventory;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Manito.Discord.Inventory
 {

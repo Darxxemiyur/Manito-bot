@@ -22,7 +22,7 @@ namespace Manito.Discord.Client
             _runIfHandled = runIfHandled;
             _predictator = predictator;
         }
-        public override Task<bool> IsFitting(TEvent args)
+        public override Task<bool> IsFitting(DiscordClient client, TEvent args)
         {
             var res = _predictator(args);
 

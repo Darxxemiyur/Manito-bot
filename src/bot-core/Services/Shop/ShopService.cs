@@ -8,9 +8,10 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
-using Manito.Discord.Db;
+using Manito.Discord.Database;
 using System.Linq;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Threading;
 
 namespace Manito.Discord.Shop
@@ -46,10 +47,10 @@ namespace Manito.Discord.Shop
         public async Task<ShopSession> StartSession(DiscordUser customer,
             DiscordInteraction intr)
         {
-            var sess = new ShopSession(_client, customer, _service.Economy.GetPlayerWallet(customer),
+            var sess = new ShopSession(intr, _client, customer, _service.Economy.GetPlayerWallet(customer),
              _service.Inventory.GetPlayerInventory(customer), _cashRegister, x => _shopSessions.Remove(x));
             _shopSessions.Add(sess);
-            await _service.ExecutionThread.AddNew(() => sess.EnterMenu(intr));
+            await _service.ExecutionThread.AddNew(() => sess.EnterMenu());
             return sess;
         }
         public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>

@@ -64,7 +64,7 @@ namespace Manito.Discord.Inventory
 
         private IEnumerable<Item> GenerateNewUserItems(ulong id)
         {
-            for (var i = 0; i < 0; i++)
+            for (var i = 0; i < 1; i++)
             {
                 yield return new Item() { Id = itemId++, Owner = id, ItemType = $"Bonus{i}" };
             }

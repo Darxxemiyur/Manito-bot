@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Manito.Discord
 {
@@ -14,12 +15,12 @@ namespace Manito.Discord
         private TaskEventProxy<(DiscordClient, T)> _facade;
         public DiscordEventProxy() => _facade = new();
         public Task Handle(DiscordClient client, T stuff) => _facade.Handle((client, stuff));
-        public Task<Boolean> HasAny() => _facade.HasAny();
+        public Task<bool> HasAny() => _facade.HasAny();
         public async Task Cancel() => await _facade.Cancel();
         public async Task<(DiscordClient, T)> GetData() => await _facade.GetData();
 
-        private Boolean disposedValue;
-        protected virtual void Dispose(Boolean disposing)
+        private bool disposedValue;
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

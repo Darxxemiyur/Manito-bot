@@ -12,6 +12,7 @@ using DSharpPlus.SlashCommands.EventArgs;
 using DSharpPlus.SlashCommands.Attributes;
 
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.Shop;
 using Manito.Discord.Economy;
 

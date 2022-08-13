@@ -22,10 +22,14 @@ namespace Manito.Discord.Client
 
         public EventBuffer(DiscordClient client)
         {
-            Message = new(x => client.MessageCreated += x);
-            Interact = new(x => client.InteractionCreated += x);
-            CompInteract = new(x => client.ComponentInteractionCreated += x);
-            MsgAddReact = new(x => client.MessageReactionAdded += x);
+            Message = new(x => client.MessageCreated += x,
+             x => client.MessageCreated -= x);
+            Interact = new(x => client.InteractionCreated += x,
+             x => client.InteractionCreated -= x);
+            CompInteract = new(x => client.ComponentInteractionCreated += x,
+             x => client.ComponentInteractionCreated -= x);
+            MsgAddReact = new(x => client.MessageReactionAdded += x,
+             x => client.MessageReactionAdded -= x);
         }
         public EventBuffer(EventInline client)
         {
@@ -47,22 +51,28 @@ namespace Manito.Discord.Client
     public class SingleEventBuffer<TEvent> where TEvent : DiscordEventArgs
     {
         private DiscordEventProxy<TEvent> _eventBuffer;
+        private Action<AsyncEventHandler<DiscordClient, TEvent>> _unlinker;
         public event Func<DiscordClient, TEvent, Task> OnMessage;
         private void CreateEventBuffer()
         {
             _eventBuffer = new();
         }
-        public SingleEventBuffer(Action<AsyncEventHandler<DiscordClient, TEvent>> linker)
+        public SingleEventBuffer(Action<AsyncEventHandler<DiscordClient, TEvent>> linker,
+         Action<AsyncEventHandler<DiscordClient, TEvent>> unlinker)
         {
             CreateEventBuffer();
             linker(_eventBuffer.Handle);
+            _unlinker = unlinker;
         }
         public SingleEventBuffer(PerEventInline<TEvent> linker)
         {
             CreateEventBuffer();
             linker.OnFail += _eventBuffer.Handle;
         }
-
+        ~SingleEventBuffer()
+        {
+            _unlinker(_eventBuffer.Handle);
+        }
         public async Task Loop()
         {
             while (true)

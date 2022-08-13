@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity.Extensions;
@@ -20,11 +21,12 @@ namespace Manito.Discord.Client
         public ApplicationCommands(MyDomain collection)
         {
             _collection = collection;
-            Commands = new Dictionary<String, IEnumerable<DiscordApplicationCommand>>();
+            Commands = new Dictionary<string, IEnumerable<DiscordApplicationCommand>>();
         }
         public async Task UpdateCommands()
         {
             Client.Ready += DoUpdateCommands;
+            
         }
         public void Add(string key, IEnumerable<DiscordApplicationCommand> value) =>
             Commands.Add(key, value);
@@ -35,6 +37,10 @@ namespace Manito.Discord.Client
             args.Handled = true;
             await Client.BulkOverwriteGlobalApplicationCommandsAsync(commands);
         }
-        public readonly Dictionary<String, IEnumerable<DiscordApplicationCommand>> Commands;
+        public readonly Dictionary<string, IEnumerable<DiscordApplicationCommand>> Commands;
+        public async Task Autocomplete()
+        {
+
+        }
     }
 }

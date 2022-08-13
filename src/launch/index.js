@@ -18,7 +18,7 @@ UntilExit.catch((e) => {
   throw e;
 });
 
-UntilExit.then((OnGood) => {
+UntilExit.then((OnGood,re) => {
   ///Start bot process
   var run = child_process.spawn("dotnet", [
     "run",

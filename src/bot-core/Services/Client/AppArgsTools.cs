@@ -75,63 +75,33 @@ namespace Manito.Discord.Client
          .ToDictionary(x => x.Item1, x => x.Item2));
         public ArgListTools GetReq() => new(GetArgPairs(_reqArgs)
          .ToDictionary(x => x.Item1, x => x.Item2));
-
+        private ArgListTools GetOp(bool r) => r ? GetReq() : GetOptional();
         public byte? GetByteArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetByteArg(arg);
+            return GetOp(required).GetByteArg(arg);
         }
         public short? GetShortArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetShortArg(arg);
+            return GetOp(required).GetShortArg(arg);
         }
         public int? GetIntArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetIntArg(arg);
+            return GetOp(required).GetIntArg(arg);
         }
         public long? GetLongArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetLongArg(arg);
+            return GetOp(required).GetLongArg(arg);
         }
         public string GetStringArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetStringArg(arg);
+            return GetOp(required).GetStringArg(arg);
         }
         public object GetArg(string arg, bool required = true)
         {
-            return (required ? GetReq() : GetOptional()).GetArg(arg);
+            return GetOp(required).GetArg(arg);
         }
     }
-    /// <summary>
-    /// Tools that simplifies component interaction.
-    /// </summary>
-    /// <typeparam name="TBuilder"></typeparam>
-    public class AppInteractionTools<TBuilder>
-    {
-        private Func<DiscordComponent[], TBuilder> _addComponent;
-        private ActivitiesTools _tools;
-        private Func<ComponentInteractionCreateEventArgs, bool> _filter;
-        private List<DiscordComponent> _components;
-        public AppInteractionTools(ActivitiesTools tools,
-         Func<DiscordComponent[], TBuilder> addComponent,
-         Func<Task> postMessage,
-         Func<ComponentInteractionCreateEventArgs, bool> filter)
-        {
-            _tools = tools;
-            _addComponent = addComponent;
-            _filter = filter;
-            _components = new();
-        }
-        public TBuilder AddComponents(DiscordComponent[] components)
-        {
-            _components.AddRange(components);
-            return _addComponent(components);
-        }
-        public Task WaitForInteraction()
-        {
-            return _tools.WaitForComponentInteraction(x => _filter(x));
-        }
 
-    }
     public class ArgListTools : IReadOnlyDictionary<string, object>
     {
         private readonly IReadOnlyDictionary<string, object> _list;

@@ -3,14 +3,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.Economy;
 using Manito.Discord.Inventory;
 using Manito.Discord.Shop;
+using Microsoft.Extensions.DependencyInjection;
+using Manito.Discord.PermanentMessage;
+using Manito.Discord.Database;
+using Manito.Discord.Config;
 
 namespace Manito.Discord
 {
     public class MyDomain
     {
+        private IServiceCollection _serviceCollection;
+        private MyDbFactory _db;
+        public MyDbFactory DbFactory => _db;
         private ApplicationCommands _appCommands;
         private MyDiscordClient _myDiscordClient;
         private EventFilters _filters;
@@ -18,11 +26,14 @@ namespace Manito.Discord
         private ServerEconomy _economy;
         private IInventorySystem _inventory;
         private ShopService _shopService;
+        private RootConfig _rootConfig;
+        public IServiceCollection ServiceCollection => _serviceCollection;
         public MyDiscordClient MyDiscordClient => _myDiscordClient;
         public ExecThread ExecutionThread => _executionThread;
         public ServerEconomy Economy => _economy;
         public IInventorySystem Inventory => _inventory;
         public ShopService ShopService => _shopService;
+        private MessageController _msgWallCtr;
         public static async Task<MyDomain> Create()
         {
             var service = new MyDomain();
@@ -31,14 +42,16 @@ namespace Manito.Discord
 
             return service;
         }
-        private MyDomain()
-        {
-        }
+        private MyDomain() { }
         private async Task Initialize()
         {
+            _rootConfig = RootConfig.GetConfig();
+
+            _db = new(this, _rootConfig.DatabaseCfg);
             _inventory = new TestInventorySystem();
-            _economy = new(this);
+            _economy = new(this, _db);
             _myDiscordClient = new MyDiscordClient(this);
+            _msgWallCtr = new(this);
             _shopService = new ShopService(this);
             _appCommands = _myDiscordClient.AppCommands;
             _executionThread = new ExecThread();
@@ -60,6 +73,7 @@ namespace Manito.Discord
             yield return _myDiscordClient.StartLongTerm();
             yield return _filters.RunModule();
             yield return _economy.RunModule();
+            yield return _msgWallCtr.RunModule();
         }
     }
 }

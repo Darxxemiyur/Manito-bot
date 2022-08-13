@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Manito.Discord
+namespace  Name.Bayfaderix.Darxxemiyur.Common
 {
     public class TaskEventProxy<T> : IDisposable
     {
@@ -20,7 +20,7 @@ namespace Manito.Discord
         private TaskCompletionSource<T> _generator;
         private readonly ConcurrentQueue<Task<T>> _chain;
         private readonly SemaphoreSlim _sync;
-        public Task<Boolean> HasAny() => Task.FromResult(_chain.Any(x => x.IsCompleted));
+        public Task<bool> HasAny() => Task.FromResult(_chain.Any(x => x.IsCompleted));
         public async Task Handle(T stuff)
         {
             try
@@ -66,8 +66,8 @@ namespace Manito.Discord
             return await (result ?? Task.FromResult<T>(default));
         }
 
-        private Boolean disposedValue;
-        protected virtual void Dispose(Boolean disposing)
+        private bool disposedValue;
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
@@ -109,13 +109,13 @@ namespace Manito.Discord
         {
             _facade = new();
         }
-        private TaskEventProxy<Boolean> _facade;
-        public Task<Boolean> HasAny() => _facade.HasAny();
+        private TaskEventProxy<bool> _facade;
+        public Task<bool> HasAny() => _facade.HasAny();
         public Task Handle() => _facade.Handle(true);
         public Task Cancel() => _facade.Cancel();
         public Task GetData() => _facade.GetData();
-        private Boolean disposedValue;
-        protected virtual void Dispose(Boolean disposing)
+        private bool disposedValue;
+        protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

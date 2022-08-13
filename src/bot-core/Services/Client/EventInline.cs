@@ -11,6 +11,7 @@ using DSharpPlus.SlashCommands;
 using Emzi0767.Utilities;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Manito.Discord.Client
 {
@@ -42,12 +43,13 @@ namespace Manito.Discord.Client
         public static int DefaultOrder = 10;
         private Dictionary<int, List<Predictator<TEvent>>> _predictators;
         private SemaphoreSlim _lock;
-        public event Func<DiscordClient, TEvent, Task> OnFail;
-        public PerEventInline(SingleEventBuffer<TEvent> buffer)
+        public string TypeName => GetType().FullName;
+        public event AsyncEventHandler<DiscordClient, TEvent> OnFail;
+        public PerEventInline(SingleEventBuffer<TEvent> buf)
         {
             _lock = new(1, 1);
             _predictators = new();
-            buffer.OnMessage += Check;
+            buf.OnMessage += Check;
         }
         public async Task Add(int order, Predictator<TEvent> predictator)
         {
@@ -60,49 +62,60 @@ namespace Manito.Discord.Client
         }
         public Task Add(Predictator<TEvent> predictator) => Add(DefaultOrder, predictator);
 
-        private async Task Check(DiscordClient client, TEvent args)
+        private async Task<IEnumerable<(int, Predictator<TEvent>)>> CheckEOL(IEnumerable<(int, Predictator<TEvent>)> input)
+        {
+            var rrr = Enumerable.Empty<(int, Predictator<TEvent>)>();
+            foreach (var ch in input)
+            {
+                if (await ch.Item2.IsREOL())
+                    rrr = rrr.Append((ch.Item1, ch.Item2));
+            }
+            return rrr;
+        }
+        private async Task<IEnumerable<Predictator<TEvent>>> RunEvent(DiscordClient client, TEvent args, IEnumerable<Predictator<TEvent>> input)
+        {
+            var rrr = Enumerable.Empty<Predictator<TEvent>>();
+            var handled = false;
+            foreach (var chk in input)
+            {
+                if (!await chk.IsFitting(client, args) || (handled && !chk.RunIfHandled)) continue;
+                handled = true;
+                rrr = rrr.Append(chk);
+                args.Handled = true;
+            }
+            return rrr;
+        }
+        public async Task<bool> Check(DiscordClient client, TEvent args)
         {
             await _lock.WaitAsync();
-            var handled = false;
-            List<(int, Predictator<TEvent>)> toDelete = new();
-            foreach (var ch in _predictators.SelectMany(x => x.Value.Select(y => (x.Key, y))))
-            {
-                var chk = ch.y;
-                if (await chk.IsREOL())
-                {
-                    toDelete.Add((ch.Key, chk));
-                }
-                else if (await chk.IsFitting(args) && (!handled || chk.RunIfHandled))
-                {
-                    handled = true;
-                    await chk.Handle(client, args);
-                    args.Handled = true;
 
-                    if (await chk.IsREOL())
-                    {
-                        toDelete.Add((ch.Key, chk));
-                    }
+            var itms = _predictators.SelectMany(x => x.Value.Select(y => (x.Key, y)));
 
-                }
-            }
+            var itmsToDlt = await CheckEOL(itms);
+            //Deletes and works!
+            _ = itmsToDlt.Where(x => _predictators[x.Item1].Remove(x.Item2)
+             && _predictators[x.Item1].Count == 0 && _predictators.Remove(x.Item1)).ToArray();
 
-            toDelete.ForEach(x =>
-            {
-                _predictators[x.Item1].Remove(x.Item2);
-                if (_predictators[x.Item1].Count <= 0)
-                    _predictators.Remove(x.Item1);
-            });
+            var toRun = await RunEvent(client, args, itms.Select(x => x.y));
+            foreach (var itm in toRun)
+                await itm.Handle(client, args);
+            itmsToDlt = await CheckEOL(itms);
+            //Deletes and works!
+            _ = itmsToDlt.Where(x => _predictators[x.Item1].Remove(x.Item2)
+             && _predictators[x.Item1].Count == 0 && _predictators.Remove(x.Item1)).ToArray();
+
             _lock.Release();
 
-            if (!handled && OnFail != null)
+            if (!toRun.Any() && OnFail != null)
                 await OnFail(client, args);
-        }
 
+            return !toRun.Any();
+        }
     }
     public abstract class Predictator<TEvent> where TEvent : DiscordEventArgs
     {
-        /// Maybe create an ID for predictator, which client can receive buffered events
-        public abstract Task<bool> IsFitting(TEvent args);
+        // Maybe create an ID for predictator, which client can receive buffered events
+        public abstract Task<bool> IsFitting(DiscordClient client, TEvent args);
         public abstract bool RunIfHandled { get; }
         public abstract Task<bool> IsREOL();
         protected readonly DiscordEventProxy<(Predictator<TEvent>, TEvent)> _eventProxy;
@@ -110,7 +123,6 @@ namespace Manito.Discord.Client
         public Task Handle(DiscordClient client, TEvent args) =>
             _eventProxy.Handle(client, (this, args));
         public virtual async Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout)
-
         {
             var timeoutTask = Task.Delay(timeout);
 

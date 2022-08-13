@@ -14,7 +14,11 @@ namespace Manito.Discord.Inventory
 
         public override bool Equals(object obj) => (obj is IItem other) && Equals(other);
 
-        public override int GetHashCode() => HashCode.Combine(Id, Owner, Quantity, ItemType, Custom);
+        public override int GetHashCode() => HashCode.Combine(  Id.GetHashCode(),
+                                                                Owner.GetHashCode(),
+                                                                Quantity.GetHashCode(),
+                                                                ItemType.GetHashCode(),
+                                                                Custom.GetHashCode());
 
         public static bool operator ==(Item item1, IItem item2) => item1.Equals(item2);
         public static bool operator !=(Item item1, IItem item2) => !item1.Equals(item2);

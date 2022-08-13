@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
-using Manito.Discord.Db;
+using Manito.Discord.Database;
 using System.Linq;
 
 namespace Manito.Discord.Shop

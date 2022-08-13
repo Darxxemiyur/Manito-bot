@@ -12,7 +12,7 @@ namespace Manito.Discord.Shop
         /// <summary>
         /// Name of the Item
         /// </summary>
-        public String Name;
+        public string Name;
 
 
         /// <summary>

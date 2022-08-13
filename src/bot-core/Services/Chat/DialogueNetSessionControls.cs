@@ -6,12 +6,14 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
 using Manito.Discord.Economy;
 using DSharpPlus.EventArgs;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Inventory;
 using System.Threading;
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.Chat.DialogueNet
 {
@@ -34,7 +36,7 @@ namespace Manito.Discord.Chat.DialogueNet
             _sessions.Any(predictate);
         public bool StopSession(T session) => StopSession(x => x == session);
         public bool StopSession(Predicate<T> predicate) => _sessions.RemoveAll(predicate) > 0;
-        
+
         public async Task<T1> Atomary<T1>(Func<DialogueNetSessionControls<T>, Task<T1>> run)
         {
             await _lock.WaitAsync();
@@ -46,7 +48,7 @@ namespace Manito.Discord.Chat.DialogueNet
         {
             var sess = createSession();
             _sessions.Add(sess);
-            await _service.ExecutionThread.AddNew(() => Common.RunNetwork(getNet(sess)));
+            await _service.ExecutionThread.AddNew(() => NetworkCommon.RunNetwork(getNet(sess)));
             return sess;
         }
 

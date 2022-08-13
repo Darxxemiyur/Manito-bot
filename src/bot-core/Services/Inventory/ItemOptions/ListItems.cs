@@ -9,140 +9,176 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.Chat.DialogueNet;
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.Inventory
 {
     public class ListItems : IDialogueNet
     {
         private InventorySession _session;
+        private const int max = 25;
+        private const int rows = 5;
+        private int _page;
+        private int _pageCount;
+        private int _leftsp;
+        private DiscordInteractionResponseBuilder _msg;
+        private DiscordComponent[] _btnDef;
+        private DiscordButtonComponent _firstList;
+        private DiscordButtonComponent _prevList;
+        private DiscordButtonComponent _exBtn;
+        private DiscordButtonComponent _nextList;
+        private DiscordButtonComponent _latterList;
+        private string _navPrefix;
+        private string _itmPrefix;
+        private string _othPrefix;
+
+        public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 
         public ListItems(InventorySession session, int startPage)
         {
             _session = session;
             _page = startPage;
+            _navPrefix = "nav";
+            _itmPrefix = "item";
         }
-        private const int max = 25;
-        private const int rows = 5;
-        private int _page;
-        private async Task<NextNetInstruction> ListTheItems(InstructionArguments args)
+        private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArguments args)
         {
-            var exBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exitBtn", "Закрыть",
-             false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("✖️")));
-            var firstList = new DiscordButtonComponent(ButtonStyle.Success, "firstBtn", "Перв. стр",
+            _firstList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_firstBtn", "Перв. стр",
              false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("◀️")));
-            var prevList = new DiscordButtonComponent(ButtonStyle.Success, "prevBtn", "Пред. стр",
+            _prevList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_prevBtn", "Пред. стр",
              false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("⬅️")));
-            var nextList = new DiscordButtonComponent(ButtonStyle.Success, "nextBtn", "След. стр",
+            _exBtn = new DiscordButtonComponent(ButtonStyle.Danger, $"{_navPrefix}_exitBtn", "Закрыть",
+             false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("✖️")));
+            _nextList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_nextBtn", "След. стр",
              false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("➡️")));
-            var latterList = new DiscordButtonComponent(ButtonStyle.Success, "latterBtn", "Посл. стр",
+            _latterList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_latterBtn", "Посл. стр",
              false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("▶️")));
-            var def = new DiscordComponent[] { firstList, prevList, exBtn, nextList, latterList };
-            var leftsp = max - def.Length;
+            _btnDef = new DiscordComponent[] { _firstList, _prevList, _exBtn, _nextList, _latterList };
 
-            while (true)
+            return new(PrintActions, NextNetworkActions.Continue);
+        }
+        private async Task<NextNetworkInstruction> PrintActions(NetworkInstructionArguments args)
+        {
+            _leftsp = max - _btnDef.Length;
+
+            _msg = new DiscordInteractionResponseBuilder();
+            var emb = new DiscordEmbedBuilder();
+
+            var inv = _session.PInventory.GetInventoryItems();
+            var invCount = inv.Count();
+
+            var pages = inv.Select((x, y) => (x, y)).Chunk(_leftsp);
+
+            _pageCount = Math.Max(pages.Count() - 1, 0);
+
+            _page = Math.Clamp(_page, 0, _pageCount);
+            IEnumerable<(ItemDescriptor, int)> itms = Enumerable.Empty<(ItemDescriptor, int)>();
+            var btns = Enumerable.Empty<DiscordComponent>();
+            if (invCount > 0)
             {
-                var msg = new DiscordInteractionResponseBuilder();
-                var emb = new DiscordEmbedBuilder();
+                itms = pages.ElementAtOrDefault(_page)?
+                    .Select(x => ((ItemDescriptor)new UniversalDescriptor(x.x), x.y));
 
-                var inv = _session.PInventory.GetInventoryItems();
-                var invCount = inv.Count();
+                foreach (var (x, y) in itms)
+                    emb.AddField($"Предмет №{y}", x.GetEmbedDescriptor(), true);
 
-                var pages = inv.Select((x, y) => (x, y)).Chunk(leftsp);
-
-                var pageCount = Math.Max(pages.Count() - 1, 0);
-
-                _page = Math.Clamp(_page, 0, pageCount);
-
-                var btns = Enumerable.Empty<DiscordComponent>();
-                if (invCount > 0)
-                {
-                    var list = pages.ElementAtOrDefault(_page);
-
-                    foreach (var (x, y) in list)
-                        emb.AddField($"Предмет №{y}", $"{x.ItemType} x{x.Quantity}", true);
-
-                    btns = list.Select(x => new DiscordButtonComponent(ButtonStyle.Primary,
-                       $"openitem{x.x.Id}", $"{x.x.ItemType}"));
-                }
-                else
-                {
-                    emb.WithDescription("У вас пусто в инвентаре :(");
-                }
-
-                btns = btns.Concat(Enumerable.Range(1, leftsp - btns.Count()).Select(x =>
-                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{x}dummy",
-                 " ** ** ** ** ** ** ", true)));
-
-                emb.WithFooter($"Всего предметов: {invCount}\nСтраница {_page + 1} из {pageCount + 1}");
-
-                if (_page == 0)
-                {
-                    firstList.Disable();
-                    prevList.Disable();
-                }
-                else
-                {
-                    firstList.Enable();
-                    prevList.Enable();
-                }
-
-                if (_page == pageCount)
-                {
-                    nextList.Disable();
-                    latterList.Disable();
-                }
-                else
-                {
-                    nextList.Enable();
-                    latterList.Enable();
-                }
-
-                foreach (var btnsr in btns.Concat(def).Chunk(rows))
-                    msg.AddComponents(btnsr);
-
-                await _session.Respond(msg.AddEmbed(emb));
-
-                var resp = await _session.GetInteraction(msg.Components);
-
-                if (resp.CompareButton(firstList))
-                {
-                    _page = 0;
-                    continue;
-                }
-
-                if (resp.CompareButton(prevList))
-                {
-                    _page--;
-                    continue;
-                }
-
-                if (resp.CompareButton(nextList))
-                {
-                    _page++;
-                    continue;
-                }
-
-                if (resp.CompareButton(latterList))
-                {
-                    _page = pageCount;
-                    continue;
-                }
-
-                if (resp.CompareButton(exBtn))
-                {
-                    await _session.QuitSession();
-                    break;
-                }
-
-                await _session.PInventory.RemoveItem(inv
-                 .FirstOrDefault(x => resp.Interaction
-                 .Data.CustomId.Contains($"{x.Id}")));
+                btns = itms.Select(x => new DiscordButtonComponent(ButtonStyle.Primary,
+                   $"{_itmPrefix}_{x.Item1.Item.Id}", x.Item1.GetButtonDescriptor()));
+            }
+            else
+            {
+                emb.WithDescription("У вас пусто в инвентаре :(");
             }
 
-            return new(null, NextNetActions.Success);
+            btns = btns.Concat(Enumerable.Range(1, _leftsp - btns.Count()).Select(x =>
+             new DiscordButtonComponent(ButtonStyle.Secondary, $"{x}dummy",
+             " ** ** ** ** ** ** ", true)));
+
+            emb.WithFooter($"Всего предметов: {invCount}\nСтраница {_page + 1} из {_pageCount + 1}");
+
+            if (_page == 0)
+            {
+                _firstList.Disable();
+                _prevList.Disable();
+            }
+            else
+            {
+                _firstList.Enable();
+                _prevList.Enable();
+            }
+
+            if (_page == _pageCount)
+            {
+                _nextList.Disable();
+                _latterList.Disable();
+            }
+            else
+            {
+                _nextList.Enable();
+                _latterList.Enable();
+            }
+
+            foreach (var btnsr in btns.Concat(_btnDef).Chunk(rows))
+                _msg.AddComponents(btnsr);
+
+            await _session.Respond(_msg.AddEmbed(emb));
+
+            return new(WaitForResponse, NextNetworkActions.Continue, itms);
+        }
+        private async Task<NextNetworkInstruction> WaitForResponse(NetworkInstructionArguments args)
+        {
+            var inv = (IEnumerable<(ItemDescriptor, int)>)args.Payload;
+
+            var resp = await _session.GetInteraction(_msg.Components);
+
+
+            if (resp.ButtonId.StartsWith(_itmPrefix))
+                return new(UseItem, NextNetworkActions.Continue, (resp, inv));
+
+            if (resp.ButtonId.StartsWith(_navPrefix))
+                return new(MoveToPage, NextNetworkActions.Continue, resp);
+
+
+            return new(null, NextNetworkActions.Stop);
+        }
+        private async Task<NextNetworkInstruction> UseItem(NetworkInstructionArguments args)
+        {
+            var resp = ((InteractiveInteraction, IEnumerable<(ItemDescriptor, int)>))args.Payload;
+
+            var item = resp.Item2.FirstOrDefault(x => resp
+                .Item1.ButtonId.Contains($"{x.Item1.Item.Id}"));
+
+            var net = item.Item1.GetItemNet(_session,
+                new NextNetworkInstruction(PrintActions, NextNetworkActions.Continue));
+
+            return net.GetStartingInstruction();
+        }
+        private async Task<NextNetworkInstruction> MoveToPage(NetworkInstructionArguments args)
+        {
+            var resp = (InteractiveInteraction)args.Payload;
+
+            if (resp.CompareButton(_firstList))
+                _page = 0;
+
+            if (resp.CompareButton(_prevList))
+                _page--;
+
+            if (resp.CompareButton(_nextList))
+                _page++;
+
+            if (resp.CompareButton(_latterList))
+                _page = _pageCount;
+
+            if (!resp.CompareButton(_exBtn))
+                return new(PrintActions, NextNetworkActions.Continue);
+
+            await _session.QuitSession();
+            return new(null, NextNetworkActions.Stop);
         }
 
-        public NextNetInstruction GetStartingInstruction() => new(ListTheItems, NextNetActions.Continue);
+        public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
+        public NextNetworkInstruction GetStartingInstruction() => new(Initiallize, NextNetworkActions.Continue);
     }
 }

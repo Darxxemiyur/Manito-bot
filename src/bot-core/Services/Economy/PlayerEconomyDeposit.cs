@@ -11,10 +11,8 @@ namespace Manito.Discord.Economy
 
     public class PlayerEconomyDeposit
     {
-        
-        public UInt64 DiscordID;
-        public long Currency;
-        
-    }
 
+        public ulong DiscordID;
+        public long Currency;
+    }
 }

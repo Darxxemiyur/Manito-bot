@@ -4,14 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
-using Manito.Discord.Db;
+using Manito.Discord.Database;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
 
-    public interface IShopDbFactory : IDbFactory
+    public interface IShopDbFactory : IMyDbFactory
     {
-        DbSet<ShopItem> ShopItems { get; }
+        new IShopDb CreateMyDbContext();
+        new Task<IShopDb> CreateMyDbContextAsync();
     }
 
 }

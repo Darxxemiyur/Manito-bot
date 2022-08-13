@@ -17,14 +17,14 @@ namespace Manito.Discord.Client
 
     public class InteractiveInteraction
     {
-        private readonly DiscordInteraction _interaction;
-        public DiscordInteraction Interaction => _interaction;
-        private DiscordInteractionData Data => _interaction.Data;
+        public DiscordInteraction Interaction { get; }
+        private DiscordInteractionData Data => Interaction.Data;
+        public static implicit operator InteractiveInteraction(DiscordInteraction interaction) => new(interaction);
         public InteractiveInteraction(DiscordInteraction interaction)
         {
-            _interaction = interaction;
+            Interaction = interaction;
         }
-        public bool CompareButton(string name) => Data.CustomId == name;
+        public bool CompareButton(string name) => ButtonId == name;
         public bool CompareButton(DiscordButtonComponent btn) => CompareButton(btn.CustomId);
         public bool IsSelected(string option) => Data.Values.Any(x => x == option);
         public string[] GetSelected() => Data.Values;
@@ -39,7 +39,8 @@ namespace Manito.Discord.Client
          .Where(y => Data.Values.Any(x => x == y.Item1)).Select(x => x?.Item2);
         public TOption GetOption<TOption>(IDictionary<string, TOption> options)
          where TOption : class => GetOptions(options).FirstOrDefault();
-        public bool AnyComponents(IEnumerable<string> ids) => ids.Any(x => Data.CustomId == x);
+        public bool AnyComponents(IEnumerable<string> ids) => ids.Any(x => ButtonId == x);
+        public string ButtonId => Data.CustomId;
         public bool AnyComponents(IEnumerable<DiscordComponent> components) =>
          AnyComponents(components.Select(x => x.CustomId));
         public bool AnyComponents(IEnumerable<DiscordActionRowComponent> components) =>

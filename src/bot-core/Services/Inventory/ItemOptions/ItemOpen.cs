@@ -9,24 +9,31 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.Chat.DialogueNet;
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.Inventory
 {
-    public class ItemOpen : IDialogueNet
+    public class ItemSelect : IDialogueNet
     {
         private IItem _item;
         private InventorySession _session;
-        public ItemOpen(IItem item, InventorySession session)
+
+        public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
+        public ItemSelect(IItem item, InventorySession session)
         {
             _item = item;
             _session = session;
         }
 
-        private async Task<NextNetInstruction> ShowOptions(InstructionArguments args)
+        private async Task<NextNetworkInstruction> ShowOptions(NetworkInstructionArguments args)
         {
             throw new NotImplementedException();
         }
-        public NextNetInstruction GetStartingInstruction() => new(ShowOptions, NextNetActions.Continue);
+        public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
+        public NextNetworkInstruction GetStartingInstruction() => new(ShowOptions, NextNetworkActions.Continue);
+
     }
 }

@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Manito.Discord.Db;
+using Manito.Discord.Database;
 
 namespace Manito.Discord.Economy
 {
 
-    public interface IEconomyDbFactory : IDbFactory
+    public interface IEconomyDbFactory : IMyDbFactory
     {
 
         IEconomyDb CreateEconomyDbContext();

@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Manito.Discord.Economy
 {
@@ -16,7 +17,7 @@ namespace Manito.Discord.Economy
     public class EconomyCommands
     {
         private const string Locale = "ru";
-        private ServerEconomy _economy;
+        private readonly ServerEconomy _economy;
         public EconomyCommands(ServerEconomy economy) => _economy = economy;
         public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
         {
@@ -33,7 +34,7 @@ namespace Manito.Discord.Economy
             }
             return null;
         }
-        private Dictionary<string, string> GetLoc(string trans) => new Dictionary<string, string>() { { Locale, trans } };
+        private Dictionary<string, string> GetLoc(string trans) => new() { { Locale, trans } };
         private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
         {
             yield return (new DiscordApplicationCommandOption("account", "Show currency",
@@ -129,7 +130,8 @@ namespace Manito.Discord.Economy
 
             if (!argtools.DoHaveReqArgs())
             {
-                msg.WithContent($"Неправильно введены аргументы!");
+                msg.WithContent(args.Locale == "ru"
+                 ? "Неправильно введены аргументы!" : "Wrong arguments!");
                 await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
                 return;
             }
@@ -140,7 +142,9 @@ namespace Manito.Discord.Economy
 
             amt = await _economy.TransferFunds(from, to, amt);
 
-            msg.WithContent($"Успешно переведено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
+            msg.WithContent(args.Locale == "ru"
+                 ? $"Успешно переведено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>"
+                 : $"Succesfuly transfered {amt} {_economy.CurrencyEmoji} to <@{to}>'s account");
 
             await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
         }
@@ -155,7 +159,8 @@ namespace Manito.Discord.Economy
 
             if (!argtools.DoHaveReqArgs())
             {
-                msg.WithContent($"Неправильно введены аргументы!");
+                msg.WithContent(args.Locale == "ru"
+                 ? "Неправильно введены аргументы!" : "Wrong arguments!");
                 await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
                 return;
             }
@@ -183,7 +188,8 @@ namespace Manito.Discord.Economy
 
             if (!argtools.DoHaveReqArgs())
             {
-                msg.WithContent($"Неправильно введены аргументы!");
+                msg.WithContent(args.Locale == "ru"
+                 ? "Неправильно введены аргументы!" : "Wrong arguments!");
                 await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
                 return;
             }

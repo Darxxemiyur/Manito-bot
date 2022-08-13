@@ -12,6 +12,7 @@ using DSharpPlus.SlashCommands.EventArgs;
 using DSharpPlus.SlashCommands.Attributes;
 
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.Economy;
 using System.Threading;
 
@@ -76,8 +77,8 @@ namespace Manito.Discord.Shop
         }
         private IEnumerable<DiscordApplicationCommand> GetCommands()
         {
-            yield return new DiscordApplicationCommand("shopping", "Начать шоппинг",
-            defaultPermission: true);
+            yield return new DiscordApplicationCommand("shopping",
+             "Начать шоппинг", defaultPermission: true);
         }
 
         private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

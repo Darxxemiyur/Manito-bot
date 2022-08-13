@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 
 namespace Manito.Discord.Inventory

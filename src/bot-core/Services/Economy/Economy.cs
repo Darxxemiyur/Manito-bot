@@ -8,6 +8,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 using Manito.Discord.Client;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Manito.Discord.Economy
 {
@@ -32,18 +33,19 @@ namespace Manito.Discord.Economy
     }
     public class ServerEconomy : IModule
     {
-        private ulong _emojiId => 964951871435468810;
+        private ulong _emojiId => 997272231384207470;
         private string _emoji => $"<:{_emojiId}:{_emojiId}>";
         public ulong CurrencyEmojiId => _emojiId;
         public string CurrencyEmoji => _emoji;
+        private IEconomyDbFactory _dbFactory;
         private Dictionary<ulong, PlayerEconomyDeposit> _deposits;
         private EconomyLogging _logger;
         public Task RunModule() => _logger.RunModule();
-        public ServerEconomy(MyDomain service)
+        public ServerEconomy(MyDomain service, IEconomyDbFactory factory)
         {
+            _dbFactory = factory;
             _logger = new(service);
             _deposits = new();
-
         }
 
         /// <summary>
@@ -51,8 +53,8 @@ namespace Manito.Discord.Economy
         /// </summary>
         /// <param name="id">User id</param>
         /// <returns>User's deposit</returns>
-        public PlayerEconomyDeposit GetDeposit(ulong id) => _deposits.ContainsKey(id) ?
-        _deposits[id] : _deposits[id] = new()
+        public PlayerEconomyDeposit GetDeposit(ulong id) =>
+         _deposits.ContainsKey(id) ? _deposits[id] : _deposits[id] = new()
         {
             DiscordID = id,
             Currency = 5000
