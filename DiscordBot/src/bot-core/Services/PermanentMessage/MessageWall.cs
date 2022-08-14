@@ -13,7 +13,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Manito.Discord.PermanentMessage
 {
-
+    /// <summary>
+    /// SetOf Messages
+    /// </summary>
     public class MessageWall
     {
         public ulong ID { get; set; }

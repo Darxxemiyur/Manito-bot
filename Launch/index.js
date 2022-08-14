@@ -7,7 +7,7 @@ var deleg = (x) => console.log(x.toString());
 var hookOut = (x) => x.on("data", deleg);
 var hookErr = (x) => hookOut(x.stderr) && hookOut(x.stdout);
 
-var build = child_process.spawn("dotnet", ["build", path]);
+var build = child_process.spawn("dotnet", ["build", path + "/DiscordBot/src"]);
 hookErr(build);
 
 var UntilExit = new Promise((OnGood, OnBad) => {
@@ -18,12 +18,12 @@ UntilExit.catch((e) => {
   throw e;
 });
 
-UntilExit.then((OnGood,re) => {
+UntilExit.then((OnGood, re) => {
   ///Start bot process
   var run = child_process.spawn("dotnet", [
     "run",
     "--project",
-    path + "/bot-core",
+    path + "/DiscordBot/src/bot-core",
   ]);
 
   ///Log std err/out for data

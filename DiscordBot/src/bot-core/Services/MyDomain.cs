@@ -27,13 +27,14 @@ namespace Manito.Discord
         private IInventorySystem _inventory;
         private ShopService _shopService;
         private RootConfig _rootConfig;
+        private MessageController _msgWallCtr;
         public IServiceCollection ServiceCollection => _serviceCollection;
         public MyDiscordClient MyDiscordClient => _myDiscordClient;
         public ExecThread ExecutionThread => _executionThread;
         public ServerEconomy Economy => _economy;
         public IInventorySystem Inventory => _inventory;
         public ShopService ShopService => _shopService;
-        private MessageController _msgWallCtr;
+        public MessageController MsgWallCtr => _msgWallCtr;
         public static async Task<MyDomain> Create()
         {
             var service = new MyDomain();

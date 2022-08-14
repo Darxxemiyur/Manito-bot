@@ -24,6 +24,7 @@ namespace Manito.Discord.Chat.DialogueNet
         protected ulong? _chId;
         protected ulong? _msId;
         private bool _irtt;
+        private bool _uirtt;
         public DiscordUser User => _user;
         public MyDiscordClient Client => _client;
         public DiscordInteraction Args => IArgs.Interaction;
@@ -53,6 +54,11 @@ namespace Manito.Discord.Chat.DialogueNet
         private InteractionResponseType IRT => !_irtt && (_irtt = true)
             ? InteractionResponseType.ChannelMessageWithSource
             : InteractionResponseType.UpdateMessage;
+        private InteractionResponseType UIRT => !_uirtt && (_uirtt = true)
+            ? InteractionResponseType.DeferredChannelMessageWithSource
+            : InteractionResponseType.DeferredMessageUpdate;
+
+        public Task RespondLater() => Args.CreateResponseAsync(UIRT);
         public async Task Respond(DiscordInteractionResponseBuilder bld = default)
         {
             await Args.CreateResponseAsync(IRT, bld?.AsEphemeral(IsEphemeral));

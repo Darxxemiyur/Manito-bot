@@ -19,10 +19,12 @@ namespace Manito.Discord.PermanentMessage
 
     public class MessageWallSession : DialogueNetSession
     {
-        public MessageWallSession(InteractiveInteraction iargs, MyDiscordClient client, DiscordUser user)
+        public readonly IPermMessageDbFactory DBFactory;
+        public MessageWallSession(InteractiveInteraction iargs,
+         MyDiscordClient client, DiscordUser user, IPermMessageDbFactory factory)
          : base(iargs, client, user, false)
         {
-            
+            DBFactory = factory;
         }
         
     }

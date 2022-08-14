@@ -23,7 +23,7 @@ namespace Manito.Discord.PermanentMessage
         }
         public Task<MessageWallSession> StartSession(DiscordInteraction args,
          Func<MessageWallSession, IDialogueNet> getNet) => StartSession(() =>
-         new MessageWallSession(new(args), Service.MyDiscordClient, args.User), getNet);
+         new MessageWallSession(new(args), Service.MyDiscordClient, args.User, Service.DbFactory), getNet);
     }
 
 }

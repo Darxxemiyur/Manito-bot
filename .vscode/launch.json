@@ -1,23 +1,25 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "pwa-node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/src/launch/index.js",
-            "args": [
-                "${workspaceFolder}/src/"
-            ],
-            "presentation": {
-                "clear": true                        // <-- this line
-            }
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Discord bot",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/DiscordBot/src/bot-core/bin/Debug/net6.0/Manito.dll",
+      "args": [ "${workspaceFolder}/DiscordBot/src/bot-core" ],
+      "cwd": "${workspaceFolder}/DiscordBot/src/bot-core",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    },
+    {
+        "name": "ServerManager Launch",
+        "type": "python",
+        "request": "launch",
+        "program": "${file}"
+    }
+  ]
 }

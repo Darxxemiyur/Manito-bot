@@ -13,7 +13,7 @@
                 "/property:GenerateFullPaths=true",
                 // Do not generate summary otherwise it leads to duplicate errors in Problems panel
                 "/consoleloggerparameters:NoSummary",
-                "./src/"
+                "${workspaceFolder}/DiscordBot/src"
             ],
             "group": "build",
             "presentation": {
@@ -29,7 +29,7 @@
             "args": [
                 "run",
                 "--project",
-                "./src/bot-core"
+                "${workspaceFolder}/DiscordBot/src/bot-core"
             ],
             "dependsOn": [
                 "build"

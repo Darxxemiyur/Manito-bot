@@ -8,6 +8,7 @@ using Manito.Discord.Economy;
 using Manito.Discord.Filters;
 using Manito.Discord.Inventory;
 using Manito.Discord.Shop;
+using Manito.Discord.PermanentMessage;
 
 namespace Manito.Discord.Client
 {
@@ -23,6 +24,7 @@ namespace Manito.Discord.Client
         private InventoryFilter _inventoryFilter;
         private EconomyFilter _economyFilter;
         private DebugFilter _debugFilter;
+        private MsgWallFilter _msgWallFilter;
         public EventBuffer MyEventBuffer => _eventBuffer;
         public ShopFilter Shop => _shopFilter;
         public NoiseFilter Noise => _noiseFilter;
@@ -36,6 +38,7 @@ namespace Manito.Discord.Client
         }
         public async Task Initialize()
         {
+            _msgWallFilter = new MsgWallFilter(_service, _eventBuffer);
             _noiseFilter = new NoiseFilter(_eventBuffer);
             _economyFilter = new EconomyFilter(_service, _eventBuffer);
             _inventoryFilter = new InventoryFilter(_service, _eventBuffer);
@@ -53,6 +56,7 @@ namespace Manito.Discord.Client
             yield return _shopFilter.RunModule();
             yield return _economyFilter.RunModule();
             yield return _debugFilter.RunModule();
+            yield return _msgWallFilter.RunModule();
         }
         public Task RunModule() => Task.WhenAll(GetRuns());
     }

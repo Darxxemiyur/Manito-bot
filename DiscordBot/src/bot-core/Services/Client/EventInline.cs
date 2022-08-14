@@ -38,6 +38,11 @@ namespace Manito.Discord.Client
         }
         public Task Run() => _sourceEventBuffer.EventLoops();
     }
+    /// <summary>
+    /// Single event pipe inliner.
+    /// Forwards events to respective listeners, if not catched, forwards to base listeners.
+    /// </summary>
+    /// <typeparam name="TEvent"></typeparam>
     public class PerEventInline<TEvent> where TEvent : DiscordEventArgs
     {
         public static int DefaultOrder = 10;
@@ -97,8 +102,9 @@ namespace Manito.Discord.Client
              && _predictators[x.Item1].Count == 0 && _predictators.Remove(x.Item1)).ToArray();
 
             var toRun = await RunEvent(client, args, itms.Select(x => x.y));
-            foreach (var itm in toRun)
-                await itm.Handle(client, args);
+
+            foreach (var itm in toRun) await itm.Handle(client, args);
+
             itmsToDlt = await CheckEOL(itms);
             //Deletes and works!
             _ = itmsToDlt.Where(x => _predictators[x.Item1].Remove(x.Item2)
@@ -136,7 +142,13 @@ namespace Manito.Discord.Client
             var result = await gettingData;
 
             return (result.Item1, result.Item2.Item2);
+        }
 
+        public virtual async Task<(DiscordClient, TEvent)> GetEvent()
+        {
+            var result = await _eventProxy.GetData();
+            
+            return (result.Item1, result.Item2.Item2);
         }
     }
 }

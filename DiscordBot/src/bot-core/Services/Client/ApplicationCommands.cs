@@ -26,7 +26,6 @@ namespace Manito.Discord.Client
         public async Task UpdateCommands()
         {
             Client.Ready += DoUpdateCommands;
-            
         }
         public void Add(string key, IEnumerable<DiscordApplicationCommand> value) =>
             Commands.Add(key, value);
