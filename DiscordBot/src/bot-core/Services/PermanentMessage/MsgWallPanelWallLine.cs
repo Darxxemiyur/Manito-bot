@@ -22,7 +22,7 @@ namespace Manito.Discord.PermanentMessage
             private int _gid;
             public string GetButtonId() => $"MessageWallLine{_lid}";
 
-            public string GetButtonName() => $"Стена {_lid}";
+            public string GetButtonName() => $"Стена {_lid} ID:{_wallLine.ID}";
 
             public MessageWallLine GetCarriedItem() => _wallLine;
 
@@ -169,8 +169,11 @@ namespace Manito.Discord.PermanentMessage
             var response = await _session.GetInteraction();
 
             if (_lilGoBackInstr == SelectToEdit || !response.CompareButton(removeBtn))
-                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
-
+            {
+                await _session.Respond(InteractionResponseType.UpdateMessage,
+                    new DiscordInteractionResponseBuilder()
+                    .AddComponents(returnBtn.Disable(), removeBtn.Disable()));
+            }
 
             if (response.CompareButton(returnBtn))
                 return new(ShowOptions);
