@@ -48,18 +48,6 @@ namespace Manito.Discord.Shop
                 Category = ShopItemCategory.Revive,
                 Price = 100,
             };
-            yield return new ShopItem
-            {
-                Name = "Яйцо",
-                Category = ShopItemCategory.Egg,
-                Price = 100,
-            };
-            yield return new ShopItem
-            {
-                Name = "Телепорт",
-                Category = ShopItemCategory.Teleport,
-                Price = 100,
-            };
         }
         public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
             (bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~")

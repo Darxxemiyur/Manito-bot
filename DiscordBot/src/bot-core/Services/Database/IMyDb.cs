@@ -8,7 +8,7 @@ using Manito.Discord.Shop;
 namespace Manito.Discord.Database
 {
 
-    public interface IMyDatabase : IDisposable, IAsyncDisposable
+    public interface IMyDatabase : IDisposable
     {
         DbContextImplementation ImplementedContext { get; }
         /// <summary>

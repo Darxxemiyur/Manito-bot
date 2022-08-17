@@ -16,9 +16,9 @@
     <PackageReference Include="DSharpPlus.VoiceNext" Version="4.2.0" />
     <PackageReference Include="DSharpPlus.VoiceNext.Natives" Version="1.0.0" />
     <PackageReference Include="emzi0767.common" Version="2.6.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
-    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.7" />
-    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.8" />
+    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.8" />
     <PackageReference Include="microsoft.extensions.caching.abstractions" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.caching.memory" Version="6.0.1" />
     <PackageReference Include="microsoft.extensions.dependencyinjection" Version="6.0.0" />

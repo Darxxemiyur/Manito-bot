@@ -36,7 +36,6 @@ namespace Manito.Discord.Chat.DialogueNet
             _sessions.Any(predictate);
         public bool StopSession(T session) => StopSession(x => x == session);
         public bool StopSession(Predicate<T> predicate) => _sessions.RemoveAll(predicate) > 0;
-
         public async Task<T1> Atomary<T1>(Func<DialogueNetSessionControls<T>, Task<T1>> run)
         {
             await _lock.WaitAsync();

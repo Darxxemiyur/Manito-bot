@@ -16,7 +16,6 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.PermanentMessage
 {
-
     public class MessageWallSession : DialogueNetSession
     {
         public readonly IPermMessageDbFactory DBFactory;
@@ -27,5 +26,15 @@ namespace Manito.Discord.PermanentMessage
             DBFactory = factory;
         }
         
+    }
+    public class MessageWallSessionController : DialogueNetSessionControls<MessageWallSession>
+    {
+        public MessageWallSessionController(MyDomain service) : base(service)
+        {
+
+        }
+        public Task<MessageWallSession> StartSession(DiscordInteraction args,
+         Func<MessageWallSession, IDialogueNet> getNet) => StartSession(() =>
+         new MessageWallSession(new(args), Service.MyDiscordClient, args.User, Service.DbFactory), getNet);
     }
 }

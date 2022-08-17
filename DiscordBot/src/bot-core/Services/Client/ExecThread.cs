@@ -50,6 +50,11 @@ namespace Manito.Discord.Client
 
                 //Handle the removal of completed tasks yielded from awaiting for any
                 await _sync.WaitAsync();
+
+                //Forward all exceptions to the stderr-ish
+                if (completedTask?.Exception != null)
+                    await Console.Error.WriteLineAsync($"{completedTask?.Exception?.InnerException}");
+
                 //Returns false if it tries to remove 'timeout' task, and true if succeeds
                 _executingTasks.Remove(completedTask);
                 _onNew = new();

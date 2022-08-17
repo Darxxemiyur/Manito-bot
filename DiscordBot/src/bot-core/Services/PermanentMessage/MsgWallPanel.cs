@@ -1,11 +1,7 @@
-using System;
 using System.Threading.Tasks;
-using System.Linq;
 
 using DSharpPlus;
 using DSharpPlus.Entities;
-
-using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
 using Manito.Discord.Economy;
@@ -13,6 +9,7 @@ using DSharpPlus.EventArgs;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Inventory;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
+using System.Diagnostics;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -36,29 +33,41 @@ namespace Manito.Discord.PermanentMessage
         {
             return GetStartingInstruction();
         }
-        private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArguments arg)
+        private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArgument arg)
         {
-            try
+            var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Единицу");
+            var wall = new DiscordButtonComponent(ButtonStyle.Primary, "wall", "Набор единиц");
+            var wallTranslator = new DiscordButtonComponent(ButtonStyle.Primary, "wallTranslator", "Переводчик");
+
+            var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
+
+            var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
+                .WithContent("Выбор изменения информации")
+                .AddComponents(wallLine, wall, wallTranslator)
+                .AddComponents(exitBtn));
+
+            if (response.CompareButton(wallLine))
             {
-                await _session.RespondLater();
-                await Task.Delay(5000);
-
-                await _session.Respond(new DiscordInteractionResponseBuilder().WithContent("Eurika!"));
-
-                await Task.Delay(2000);
-
-                await _session.RespondLater();
-                await Task.Delay(5000);
-
-                await _session.Respond(new DiscordInteractionResponseBuilder().WithContent("Eurika!"));
-
-                await _session.QuitSession();
+                var next = new MsgWallPanelWallLine(_session, new(SelectWhatToDo));
+                await NetworkCommon.RunNetwork(next);
             }
-            catch (Exception e)
+
+            if (response.CompareButton(wall))
             {
-                Console.WriteLine($"{e}");
+                var next = new MsgWallPanelWall(_session, new(SelectWhatToDo));
+                await NetworkCommon.RunNetwork(next);
             }
-            return new();
+
+            if (response.CompareButton(wallTranslator))
+            {
+                var next = new MsgWallPanelWallTranslator(_session, new(SelectWhatToDo));
+                await NetworkCommon.RunNetwork(next);
+            }
+
+            if (response.CompareButton(exitBtn))
+                return new();
+
+            return new(SelectWhatToDo);
         }
     }
 }

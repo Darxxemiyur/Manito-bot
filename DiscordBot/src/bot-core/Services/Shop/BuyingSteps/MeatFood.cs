@@ -30,7 +30,7 @@ namespace Manito.Discord.Shop
             _food = food;
         }
 
-        private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
         {
             var btns = Common.Generate;
             var ms1 = $"Выберите количество {_food.Name}";
@@ -49,7 +49,7 @@ namespace Manito.Discord.Shop
 
             return new(ExecuteTransaction, NextNetworkActions.Continue);
         }
-        private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
         {
             var wallet = _session.Wallet;
             var inventory = _session.Inventory;
@@ -64,7 +64,7 @@ namespace Manito.Discord.Shop
 
             return new NextNetworkInstruction(null, NextNetworkActions.Stop);
         }
-        private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
         {
             var price = _quantity * _food.Price;
             var ms1 = $"Вы не можете позволить {_quantity} {_food.Name} за {price}.";

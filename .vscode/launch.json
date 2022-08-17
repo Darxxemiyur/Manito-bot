@@ -5,13 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Discord bot",
+      "name": "Discord bot Debug",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/DiscordBot/src/bot-core/bin/Debug/net6.0/Manito.dll",
       "args": [ "${workspaceFolder}/DiscordBot/src/bot-core" ],
       "cwd": "${workspaceFolder}/DiscordBot/src/bot-core",
+      "justMyCode": true,
       "stopAtEntry": false,
       "console": "internalConsole"
     },

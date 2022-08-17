@@ -16,9 +16,9 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Network
         }
         private static async Task<object> RunNetwork(NextNetworkInstruction inst, NodeResultHandler handler)
         {
-            do
+            while (!await handler(inst))
                 inst = await inst.NextStep(new(inst));
-            while (!await handler(inst));
+                
             return inst.Payload;
         }
     }

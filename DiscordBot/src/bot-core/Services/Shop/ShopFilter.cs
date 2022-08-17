@@ -28,7 +28,6 @@ namespace Manito.Discord.Shop
             {
                 var data = (await _queue.GetData()).Item2;
                 await HandleAsCommand(data);
-
             }
         }
         private async Task<ulong> CheckMessage(ulong chnlId, ulong msgId)
@@ -56,7 +55,7 @@ namespace Manito.Discord.Shop
             {
                 messageId = await CheckMessage(chnlId, messageId);
                 var inter = await _service.MyDiscordClient.ActivityTools
-                    .WaitForComponentInteraction(x => x.Message.Id == messageId, TimeSpan.FromDays(1));
+                    .WaitForComponentInteraction(x => x.Message.Id == messageId);
 
                 var payload = inter.Interaction;
                 await _queue.Handle(_service.MyDiscordClient.Client, payload);
@@ -83,11 +82,11 @@ namespace Manito.Discord.Shop
 
         private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
         {
-            if (_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
-            {
-                await _queue.Handle(client, args.Interaction);
-                args.Handled = true;
-            }
+            if (!_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
+                return;
+
+            await _queue.Handle(client, args.Interaction);
+            args.Handled = true;
         }
         private async Task HandleAsCommand(DiscordInteraction args)
         {

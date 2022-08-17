@@ -23,7 +23,7 @@ namespace Manito.Discord.Inventory
         public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
         public CarcassInteraction(DialogueNetSession session, IItem item, NextNetworkInstruction ret) =>
          (_session, _item, _ret) = (session, item, ret);
-        private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArgument args)
         {
             var resp = new DiscordInteractionResponseBuilder();
             resp.WithContent("Меня пока-что нельзя использовать, извините.");

@@ -28,7 +28,7 @@ namespace Manito.Discord.Inventory
             _session = session;
         }
 
-        private async Task<NextNetworkInstruction> ShowOptions(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> ShowOptions(NetworkInstructionArgument args)
         {
             throw new NotImplementedException();
         }

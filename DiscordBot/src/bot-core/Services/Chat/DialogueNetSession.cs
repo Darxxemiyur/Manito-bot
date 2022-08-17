@@ -24,7 +24,6 @@ namespace Manito.Discord.Chat.DialogueNet
         protected ulong? _chId;
         protected ulong? _msId;
         private bool _irtt;
-        private bool _uirtt;
         public DiscordUser User => _user;
         public MyDiscordClient Client => _client;
         public DiscordInteraction Args => IArgs.Interaction;
@@ -54,18 +53,58 @@ namespace Manito.Discord.Chat.DialogueNet
         private InteractionResponseType IRT => !_irtt && (_irtt = true)
             ? InteractionResponseType.ChannelMessageWithSource
             : InteractionResponseType.UpdateMessage;
-        private InteractionResponseType UIRT => !_uirtt && (_uirtt = true)
-            ? InteractionResponseType.DeferredChannelMessageWithSource
-            : InteractionResponseType.DeferredMessageUpdate;
 
-        public Task RespondLater() => Args.CreateResponseAsync(UIRT);
-        public async Task Respond(DiscordInteractionResponseBuilder bld = default)
+        /// <summary>
+        /// Respond to an interaction.
+        /// </summary>
+        /// <param name="bld"></param>
+        /// <returns></returns>
+        public Task Respond(DiscordInteractionResponseBuilder bld = default)
         {
-            await Args.CreateResponseAsync(IRT, bld?.AsEphemeral(IsEphemeral));
+            return Respond(IRT, bld?.AsEphemeral(IsEphemeral));
+        }
+
+        /// <summary>
+        /// Fires Respond and then fires GetInteraction against components placed in the fired message body.
+        /// </summary>
+        /// <param name="bld"></param>
+        /// <returns></returns>
+        public Task<InteractiveInteraction> RespondAndWait(DiscordInteractionResponseBuilder bld = default)
+        {
+            return RespondAndWait(IRT, bld?.AsEphemeral(IsEphemeral));
+        }
+
+        /// <summary>
+        /// Fires Respond and then fires GetInteraction against components placed in the fired message body.
+        /// </summary>
+        /// <param name="bld"></param>
+        /// <returns></returns>
+        public async Task<InteractiveInteraction> RespondAndWait(InteractionResponseType rsptp,
+         DiscordInteractionResponseBuilder bld = default)
+        {
+            await Respond(rsptp, bld);
+            return await GetInteraction(bld.Components);
+        }
+        /// <summary>
+        /// Responds to an interaction with given response type and optional response body.
+        /// </summary>
+        /// <param name="rsptp"></param>
+        /// <param name="bld"></param>
+        /// <returns></returns>
+        public async Task Respond(InteractionResponseType rsptp,
+         DiscordInteractionResponseBuilder bld = default)
+        {
+            await Args.CreateResponseAsync(rsptp, bld?.AsEphemeral(IsEphemeral));
             if (!IsEphemeral && _chId == null)
                 _chId = (await Args.GetOriginalResponseAsync()).ChannelId;
             if (!IsEphemeral && _msId == null)
                 _msId = (await Args.GetOriginalResponseAsync()).Id;
+        }
+
+        public async Task<DiscordMessage> GetSessionMessage()
+        {
+            return (await _client.ActivityTools.WaitForMessage((x) => x.Author.Id == Args.User.Id
+                && x.Message.ChannelId == _chId)).Message;
         }
         public virtual async Task QuitSession()
         {
@@ -79,6 +118,9 @@ namespace Manito.Discord.Chat.DialogueNet
         }
         public Task<InteractiveInteraction> GetInteraction(
          IEnumerable<DiscordActionRowComponent> components) =>
+         GetInteraction(x => x.AnyComponents(components));
+        public Task<InteractiveInteraction> GetInteraction(
+         params DiscordComponent[] components) =>
          GetInteraction(x => x.AnyComponents(components));
         public async Task<InteractiveInteraction> GetInteraction(
          Func<InteractiveInteraction, bool> checker)

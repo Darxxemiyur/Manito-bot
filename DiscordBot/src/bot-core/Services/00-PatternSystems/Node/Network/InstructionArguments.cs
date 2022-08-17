@@ -1,9 +1,9 @@
 namespace Name.Bayfaderix.Darxxemiyur.Node.Network
 {
-    public class NetworkInstructionArguments
+    public class NetworkInstructionArgument
     {
         public object Payload { get; }
-        public NetworkInstructionArguments(object payload) => Payload = payload;
-        public NetworkInstructionArguments(NextNetworkInstruction payload) => Payload = payload.Payload;
+        public NetworkInstructionArgument(object payload) => Payload = payload;
+        public NetworkInstructionArgument(NextNetworkInstruction payload) => Payload = payload.Payload;
     }
 }

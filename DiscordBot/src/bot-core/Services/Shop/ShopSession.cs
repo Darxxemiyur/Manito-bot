@@ -67,7 +67,7 @@ namespace Manito.Discord.Shop
             var str = (list ?? _cashRegister.GetShopItems()).Aggregate(emb, (x, y) =>
             {
                 var price = $"{_wallet.CurrencyEmoji} {y.Price}";
-                return x.AddField($"**{y.Name}**", "**Цена за 1 ед:** " + price, true);
+                return x.AddField($"**{y.Name}**", $"**Цена за 1 ед:** {price}", true);
             });
             return emb;
 
@@ -83,18 +83,13 @@ namespace Manito.Discord.Shop
         {
             switch (item.Category)
             {
-                case ShopItemCategory.Egg:
-                    return new BuyingStepsForEgg(this, item);
                 case ShopItemCategory.SatiationCarcass:
                 case ShopItemCategory.Carcass:
                     return new BuyingStepsForMeatFood(this, item);
                 case ShopItemCategory.Plant:
                     return new BuyingStepsForPlantFood(this, item);
                 default:
-                    return new BuyingStepsForPlantFood(this, item);
-
-                    //default:
-                    //    throw new NotImplementedException();
+                    return new BuyingStepsForError(this);
             }
         }
         private async Task ItemSelected(ShopItem item)
@@ -112,7 +107,7 @@ namespace Manito.Discord.Shop
                     var shopItems = _cashRegister.GetShopItems();
                     var items = GetSelector(shopItems);
                     var mg = GetResponse(GetShopItems(null, shopItems))
-                        .AddComponents(items).AddComponents(exbtn);
+                        .AddComponents(items).AddComponents(exbtn).WithContent("");
                     await Respond(mg);
 
 

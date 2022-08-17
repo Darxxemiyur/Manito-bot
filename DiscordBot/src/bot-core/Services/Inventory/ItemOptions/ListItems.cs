@@ -43,7 +43,7 @@ namespace Manito.Discord.Inventory
             _navPrefix = "nav";
             _itmPrefix = "item";
         }
-        private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArgument args)
         {
             _firstList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_firstBtn", "Перв. стр",
              false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("◀️")));
@@ -59,7 +59,7 @@ namespace Manito.Discord.Inventory
 
             return new(PrintActions, NextNetworkActions.Continue);
         }
-        private async Task<NextNetworkInstruction> PrintActions(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> PrintActions(NetworkInstructionArgument args)
         {
             _leftsp = max - _btnDef.Length;
 
@@ -127,7 +127,7 @@ namespace Manito.Discord.Inventory
 
             return new(WaitForResponse, NextNetworkActions.Continue, itms);
         }
-        private async Task<NextNetworkInstruction> WaitForResponse(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> WaitForResponse(NetworkInstructionArgument args)
         {
             var inv = (IEnumerable<(ItemDescriptor, int)>)args.Payload;
 
@@ -141,9 +141,9 @@ namespace Manito.Discord.Inventory
                 return new(MoveToPage, NextNetworkActions.Continue, resp);
 
 
-            return new(null, NextNetworkActions.Stop);
+            return new();
         }
-        private async Task<NextNetworkInstruction> UseItem(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> UseItem(NetworkInstructionArgument args)
         {
             var resp = ((InteractiveInteraction, IEnumerable<(ItemDescriptor, int)>))args.Payload;
 
@@ -155,7 +155,7 @@ namespace Manito.Discord.Inventory
 
             return net.GetStartingInstruction();
         }
-        private async Task<NextNetworkInstruction> MoveToPage(NetworkInstructionArguments args)
+        private async Task<NextNetworkInstruction> MoveToPage(NetworkInstructionArgument args)
         {
             var resp = (InteractiveInteraction)args.Payload;
 
