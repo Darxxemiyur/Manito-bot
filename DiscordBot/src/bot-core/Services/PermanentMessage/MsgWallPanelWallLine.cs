@@ -53,10 +53,13 @@ namespace Manito.Discord.PermanentMessage
         private MessageWallSession _session;
         private NextNetworkInstruction _ret;
         private MessageWallLine _line;
+        private InteractiveSelectMenu<MessageWallLine> _selectMenu;
         public MsgWallPanelWallLine(MessageWallSession session, NextNetworkInstruction ret)
         {
             _session = session;
             _ret = ret;
+            _selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session,
+                new QueryablePageReturner<MessageWallLine>(Querryer, x => new MsgWallDescriptor(x)));
         }
         private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
         {
@@ -64,6 +67,7 @@ namespace Manito.Discord.PermanentMessage
             var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
             var editBtn = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
             var mkNewBtn = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
+            var createTestBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "createtest", "Создать тест-датасет");
 
 
             await _session.Respond(InteractionResponseType.UpdateMessage,
@@ -82,9 +86,23 @@ namespace Manito.Discord.PermanentMessage
                 .AddComponents(mkNewBtn.Disable(), editBtn.Disable(), exitBtn.Disable()));
 
             if (response.CompareButton(mkNewBtn)) return new(CreateNew);
+            if (response.CompareButton(createTestBtn)) return new(CreateTestData);
             if (response.CompareButton(editBtn)) return new(SelectToEdit);
 
             return new();
+        }
+        private async Task<NextNetworkInstruction> CreateTestData(NetworkInstructionArgument args)
+        {
+            using var db = await _session.DBFactory.CreateMyDbContextAsync();
+            for (var i = 0; i < 450; i++)
+            {
+                for (var g = 0; g < 1000; g++)
+                    db.MessageWallLines.Add(new($"{(i * 1000) + g}"));
+
+                await db.SaveChangesAsync();
+            }
+
+            return new(EnterMenu);
         }
         private async Task<NextNetworkInstruction> CreateNew(NetworkInstructionArgument args)
         {
@@ -96,17 +114,16 @@ namespace Manito.Discord.PermanentMessage
             _lilGoBackInstr = EnterMenu;
             return new(ShowOptions);
         }
+        private IQueryable<MessageWallLine> Querryer()
+        {
+            using var db = _session.DBFactory.CreateMyDbContext();
+
+            return db.MessageWallLines;
+        }
         private async Task<NextNetworkInstruction> SelectToEdit(NetworkInstructionArgument args)
         {
-            using var db = await _session.DBFactory.CreateMyDbContextAsync();
 
-            var req = await db.MessageWallLines.ToArrayAsync();
-
-            var selections = req.Select(x => new MsgWallDescriptor(x)).ToArray();
-
-            var selector = new InteractiveSelectMenu<MessageWallLine>(_session, selections);
-
-            _line = (await selector.EvaluateItem())?.GetCarriedItem();
+            _line = (await _selectMenu.EvaluateItem())?.GetCarriedItem();
 
             _lilGoBackInstr = SelectToEdit;
             return new(_line == null ? EnterMenu : ShowOptions);
@@ -204,7 +221,16 @@ namespace Manito.Discord.PermanentMessage
 
             _line.SetLine(msg.Content);
 
-            await db.SaveChangesAsync();
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                db.MessageWallLines.Add(_line);
+                await db.SaveChangesAsync();
+            }
+
             return new(ShowOptions);
         }
         private async Task<NextNetworkInstruction> ChangeWall(NetworkInstructionArgument args)

@@ -17,7 +17,6 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.Client
 {
-
     /// <summary>
     /// Single net dialogue based Item selector.
     /// </summary>
@@ -26,7 +25,7 @@ namespace Manito.Discord.Client
         private DialogueNetSession _session;
         private const int max = 25;
         private const int rows = 5;
-        private int _page;
+        private int Page { get => _paginater.Page; set => _paginater.Page = value; }
         private int _pageCount;
         private int _leftsp;
         private DiscordWebhookBuilder _msg;
@@ -39,13 +38,13 @@ namespace Manito.Discord.Client
         private string _navPrefix;
         private string _itmPrefix;
         private string _othPrefix;
-        private IEnumerable<IItemDescriptor<TItem>> _selections;
         public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+        private IPageReturner<TItem> _paginater;
         public InteractiveSelectMenu(DialogueNetSession session,
-         IEnumerable<IItemDescriptor<TItem>> itemList)
+         IPageReturner<TItem> paginater)
         {
             _session = session;
-            _selections = itemList;
+            _paginater = paginater;
             _navPrefix = "nav";
             _itmPrefix = "item";
         }
@@ -76,16 +75,17 @@ namespace Manito.Discord.Client
             _msg = new DiscordWebhookBuilder();
             var emb = new DiscordEmbedBuilder();
 
-            var invCount = _selections.Count();
+            _paginater.PerPage = _leftsp;
 
-            var pages = _selections.Select((x, y) => x.SetGlobalDisplayedOrder(y)).Chunk(_leftsp);
+            var invCount = _paginater.Total;
 
-            _pageCount = Math.Max(pages.Count() - 1, 0);
+            _pageCount = _paginater.GetPages;
 
-            _page = Math.Clamp(_page, 0, _pageCount);
+            Page = Math.Clamp(Page, 1, _pageCount);
 
-            IEnumerable<IItemDescriptor<TItem>> itms = pages.ElementAtOrDefault(_page)?
-            .Select((x, y) => x.SetLocalDisplayedOrder(y));
+
+            IEnumerable<IItemDescriptor<TItem>> itms = _paginater.ListablePage
+                .Select((x, y) => x.SetLocalDisplayedOrder(y));
 
             var btns = itms?.Where(x => x.HasButton()).Select(x =>
                 new DiscordButtonComponent(ButtonStyle.Primary,
@@ -96,9 +96,9 @@ namespace Manito.Discord.Client
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{x}dummy",
                 " ** ** ** ** ** ** ", true)));
 
-            emb.WithFooter($"Всего предметов: {invCount}\nСтраница {_page + 1} из {_pageCount + 1}");
+            emb.WithFooter($"Всего предметов: {invCount}\nСтраница {Page} из {_pageCount}");
 
-            if (_page == 0)
+            if (Page <= 1)
             {
                 _firstList.Disable();
                 _prevList.Disable();
@@ -109,7 +109,7 @@ namespace Manito.Discord.Client
                 _prevList.Enable();
             }
 
-            if (_page == _pageCount)
+            if (Page >= _pageCount)
             {
                 _nextList.Disable();
                 _latterList.Disable();
@@ -146,7 +146,7 @@ namespace Manito.Discord.Client
         private async Task<NextNetworkInstruction> ReturnItem(NetworkInstructionArgument args)
         {
             var resp = ((InteractiveInteraction, IEnumerable<IItemDescriptor<TItem>>))args.Payload;
-            
+
             await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
 
             var item = resp.Item2.FirstOrDefault(x => resp
@@ -159,16 +159,16 @@ namespace Manito.Discord.Client
             var resp = (InteractiveInteraction)args.Payload;
 
             if (resp.CompareButton(_exBtn)) return new();
-            
+
             await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
 
-            if (resp.CompareButton(_firstList)) _page = 0;
+            if (resp.CompareButton(_firstList)) Page = 0;
 
-            if (resp.CompareButton(_prevList)) _page--;
+            if (resp.CompareButton(_prevList)) Page--;
 
-            if (resp.CompareButton(_nextList)) _page++;
+            if (resp.CompareButton(_nextList)) Page++;
 
-            if (resp.CompareButton(_latterList)) _page = _pageCount;
+            if (resp.CompareButton(_latterList)) Page = _pageCount;
 
             return new(PrintActions);
         }
@@ -189,5 +189,78 @@ namespace Manito.Discord.Client
         int GetGlobalDisplayOrder();
         int GetLocalDisplayOrder();
         TItem GetCarriedItem();
+    }
+
+    public interface IPageReturner<TItem>
+    {
+        IQueryable<TItem> GetQueryablePage();
+
+        IEnumerable<IItemDescriptor<TItem>> EnumerablePage { get; }
+
+        IList<IItemDescriptor<TItem>> ListablePage { get; }
+
+        /// <summary>
+        /// Method to convert Queryable Item into Descriptable.
+        /// </summary>
+        /// <param name="item">The item</param>
+        /// <returns>Descripted Item</returns>
+        IItemDescriptor<TItem> Convert(TItem item);
+
+        /// <summary>
+        /// Displayed on pages
+        /// </summary>
+        /// <value></value>
+        int PerPage { get; set; }
+
+        /// <summary>
+        /// Total on current page amount
+        /// </summary>
+        /// <value></value>
+        int OnPage { get; }
+
+        /// <summary>
+        /// Total item amount
+        /// </summary>
+        /// <value></value>
+        int Total { get; }
+
+        /// <summary>
+        /// Total pages amount
+        /// </summary>
+        /// <value></value>
+        int GetPages { get; }
+
+        /// <summary>
+        /// Current page. Set, or Get
+        /// </summary>
+        /// <value></value>
+        int Page { get; set; }
+    }
+
+    public class QueryablePageReturner<TItem> : IPageReturner<TItem>
+    {
+        private Func<IQueryable<TItem>> _querryer;
+        public IQueryable<TItem> GetQueryablePage()
+        {
+            return _querryer().Skip(PerPage * (Page - 1)).Take(PerPage);
+        }
+        public IEnumerable<IItemDescriptor<TItem>> EnumerablePage => ListablePage;
+        public IList<IItemDescriptor<TItem>> ListablePage => GetQueryablePage()
+        .ToList().ConvertAll(x => _converter(x));
+        private Func<TItem, IItemDescriptor<TItem>> _converter;
+        public QueryablePageReturner(Func<IQueryable<TItem>> querryer,
+            Func<TItem, IItemDescriptor<TItem>> converter)
+        {
+            _querryer = querryer;
+            _converter = converter;
+        }
+
+        public IItemDescriptor<TItem> Convert(TItem item) => _converter(item);
+        public int GetPages => (int)Math.Ceiling((float)Total / PerPage);
+        private int _page;
+        public int Page { get => _page; set => _page = Math.Clamp(value, 1, GetPages); }
+        public int PerPage { get; set; } = 25;
+        public int OnPage => GetQueryablePage().Count();
+        public int Total => _querryer().Count();
     }
 }
