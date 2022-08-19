@@ -5,6 +5,12 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Network
         public readonly Node NextStep;
         public readonly NextNetworkActions NextAction;
         public readonly object Payload;
+        public NextNetworkInstruction(NextNetworkInstruction parent)
+        {
+            NextStep = parent.NextStep;
+            NextAction = parent.NextAction;
+            Payload = parent.Payload;
+        }
         public NextNetworkInstruction(Node nextStep, NextNetworkActions nextAction, object payload)
         {
             NextStep = nextStep;
@@ -35,6 +41,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Network
             NextAction = NextNetworkActions.Stop;
             Payload = null;
         }
+        public static implicit operator NextNetworkInstruction(Node input) => new(input);
     }
     public enum NextNetworkActions
     {

@@ -59,15 +59,16 @@ namespace Manito.Discord.PermanentMessage
         }
         private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
         {
-            using var db = await _session.DBFactory.CreateMyDbContextAsync();
 
-
+            var createBtn = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
+            var selectBtn = new DiscordButtonComponent(ButtonStyle.Primary, "select", "Выбрать");
             var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
+
             var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
                 .WithContent("Добро пожаловать в меню управления транслятора стены строк!")
-                .AddComponents(exitBtn));
+                .AddComponents(createBtn, selectBtn, exitBtn));
 
-            throw new Exception();
+            throw new NotImplementedException();
         }
         private async Task<NextNetworkInstruction> CreateNewWall(NetworkInstructionArgument arg)
         {

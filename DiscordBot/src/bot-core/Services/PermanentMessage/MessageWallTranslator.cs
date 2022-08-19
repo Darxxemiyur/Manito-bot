@@ -24,6 +24,7 @@ namespace Manito.Discord.PermanentMessage
             set => Translation = value.Split(";").Select(y => y.Split(":"))
                     .ToDictionary(y => ulong.Parse(y[0]), y => y[1]);
         }
+        
         /// <summary>
         /// List of message id to content pairs.
         /// </summary>

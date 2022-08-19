@@ -18,7 +18,7 @@ namespace Manito.Discord.PermanentMessage
         public ulong ID { get; set; }
         public MessageWall MessageWall { get; set; }
         public string WallLine { get; private set; }
-        public MessageWallLine() => WallLine = "";
+        public MessageWallLine() { }
         public MessageWallLine(string line) => WallLine = line;
         public void SetLine(string line) => WallLine = line;
         public bool IsNull() => string.IsNullOrWhiteSpace(WallLine);

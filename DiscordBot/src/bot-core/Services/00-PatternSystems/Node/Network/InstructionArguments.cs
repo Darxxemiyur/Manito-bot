@@ -1,3 +1,5 @@
+using System;
+
 namespace Name.Bayfaderix.Darxxemiyur.Node.Network
 {
     public class NetworkInstructionArgument

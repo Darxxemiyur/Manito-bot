@@ -48,13 +48,13 @@ namespace Manito.Discord.PermanentMessage
 
             if (response.CompareButton(wallLine))
             {
-                var next = new MsgWallPanelWallLine(_session, new(SelectWhatToDo));
+                var next = new MsgWallPanelWallLine(_session);
                 await NetworkCommon.RunNetwork(next);
             }
 
             if (response.CompareButton(wall))
             {
-                var next = new MsgWallPanelWall(_session, new(SelectWhatToDo));
+                var next = new MsgWallPanelWall(_session);
                 await NetworkCommon.RunNetwork(next);
             }
 

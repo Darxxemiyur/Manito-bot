@@ -26,7 +26,7 @@ namespace Manito.Discord.Client
         private const int max = 25;
         private const int rows = 5;
         private int Page { get => _paginater.Page; set => _paginater.Page = value; }
-        private int _pageCount;
+        private int PageCount => _paginater.GetPages;
         private int _leftsp;
         private DiscordWebhookBuilder _msg;
         private DiscordComponent[] _btnDef;
@@ -79,9 +79,7 @@ namespace Manito.Discord.Client
 
             var invCount = _paginater.Total;
 
-            _pageCount = _paginater.GetPages;
-
-            Page = Math.Clamp(Page, 1, _pageCount);
+            Page = Page;
 
 
             IEnumerable<IItemDescriptor<TItem>> itms = _paginater.ListablePage
@@ -96,7 +94,7 @@ namespace Manito.Discord.Client
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{x}dummy",
                 " ** ** ** ** ** ** ", true)));
 
-            emb.WithFooter($"Всего предметов: {invCount}\nСтраница {Page} из {_pageCount}");
+            emb.WithFooter($"Всего предметов: {invCount}\nСтраница {Page} из {PageCount}");
 
             if (Page <= 1)
             {
@@ -109,7 +107,7 @@ namespace Manito.Discord.Client
                 _prevList.Enable();
             }
 
-            if (Page >= _pageCount)
+            if (Page >= PageCount)
             {
                 _nextList.Disable();
                 _latterList.Disable();
@@ -168,7 +166,7 @@ namespace Manito.Discord.Client
 
             if (resp.CompareButton(_nextList)) Page++;
 
-            if (resp.CompareButton(_latterList)) Page = _pageCount;
+            if (resp.CompareButton(_latterList)) Page = PageCount;
 
             return new(PrintActions);
         }
@@ -256,7 +254,7 @@ namespace Manito.Discord.Client
         }
 
         public IItemDescriptor<TItem> Convert(TItem item) => _converter(item);
-        public int GetPages => (int)Math.Ceiling((float)Total / PerPage);
+        public int GetPages => Math.Max((int)Math.Ceiling((float)Total / PerPage), 1);
         private int _page;
         public int Page { get => _page; set => _page = Math.Clamp(value, 1, GetPages); }
         public int PerPage { get; set; } = 25;
