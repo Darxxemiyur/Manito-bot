@@ -238,18 +238,23 @@ namespace Manito.Discord.Client
     public class QueryablePageReturner<TItem> : IPageReturner<TItem>
     {
         private Func<IQueryable<TItem>> _querryer;
+        private Func<IQueryable<TItem>, IQueryable<TItem>> _queryAfterEditor;
         public IQueryable<TItem> GetQueryablePage()
         {
-            return _querryer().Skip(PerPage * (Page - 1)).Take(PerPage);
+            return _queryAfterEditor(_querryer().Skip(PerPage * (Page - 1)).Take(PerPage));
         }
         public IEnumerable<IItemDescriptor<TItem>> EnumerablePage => ListablePage;
         public IList<IItemDescriptor<TItem>> ListablePage => GetQueryablePage()
         .ToList().ConvertAll(x => _converter(x));
         private Func<TItem, IItemDescriptor<TItem>> _converter;
         public QueryablePageReturner(Func<IQueryable<TItem>> querryer,
+            Func<TItem, IItemDescriptor<TItem>> converter) : this(querryer, x => x, converter) { }
+        public QueryablePageReturner(Func<IQueryable<TItem>> querryer,
+            Func<IQueryable<TItem>, IQueryable<TItem>> queryAfterEditor,
             Func<TItem, IItemDescriptor<TItem>> converter)
         {
             _querryer = querryer;
+            _queryAfterEditor = queryAfterEditor;
             _converter = converter;
         }
 

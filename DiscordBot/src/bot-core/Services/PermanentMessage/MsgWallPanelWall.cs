@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Client;
 using Microsoft.EntityFrameworkCore;
+using Name.Bayfaderix.Darxxemiyur.Node.Linkable;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.PermanentMessage
@@ -49,43 +50,252 @@ namespace Manito.Discord.PermanentMessage
                 return this;
             }
         }
-public class 
+        public class Editor : INodeNetwork
+        {
+            private MessageWallSession _session;
+            private MessageWall _wall;
+            private MsgWallPanelWallLine.Selector _lineSelector;
+            private MsgWallPanelWallLine.Editor _lineEditor;
+            private NextNetworkInstruction _ret;
+            public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+            public Editor(MessageWallSession session, NextNetworkInstruction ret)
+            {
+                _session = session;
+                _ret = ret;
+            }
+            private async Task<NextNetworkInstruction> ActionsChoose(NetworkInstructionArgument args)
+            {
+                var renameBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "rename", "Назвать");
+                var listBtn = new DiscordButtonComponent(ButtonStyle.Primary, "list", "Показать строки");
+                var remBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "Удалить");
+                var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
+                var emb = new DiscordEmbedBuilder();
+
+                emb.WithAuthor("Стена сообщений");
+                emb.WithDescription(_wall.WallName);
+                emb.AddField("Что сделать?", "** **");
+
+                await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(emb).AddComponents(renameBtn, listBtn)
+                    .AddComponents(remBtn, exitBtn));
+
+                var response = await _session.GetInteraction();
+
+                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+
+                if (response.CompareButton(renameBtn))
+                    return new(RenameWall);
+
+                if (response.CompareButton(listBtn))
+                    return new(SelectWallChildren);
+
+                if (response.CompareButton(remBtn))
+                    return new(RemoveWall);
+
+                return new(_ret);
+            }
+
+            private async Task<NextNetworkInstruction> SelectWallChildren(NetworkInstructionArgument args)
+            {
+                var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
+
+                var sel = _lineSelector;
+
+                await _session.Args.EditOriginalResponseAsync(
+                    new DiscordWebhookBuilder()
+                    .WithContent("Добро пожаловать в дочернее меню управления строками!")
+                    .AddComponents(sel.MkNewButton.Enable(), sel.EditButton.Enable(), exitBtn));
+
+                var response = await _session.GetInteraction();
+
+                if (response.CompareButton(exitBtn))
+                {
+                    await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+                    return new(ActionsChoose);
+                }
+
+                await _session.Respond(InteractionResponseType.UpdateMessage,
+                    new DiscordInteractionResponseBuilder()
+                    .WithContent("Добро пожаловать в дочернее меню управления строками!")
+                    .AddComponents(sel.MkNewButton.Disable(),
+                     sel.EditButton.Disable(), exitBtn.Disable()));
+
+
+                return sel.GetStartingInstruction(response);
+            }
+            private async Task<NextNetworkInstruction> OnChildSelected(NetworkInstructionArgument arg)
+            {
+                var itm = (MessageWallLine)arg.Payload;
+
+                if (itm == null)
+                {
+                    await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+                    return new(SelectWallChildren);
+                }
+
+                return _lineEditor.GetStartingInstruction(itm);
+            }
+            private async Task<NextNetworkInstruction> RenameWall(NetworkInstructionArgument args)
+            {
+                using var db = await _session.DBFactory.CreateMyDbContextAsync();
+                db.MessageWalls.Update(_wall);
+
+                await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+                    .WithContent("Напишите желаемое название стены сообщений"));
+
+                var msg = await _session.GetSessionMessage();
+
+                _wall.SetName(msg.Content);
+
+                try
+                {
+                    await db.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+                        .WithContent("Стена была удалена во время редактирования."));
+                }
+
+                return new(ActionsChoose);
+            }
+
+            private async Task<NextNetworkInstruction> RemoveWall(NetworkInstructionArgument args)
+            {
+
+                var returnBtn = new DiscordButtonComponent(ButtonStyle.Success, "return", "Назад");
+                var removeBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "***Удалить***");
+
+                var emb = new DiscordEmbedBuilder();
+                emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ {_wall.ID}?**");
+                await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(emb).AddComponents(returnBtn, removeBtn));
+
+                var response = await _session.GetInteraction();
+
+                if (!response.CompareButton(removeBtn))
+                {
+                    await _session.Respond(InteractionResponseType.UpdateMessage,
+                        new DiscordInteractionResponseBuilder()
+                        .AddComponents(returnBtn.Disable(), removeBtn.Disable()));
+                }
+
+                if (response.CompareButton(returnBtn))
+                    return new(ActionsChoose);
+
+                using var db = await _session.DBFactory.CreateMyDbContextAsync();
+                try
+                {
+                    db.MessageWalls.Update(_wall);
+                    await db.ImplementedContext.Entry(_wall)
+                    .Collection(x => x.Msgs).Query().LoadAsync();
+                    _wall.Msgs.Clear();
+
+                    foreach (var translator in db.MessageWallTranslators
+                        .Where(x => x.MessageWall == _wall).ToList())
+                    {
+                        translator.MessageWall = null;
+                    }
+
+                    db.MessageWalls.Remove(_wall);
+                    await db.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException) { }
+
+                _wall = null;
+
+                return new(_ret);
+            }
+            public NextNetworkInstruction GetStartingInstruction()
+            {
+                throw new NotImplementedException();
+            }
+
+            public NextNetworkInstruction GetStartingInstruction(object payload)
+            {
+                _wall = (MessageWall)payload;
+                _lineEditor = new(_session, new(SelectWallChildren));
+                _lineSelector = new(_session, OnChildSelected, _wall);
+                return new(ActionsChoose);
+            }
+        }
+        public class Selector : INodeNetwork
+        {
+            private MessageWallSession _session;
+            private InteractiveSelectMenu<MessageWall> _wallSelectMenu;
+            private Node _ret;
+            public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+            public DiscordButtonComponent CreateButton;
+            public DiscordButtonComponent SelectButton;
+            public Selector(MessageWallSession session, Node ret)
+            {
+                CreateButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
+                SelectButton = new DiscordButtonComponent(ButtonStyle.Primary, "select", "Выбрать");
+                (_session, _ret) = (session, ret);
+                _wallSelectMenu = new InteractiveSelectMenu<MessageWall>(session,
+                    new QueryablePageReturner<MessageWall>(Querryer, Decorator, x => new Descriptor(x)));
+            }
+            private IQueryable<MessageWall> Querryer()
+            {
+                using var db = _session.DBFactory.CreateMyDbContext();
+
+                return db.MessageWalls;
+            }
+            private IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
+            {
+                return input.Include(x => x.Msgs);
+            }
+            private async Task<NextNetworkInstruction> CreateWall(NetworkInstructionArgument args)
+            {
+                using var db = await _session.DBFactory.CreateMyDbContextAsync();
+
+                var wall = new MessageWall();
+                db.MessageWalls.Add(wall);
+                await db.SaveChangesAsync();
+
+                return new(_ret, wall);
+            }
+
+            public async Task<NextNetworkInstruction> SelectWall(NetworkInstructionArgument args)
+            {
+                var wall = (await _wallSelectMenu.EvaluateItem())?.GetCarriedItem();
+
+                return new(_ret, wall);
+            }
+            public NextNetworkInstruction GetStartingInstruction()
+            {
+                throw new NotImplementedException();
+            }
+            public NextNetworkInstruction GetStartingInstruction(object payload)
+            {
+                var resp = payload as InteractiveInteraction;
+
+                if (resp.CompareButton(SelectButton))
+                    return new(SelectWall);
+
+                if (resp.CompareButton(CreateButton))
+                    return new(CreateWall);
+
+                throw new NotImplementedException();
+            }
+        }
         private MessageWallSession _session;
-        private MessageWall _wall;
-        private InteractiveSelectMenu<MessageWall> _wallSelectMenu;
-        private InteractiveSelectMenu<MessageWallLine> _childSelectMenu;
+        private Editor _editor;
+        private Selector _selector;
         public MsgWallPanelWall(MessageWallSession session)
         {
             _session = session;
-            _wallSelectMenu = new InteractiveSelectMenu<MessageWall>(session,
-                new QueryablePageReturner<MessageWall>(Querryer, x => new Descriptor(x)));
-            _childSelectMenu = new InteractiveSelectMenu<MessageWallLine>(session,
-                new QueryablePageReturner<MessageWallLine>(ChildQuerryer,
-                 x => new MsgWallPanelWallLine.Descriptor(x)));
+            _selector = new(session, Decider);
+            _editor = new(session, new(_selector.SelectWall));
         }
-        private IQueryable<MessageWall> Querryer()
-        {
-            using var db = _session.DBFactory.CreateMyDbContext();
-
-            return db.MessageWalls;
-        }
-        private IQueryable<MessageWallLine> ChildQuerryer()
-        {
-            using var db = _session.DBFactory.CreateMyDbContext();
-
-            return db.MessageWallLines.Where(x => x.MessageWall == _wall);
-        }
-        private Node _lilGoBackInstr;
         private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
         {
-            var createBtn = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
-            var selectBtn = new DiscordButtonComponent(ButtonStyle.Primary, "select", "Выбрать");
             var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
 
             var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
                 .WithContent("Добро пожаловать в меню управления стены строк!")
-                .AddComponents(createBtn, selectBtn, exitBtn));
+                .AddComponents(_selector.CreateButton.Enable(), _selector.SelectButton.Enable(), exitBtn));
 
 
             if (response.CompareButton(exitBtn))
@@ -94,157 +304,20 @@ public class
             await _session.Respond(InteractionResponseType.UpdateMessage,
             new DiscordInteractionResponseBuilder()
                 .WithContent("Добро пожаловать в меню управления стены строк!")
-                .AddComponents(createBtn.Disable(), selectBtn.Disable(), exitBtn.Disable()));
+                .AddComponents(_selector.CreateButton.Disable(),
+                 _selector.SelectButton.Disable(), exitBtn.Disable()));
 
-
-            Node next = null;
-
-            if (response.CompareButton(createBtn))
-                next = CreateWall;
-            if (response.CompareButton(selectBtn))
-                next = SelectWall;
-
-            return new(next);
+            return _selector.GetStartingInstruction(response);
         }
 
-        private async Task<NextNetworkInstruction> CreateWall(NetworkInstructionArgument args)
+        private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument args)
         {
-            using var db = await _session.DBFactory.CreateMyDbContextAsync();
-            _wall = new();
-            db.MessageWalls.Add(_wall);
-            await db.SaveChangesAsync();
+            var itm = (MessageWall)args.Payload;
 
-            _lilGoBackInstr = EnterMenu;
-            return new(ActionsChoose);
-        }
+            if (itm == null)
+                return new(EnterMenu);
 
-        private async Task<NextNetworkInstruction> SelectWall(NetworkInstructionArgument args)
-        {
-            _wall = (await _wallSelectMenu.EvaluateItem())?.GetCarriedItem();
-
-            _lilGoBackInstr = SelectWall;
-            return new(_wall == null ? EnterMenu : ActionsChoose);
-        }
-
-        private async Task<NextNetworkInstruction> SelectWallChildren(NetworkInstructionArgument args)
-        {
-            var child = (await _childSelectMenu.EvaluateItem())?.GetCarriedItem();
-
-            if (child == null)
-            {
-                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
-                return new(ActionsChoose);
-            }
-
-            var diag = new MsgWallPanelWallLine(_session);
-
-            await NetworkCommon.RunNetwork(diag, child);
-
-            return new(ActionsChoose);
-        }
-
-        private async Task<NextNetworkInstruction> ActionsChoose(NetworkInstructionArgument args)
-        {
-            var renameBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "rename", "Назвать");
-            var listBtn = new DiscordButtonComponent(ButtonStyle.Primary, "list", "Показать строки");
-            var remBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "Удалить");
-            var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
-            var emb = new DiscordEmbedBuilder();
-
-            emb.WithAuthor("Стена сообщений");
-            emb.WithDescription(_wall.WallName);
-            emb.AddField("Что сделать?", "** **");
-
-            await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-                .AddEmbed(emb).AddComponents(renameBtn, listBtn)
-                .AddComponents(remBtn, exitBtn));
-
-            var response = await _session.GetInteraction();
-
-            if (_lilGoBackInstr == SelectWall || !response.CompareButton(exitBtn))
-                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
-
-            if (response.CompareButton(renameBtn))
-                return new(RenameWall);
-
-            if (response.CompareButton(listBtn))
-                return new(SelectWallChildren);
-
-            if (response.CompareButton(remBtn))
-                return new(RemoveWall);
-
-            return new(_lilGoBackInstr);
-        }
-        private async Task<NextNetworkInstruction> RenameWall(NetworkInstructionArgument args)
-        {
-            using var db = await _session.DBFactory.CreateMyDbContextAsync();
-            db.MessageWalls.Update(_wall);
-
-            await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-                .WithContent("Напишите желаемое название стены сообщений"));
-
-            var msg = await _session.GetSessionMessage();
-
-            _wall.SetName(msg.Content);
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-                    .WithContent("Стена была удалена во время редактирования."));
-            }
-
-            return new(ActionsChoose);
-        }
-
-        private async Task<NextNetworkInstruction> RemoveWall(NetworkInstructionArgument args)
-        {
-
-            var returnBtn = new DiscordButtonComponent(ButtonStyle.Success, "return", "Назад");
-            var removeBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "***Удалить***");
-
-            var emb = new DiscordEmbedBuilder();
-            emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ {_wall.ID}?**");
-            await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-                .AddEmbed(emb).AddComponents(returnBtn, removeBtn));
-
-            var response = await _session.GetInteraction();
-
-            if (_lilGoBackInstr == SelectWall || !response.CompareButton(removeBtn))
-            {
-                await _session.Respond(InteractionResponseType.UpdateMessage,
-                    new DiscordInteractionResponseBuilder()
-                    .AddComponents(returnBtn.Disable(), removeBtn.Disable()));
-            }
-
-            if (response.CompareButton(returnBtn))
-                return new(ActionsChoose);
-
-            using var db = await _session.DBFactory.CreateMyDbContextAsync();
-            try
-            {
-                db.MessageWalls.Update(_wall);
-                await db.ImplementedContext.Entry(_wall)
-                .Collection(x => x.Msgs).Query().LoadAsync();
-                _wall.Msgs.Clear();
-
-                foreach (var translator in db.MessageWallTranslators
-                    .Where(x => x.MessageWall == _wall).ToList())
-                {
-                    translator.MessageWall = null;
-                }
-
-                db.MessageWalls.Remove(_wall);
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException) { }
-
-            _wall = null;
-
-            return new(_lilGoBackInstr);
+            return _editor.GetStartingInstruction(itm);
         }
 
         public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;

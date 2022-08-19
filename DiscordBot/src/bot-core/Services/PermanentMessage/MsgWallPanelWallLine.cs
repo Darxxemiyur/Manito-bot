@@ -187,12 +187,12 @@ namespace Manito.Discord.PermanentMessage
             public DiscordButtonComponent MkNewButton;
             public DiscordButtonComponent EditButton;
             public DiscordButtonComponent CreateTestButton;
-            public Selector(MessageWallSession session, Node ret)
+            private readonly MessageWall _wall;
+            public Selector(MessageWallSession session, Node ret, MessageWall wall)
             {
-                _session = session;
+                (_wall, _session, _ret) = (wall, session, ret);
                 _selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session,
-                    new QueryablePageReturner<MessageWallLine>(Querryer, x => new Descriptor(x)));
-                _ret = ret;
+                    new QueryablePageReturner<MessageWallLine>(Querryer, Decorator, x => new Descriptor(x)));
                 EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
                 MkNewButton = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
                 CreateTestButton = new DiscordButtonComponent(ButtonStyle.Secondary, "createtest", "Создать тест-датасет");
@@ -200,7 +200,14 @@ namespace Manito.Discord.PermanentMessage
             private IQueryable<MessageWallLine> Querryer()
             {
                 using var db = _session.DBFactory.CreateMyDbContext();
+
+                if (_wall != null)
+                    return db.MessageWallLines.Where(x => x.MessageWall == _wall);
                 return db.MessageWallLines;
+            }
+            private IQueryable<MessageWallLine> Decorator(IQueryable<MessageWallLine> input)
+            {
+                return input.Include(x => x.MessageWall);
             }
             private async Task<NextNetworkInstruction> CreateTestData(NetworkInstructionArgument args)
             {
@@ -219,6 +226,13 @@ namespace Manito.Discord.PermanentMessage
             {
                 using var db = await _session.DBFactory.CreateMyDbContextAsync();
                 var line = new MessageWallLine();
+
+                if (_wall != null)
+                {
+                    line.MessageWall = _wall;
+                    db.MessageWalls.Update(_wall);
+                }
+
                 db.MessageWallLines.Add(line);
                 await db.SaveChangesAsync();
 
@@ -255,7 +269,7 @@ namespace Manito.Discord.PermanentMessage
         private Selector _selector;
         public MsgWallPanelWallLine(MessageWallSession session)
         {
-            _selector = new(session, Decider);
+            _selector = new(session, Decider, null);
             _editor = new(session, new(_selector.SelectToEdit));
             _session = session;
         }
@@ -266,7 +280,7 @@ namespace Manito.Discord.PermanentMessage
             await _session.Respond(InteractionResponseType.UpdateMessage,
                 new DiscordInteractionResponseBuilder()
                 .WithContent("Добро пожаловать в меню управления строками!")
-                .AddComponents(_selector.MkNewButton, _selector.EditButton, exitBtn));
+                .AddComponents(_selector.MkNewButton.Enable(), _selector.EditButton.Enable(), exitBtn));
 
             var response = await _session.GetInteraction();
 
