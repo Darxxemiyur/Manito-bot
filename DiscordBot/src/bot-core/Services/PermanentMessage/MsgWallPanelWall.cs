@@ -235,13 +235,13 @@ namespace Manito.Discord.PermanentMessage
                 _wallSelectMenu = new InteractiveSelectMenu<MessageWall>(session,
                     new QueryablePageReturner<MessageWall>(Querryer, Decorator, x => new Descriptor(x)));
             }
-            private IQueryable<MessageWall> Querryer()
+            public IQueryable<MessageWall> Querryer()
             {
                 using var db = _session.DBFactory.CreateMyDbContext();
 
                 return db.MessageWalls;
             }
-            private IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
+            public IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
             {
                 return input.Include(x => x.Msgs);
             }

@@ -54,6 +54,8 @@ namespace Manito.Discord.PermanentMessage
         {
             private MessageWallSession _session;
             private MessageWallLine _line;
+            private MsgWallPanelWall.Selector _wallSelector;
+            private MsgWallPanelWall.Editor _wallEditor;
             private NextNetworkInstruction _ret;
             public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
             public Editor(MessageWallSession session, NextNetworkInstruction ret)
@@ -94,7 +96,7 @@ namespace Manito.Discord.PermanentMessage
                     return new(EditContent);
 
                 if (response.CompareButton(changeWallBtn))
-                    return new(ChangeWall);
+                    return new(_wallSelector.SelectWall);
 
                 if (response.CompareButton(openWallBtn))
                     return new(OpenWall);
@@ -160,13 +162,26 @@ namespace Manito.Discord.PermanentMessage
             }
             private async Task<NextNetworkInstruction> ChangeWall(NetworkInstructionArgument args)
             {
+                var itm = (MessageWall)args.Payload;
+
+                if (itm == null)
+                    return new(ShowOptions);
+
+                _line.MessageWall = itm;
+
+                using var db = await _session.DBFactory.CreateMyDbContextAsync();
+                db.MessageWalls.Update(itm);
+                db.MessageWallLines.Update(_line);
+                await db.SaveChangesAsync();
 
                 return new(ShowOptions);
             }
             private async Task<NextNetworkInstruction> OpenWall(NetworkInstructionArgument args)
             {
+                var wall = await _wallSelector.Decorator(_wallSelector.Querryer()
+                    .Where(x => x == _line.MessageWall)).FirstAsync();
 
-                return new(ShowOptions);
+                return _wallEditor.GetStartingInstruction(wall);
             }
             public NextNetworkInstruction GetStartingInstruction()
             {
@@ -175,6 +190,11 @@ namespace Manito.Discord.PermanentMessage
             public NextNetworkInstruction GetStartingInstruction(object payload)
             {
                 _line = (MessageWallLine)payload;
+                if (_line != null)
+                {
+                    _wallEditor = new(_session, new(ShowOptions));
+                    _wallSelector = new(_session, ChangeWall);
+                }
                 return new(ShowOptions);
             }
         }
@@ -186,7 +206,6 @@ namespace Manito.Discord.PermanentMessage
             public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
             public DiscordButtonComponent MkNewButton;
             public DiscordButtonComponent EditButton;
-            public DiscordButtonComponent CreateTestButton;
             private readonly MessageWall _wall;
             public Selector(MessageWallSession session, Node ret, MessageWall wall)
             {
@@ -195,7 +214,6 @@ namespace Manito.Discord.PermanentMessage
                     new QueryablePageReturner<MessageWallLine>(Querryer, Decorator, x => new Descriptor(x)));
                 EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
                 MkNewButton = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
-                CreateTestButton = new DiscordButtonComponent(ButtonStyle.Secondary, "createtest", "Создать тест-датасет");
             }
             private IQueryable<MessageWallLine> Querryer()
             {
@@ -209,19 +227,7 @@ namespace Manito.Discord.PermanentMessage
             {
                 return input.Include(x => x.MessageWall);
             }
-            private async Task<NextNetworkInstruction> CreateTestData(NetworkInstructionArgument args)
-            {
-                using var db = await _session.DBFactory.CreateMyDbContextAsync();
-                for (var i = 0; i < 450; i++)
-                {
-                    for (var g = 0; g < 1000; g++)
-                        db.MessageWallLines.Add(new($"{(i * 1000) + g}"));
-
-                    await db.SaveChangesAsync();
-                }
-
-                return new(_ret);
-            }
+               
             private async Task<NextNetworkInstruction> CreateNew(NetworkInstructionArgument args)
             {
                 using var db = await _session.DBFactory.CreateMyDbContextAsync();

@@ -17,9 +17,11 @@ namespace Manito.Discord.PermanentMessage
     public class MsgWallPanel : IDialogueNet
     {
         private MessageWallSession _session;
+        public DiscordButtonComponent CreateTestButton;
         public MsgWallPanel(MessageWallSession session)
         {
             _session = session;
+            CreateTestButton = new DiscordButtonComponent(ButtonStyle.Secondary, "createtest", "Создать тест-датасет");
         }
 
         public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
@@ -33,6 +35,29 @@ namespace Manito.Discord.PermanentMessage
         {
             return GetStartingInstruction();
         }
+        private async Task<NextNetworkInstruction> CreateTestData(NetworkInstructionArgument args)
+        {
+            using var db = await _session.DBFactory.CreateMyDbContextAsync();
+            for (var i = 0; i < 4500; i++)
+            {
+                var newItmChild = new List<MessageWallLine>();
+                for (var g = 0; g < 100; g++)
+                {
+                    newItmChild.Add(new($"{(i * 1000) + g}"));
+                }
+                var newItm = new MessageWall($"w-{i * 1000}")
+                {
+                    Msgs = newItmChild
+                };
+
+                db.MessageWallLines.AddRange(newItmChild);
+                db.MessageWalls.Add(newItm);
+
+                await db.SaveChangesAsync();
+            }
+
+            return new(SelectWhatToDo);
+        }
         private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArgument arg)
         {
             var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Единицу");
@@ -43,7 +68,7 @@ namespace Manito.Discord.PermanentMessage
 
             var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
                 .WithContent("Выбор изменения информации")
-                .AddComponents(wallLine, wall, wallTranslator)
+                .AddComponents(wallLine, wall, wallTranslator, CreateTestButton)
                 .AddComponents(exitBtn));
 
             if (response.CompareButton(wallLine))
@@ -57,6 +82,9 @@ namespace Manito.Discord.PermanentMessage
                 var next = new MsgWallPanelWall(_session);
                 await NetworkCommon.RunNetwork(next);
             }
+
+            if (response.CompareButton(CreateTestButton))
+                return new(CreateTestData);
 
             if (response.CompareButton(wallTranslator))
             {
