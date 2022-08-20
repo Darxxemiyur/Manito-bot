@@ -21,23 +21,20 @@ namespace Manito.Discord.PermanentMessage
             private int _lid;
             private int _gid;
             public string GetButtonId() => $"MessageWallLine{_lid}";
+            public string GetButtonName()
+            {
+                var idStr = $" ID:{_wallLine.ID}";
+                var wallName = $"{_wallLine.MessageWall?.WallName ?? ""}".Trim();
 
-            public string GetButtonName() => $"Стена {_lid} ID:{_wallLine.ID}";
-
+                return (string.Concat(wallName.Take(80 - idStr.Length)) + idStr).Trim();
+            }
             public MessageWallLine GetCarriedItem() => _wallLine;
-
             public string GetFieldBody() => throw new NotImplementedException();
-
             public string GetFieldName() => throw new NotImplementedException();
-
             public int GetGlobalDisplayOrder() => _gid;
-
             public int GetLocalDisplayOrder() => _lid;
-
             public bool HasButton() => true;
-
             public bool HasField() => false;
-
             public IItemDescriptor<MessageWallLine> SetGlobalDisplayedOrder(int i)
             {
                 _gid = i;
@@ -135,19 +132,21 @@ namespace Manito.Discord.PermanentMessage
 
                 _line = null;
 
+                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+
                 return new(_ret);
             }
             private async Task<NextNetworkInstruction> EditContent(NetworkInstructionArgument args)
             {
-                using var db = await _session.DBFactory.CreateMyDbContextAsync();
-                db.MessageWallLines.Update(_line);
-
                 await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
                     .WithContent("Напишите содержимое стены сообщением"));
 
                 var msg = await _session.GetSessionMessage();
 
+                using var db = await _session.DBFactory.CreateMyDbContextAsync();
                 _line.SetLine(msg.Content);
+                db.MessageWallLines.Update(_line);
+
                 try
                 {
                     await db.SaveChangesAsync();
@@ -165,7 +164,10 @@ namespace Manito.Discord.PermanentMessage
                 var itm = (MessageWall)args.Payload;
 
                 if (itm == null)
+                {
+                    await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
                     return new(ShowOptions);
+                }
 
                 _line.MessageWall = itm;
 
@@ -219,15 +221,12 @@ namespace Manito.Discord.PermanentMessage
             {
                 using var db = _session.DBFactory.CreateMyDbContext();
 
-                if (_wall != null)
-                    return db.MessageWallLines.Where(x => x.MessageWall == _wall);
-                return db.MessageWallLines;
+                return db.MessageWallLines.Where(x => x.MessageWall == _wall).OrderBy(x => x.ID);
             }
             private IQueryable<MessageWallLine> Decorator(IQueryable<MessageWallLine> input)
             {
                 return input.Include(x => x.MessageWall);
             }
-               
             private async Task<NextNetworkInstruction> CreateNew(NetworkInstructionArgument args)
             {
                 using var db = await _session.DBFactory.CreateMyDbContextAsync();

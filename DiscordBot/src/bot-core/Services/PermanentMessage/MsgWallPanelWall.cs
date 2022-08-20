@@ -7,7 +7,6 @@ using DSharpPlus.Entities;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Client;
 using Microsoft.EntityFrameworkCore;
-using Name.Bayfaderix.Darxxemiyur.Node.Linkable;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.PermanentMessage
@@ -21,23 +20,14 @@ namespace Manito.Discord.PermanentMessage
             private int _lid;
             private int _gid;
             public string GetButtonId() => $"MessageWall{_lid}";
-
             public string GetButtonName() => $"Стена {_lid} ID:{_wall.ID}";
-
             public MessageWall GetCarriedItem() => _wall;
-
             public string GetFieldBody() => throw new NotImplementedException();
-
             public string GetFieldName() => throw new NotImplementedException();
-
             public int GetGlobalDisplayOrder() => _gid;
-
             public int GetLocalDisplayOrder() => _lid;
-
             public bool HasButton() => true;
-
             public bool HasField() => false;
-
             public IItemDescriptor<MessageWall> SetGlobalDisplayedOrder(int i)
             {
                 _gid = i;
@@ -94,7 +84,6 @@ namespace Manito.Discord.PermanentMessage
 
                 return new(_ret);
             }
-
             private async Task<NextNetworkInstruction> SelectWallChildren(NetworkInstructionArgument args)
             {
                 var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
@@ -204,6 +193,8 @@ namespace Manito.Discord.PermanentMessage
 
                 _wall = null;
 
+                await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+
                 return new(_ret);
             }
             public NextNetworkInstruction GetStartingInstruction()
@@ -239,7 +230,7 @@ namespace Manito.Discord.PermanentMessage
             {
                 using var db = _session.DBFactory.CreateMyDbContext();
 
-                return db.MessageWalls;
+                return db.MessageWalls.OrderBy(x => x.ID);
             }
             public IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
             {
@@ -251,6 +242,8 @@ namespace Manito.Discord.PermanentMessage
 
                 var wall = new MessageWall();
                 db.MessageWalls.Add(wall);
+                await db.SaveChangesAsync();
+                wall.WallName = $"Безимянная стена №{wall.ID}";
                 await db.SaveChangesAsync();
 
                 return new(_ret, wall);
@@ -292,7 +285,6 @@ namespace Manito.Discord.PermanentMessage
         {
             var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
-
             var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
                 .WithContent("Добро пожаловать в меню управления стены строк!")
                 .AddComponents(_selector.CreateButton.Enable(), _selector.SelectButton.Enable(), exitBtn));
@@ -309,7 +301,6 @@ namespace Manito.Discord.PermanentMessage
 
             return _selector.GetStartingInstruction(response);
         }
-
         private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument args)
         {
             var itm = (MessageWall)args.Payload;
@@ -319,7 +310,6 @@ namespace Manito.Discord.PermanentMessage
 
             return _editor.GetStartingInstruction(itm);
         }
-
         public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
         public NextNetworkInstruction GetStartingInstruction() => new(EnterMenu);
         public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
