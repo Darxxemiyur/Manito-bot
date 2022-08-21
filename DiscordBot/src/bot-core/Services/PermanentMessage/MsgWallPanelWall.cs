@@ -148,7 +148,6 @@ namespace Manito.Discord.PermanentMessage
 
                 return new(ActionsChoose);
             }
-
             private async Task<NextNetworkInstruction> RemoveWall(NetworkInstructionArgument args)
             {
 
@@ -172,9 +171,9 @@ namespace Manito.Discord.PermanentMessage
                 if (response.CompareButton(returnBtn))
                     return new(ActionsChoose);
 
-                using var db = await _session.DBFactory.CreateMyDbContextAsync();
                 try
                 {
+                    using var db = await _session.DBFactory.CreateMyDbContextAsync();
                     db.MessageWalls.Update(_wall);
                     await db.ImplementedContext.Entry(_wall)
                     .Collection(x => x.Msgs).Query().LoadAsync();
