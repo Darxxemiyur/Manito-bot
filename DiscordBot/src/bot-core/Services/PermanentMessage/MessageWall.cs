@@ -32,6 +32,6 @@ namespace Manito.Discord.PermanentMessage
 
         public void Compact() => Msgs = Msgs.Where(x => x.IsNull()).ToList();
         public IEnumerable<DiscordEmbedBuilder> GetEmbeds() => Msgs
-        .Select(x => new DiscordEmbedBuilder().WithDescription(x));
+            .Select(x => new DiscordEmbedBuilder().WithDescription(x));
     }
 }

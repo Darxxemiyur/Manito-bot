@@ -14,39 +14,6 @@ namespace Manito.Discord.PermanentMessage
 {
     public class MsgWallPanelWallLine : INodeNetwork
     {
-        public class Descriptor : IItemDescriptor<MessageWallLine>
-        {
-            private readonly MessageWallLine _wallLine;
-            public Descriptor(MessageWallLine wallLine) => _wallLine = wallLine;
-            private int _lid;
-            private int _gid;
-            public string GetButtonId() => $"MessageWallLine{_lid}";
-            public string GetButtonName()
-            {
-                var idStr = $" ID:{_wallLine.ID}";
-                var wallName = $"{_wallLine.MessageWall?.WallName ?? ""}".Trim();
-
-                return (string.Concat(wallName.Take(80 - idStr.Length)) + idStr).Trim();
-            }
-            public MessageWallLine GetCarriedItem() => _wallLine;
-            public string GetFieldBody() => throw new NotImplementedException();
-            public string GetFieldName() => throw new NotImplementedException();
-            public int GetGlobalDisplayOrder() => _gid;
-            public int GetLocalDisplayOrder() => _lid;
-            public bool HasButton() => true;
-            public bool HasField() => false;
-            public IItemDescriptor<MessageWallLine> SetGlobalDisplayedOrder(int i)
-            {
-                _gid = i;
-                return this;
-            }
-
-            public IItemDescriptor<MessageWallLine> SetLocalDisplayedOrder(int i)
-            {
-                _lid = i;
-                return this;
-            }
-        }
         public class Editor : INodeNetwork
         {
             private MessageWallSession _session;
@@ -202,6 +169,40 @@ namespace Manito.Discord.PermanentMessage
         }
         public class Selector : INodeNetwork
         {
+            private class Descriptor : IItemDescriptor<MessageWallLine>
+            {
+                private readonly MessageWallLine _wallLine;
+                public Descriptor(MessageWallLine wallLine) => _wallLine = wallLine;
+                private int _lid;
+                private int _gid;
+                public string GetButtonId() => $"MessageWallLine{_lid}";
+                public string GetButtonName()
+                {
+                    var idStr = $" ID:{_wallLine.ID}";
+                    var wallName = $"{_wallLine.MessageWall?.WallName ?? ""}".Trim();
+
+                    return (string.Concat(wallName.Take(80 - idStr.Length)) + idStr).Trim();
+                }
+                public MessageWallLine GetCarriedItem() => _wallLine;
+                public string GetFieldBody() => throw new NotImplementedException();
+                public string GetFieldName() => throw new NotImplementedException();
+                public int GetGlobalDisplayOrder() => _gid;
+                public int GetLocalDisplayOrder() => _lid;
+                public bool HasButton() => true;
+                public bool HasField() => false;
+                public IItemDescriptor<MessageWallLine> SetGlobalDisplayedOrder(int i)
+                {
+                    _gid = i;
+                    return this;
+                }
+
+                public IItemDescriptor<MessageWallLine> SetLocalDisplayedOrder(int i)
+                {
+                    _lid = i;
+                    return this;
+                }
+            }
+            
             private MessageWallSession _session;
             private InteractiveSelectMenu<MessageWallLine> _selectMenu;
             private Node _ret;

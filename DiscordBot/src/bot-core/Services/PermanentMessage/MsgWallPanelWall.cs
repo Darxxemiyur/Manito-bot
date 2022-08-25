@@ -4,42 +4,25 @@ using System.Threading.Tasks;
 
 using DSharpPlus;
 using DSharpPlus.Entities;
+
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Client;
+
 using Microsoft.EntityFrameworkCore;
+
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 namespace Manito.Discord.PermanentMessage
 {
+    /// <summary>
+    /// MessageWall wall submenu 
+    /// </summary>
     public class MsgWallPanelWall : INodeNetwork
     {
-        private class Descriptor : IItemDescriptor<MessageWall>
-        {
-            private readonly MessageWall _wall;
-            public Descriptor(MessageWall wall) => _wall = wall;
-            private int _lid;
-            private int _gid;
-            public string GetButtonId() => $"MessageWall{_lid}";
-            public string GetButtonName() => $"Стена {_lid} ID:{_wall.ID}";
-            public MessageWall GetCarriedItem() => _wall;
-            public string GetFieldBody() => throw new NotImplementedException();
-            public string GetFieldName() => throw new NotImplementedException();
-            public int GetGlobalDisplayOrder() => _gid;
-            public int GetLocalDisplayOrder() => _lid;
-            public bool HasButton() => true;
-            public bool HasField() => false;
-            public IItemDescriptor<MessageWall> SetGlobalDisplayedOrder(int i)
-            {
-                _gid = i;
-                return this;
-            }
 
-            public IItemDescriptor<MessageWall> SetLocalDisplayedOrder(int i)
-            {
-                _lid = i;
-                return this;
-            }
-        }
+        /// <summary>
+        /// MessageWall Wall Editor dialogue
+        /// </summary>
         public class Editor : INodeNetwork
         {
             private MessageWallSession _session;
@@ -211,6 +194,37 @@ namespace Manito.Discord.PermanentMessage
         }
         public class Selector : INodeNetwork
         {
+            /// <summary>
+            /// Selector Menu Descriptor
+            /// </summary>
+            private class Descriptor : IItemDescriptor<MessageWall>
+            {
+                private readonly MessageWall _wall;
+                public Descriptor(MessageWall wall) => _wall = wall;
+                private int _lid;
+                private int _gid;
+                public string GetButtonId() => $"MessageWall{_lid}";
+                public string GetButtonName() => $"Стена {_lid} ID:{_wall.ID}";
+                public MessageWall GetCarriedItem() => _wall;
+                public string GetFieldBody() => throw new NotImplementedException();
+                public string GetFieldName() => throw new NotImplementedException();
+                public int GetGlobalDisplayOrder() => _gid;
+                public int GetLocalDisplayOrder() => _lid;
+                public bool HasButton() => true;
+                public bool HasField() => false;
+                public IItemDescriptor<MessageWall> SetGlobalDisplayedOrder(int i)
+                {
+                    _gid = i;
+                    return this;
+                }
+
+                public IItemDescriptor<MessageWall> SetLocalDisplayedOrder(int i)
+                {
+                    _lid = i;
+                    return this;
+                }
+            }
+
             private MessageWallSession _session;
             private InteractiveSelectMenu<MessageWall> _wallSelectMenu;
             private Node _ret;

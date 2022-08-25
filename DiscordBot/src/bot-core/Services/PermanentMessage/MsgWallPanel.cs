@@ -13,7 +13,9 @@ using System.Diagnostics;
 
 namespace Manito.Discord.PermanentMessage
 {
-
+    /// <summary>
+    /// MessageWall Service Menu dialogue
+    /// </summary>
     public class MsgWallPanel : IDialogueNet
     {
         private MessageWallSession _session;

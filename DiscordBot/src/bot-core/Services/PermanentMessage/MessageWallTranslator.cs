@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using Manito.Discord.Client;
+using DSharpPlus;
+using DSharpPlus.Exceptions;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -24,7 +26,7 @@ namespace Manito.Discord.PermanentMessage
             set => Translation = value.Split(";").Select(y => y.Split(":"))
                     .ToDictionary(y => ulong.Parse(y[0]), y => y[1]);
         }
-        
+
         /// <summary>
         /// List of message id to content pairs.
         /// </summary>
@@ -37,13 +39,20 @@ namespace Manito.Discord.PermanentMessage
             ChannelId = channelId;
             MessageWall = messageWall;
         }
-        public async Task SubmitUpdate(DiscordChannel channel)
+        public async Task<int?> SubmitUpdate(DiscordClient client)
         {
             var oldDict = Translation;
             var mwDict = MessageWall.Msgs;
+
+            DiscordChannel channel = null;
+
+            try { channel = await client.GetChannelAsync(ChannelId); }
+            catch (NotFoundException) { return null; }
+
             Translation = new();
 
             var length = Math.Max(oldDict.Count, mwDict.Count);
+            var changed = length;
 
             for (var i = 0; i < length; i++)
             {
@@ -53,36 +62,58 @@ namespace Manito.Discord.PermanentMessage
                 if (tgt == slv.Value)
                 {
                     Translation.Add(slv.Key, slv.Value);
+                    changed--;
                     continue;
                 }
 
                 if (slv.Value == null)
                 {
-                    var replyK = Translation.ElementAtOrDefault(0);
-                    var reply = replyK.Key == default ? null : (ulong?)replyK.Key;
-                    var myMsg = await channel.SendMessageAsync(
-                        new DiscordMessageBuilder().WithReply(reply)
-                        .WithContent(reply != null ? null : MessageWall.WallName)
-                        .WithEmbed(new DiscordEmbedBuilder().WithDescription(tgt))
-                    );
+                    DiscordMessage myMsg = await CreateMessage(channel, tgt);
                     Translation.Add(myMsg.Id, tgt);
                     continue;
                 }
 
-                var msg = await channel.GetMessageAsync(slv.Key);
-
                 if (tgt == null)
                 {
-                    await channel.DeleteMessageAsync(msg);
+                    try
+                    {
+                        var msg = await channel.GetMessageAsync(slv.Key);
+                        await channel.DeleteMessageAsync(msg);
+                    }
+                    catch (NotFoundException) { }
                     continue;
                 }
                 if (tgt != slv.Value)
                 {
+                    DiscordMessage msg = null;
+                    try
+                    {
+                        msg = await channel.GetMessageAsync(slv.Key);
+                        await msg.ModifyAsync(x => (x.Content, x.Embed) =
+                            (msg.Content, new DiscordEmbedBuilder(msg.Embeds[0]).WithDescription(tgt)));
+                    }
+                    catch (NotFoundException) { }
+
+                    msg ??= await CreateMessage(channel, tgt);
+
                     Translation.Add(msg.Id, tgt);
-                    await msg.ModifyAsync(x => (x.Content, x.Embed) =
-                     (msg.Content, new DiscordEmbedBuilder(msg.Embeds[0]).WithDescription(tgt)));
                 }
             }
+
+            return changed;
+        }
+
+        private async Task<DiscordMessage> CreateMessage(DiscordChannel channel, string tgt)
+        {
+            var replyK = Translation.ElementAtOrDefault(0);
+            var reply = replyK.Key == default ? null : (ulong?)replyK.Key;
+            var myMsg = await channel.SendMessageAsync(
+                new DiscordMessageBuilder()
+                .WithContent(reply != null ? null : MessageWall.WallName)
+                .WithEmbed(new DiscordEmbedBuilder().WithDescription(tgt))
+            );
+
+            return myMsg;
         }
     }
 }
