@@ -171,7 +171,7 @@ namespace Manito.Discord.PermanentMessage
 
                 using var db = await _session.DBFactory.CreateMyDbContextAsync();
                 db.MessageWalls.Update(itm);
-                db.MessageWallLines.Update(_translator);
+                db.MessageWallTranslators.Update(_translator);
                 await db.SaveChangesAsync();
 
                 return new(ShowOptions);
@@ -189,7 +189,7 @@ namespace Manito.Discord.PermanentMessage
             }
             public NextNetworkInstruction GetStartingInstruction(object payload)
             {
-                _translator = (MessageWallLine)payload;
+                _translator = (MessageWallTranslator)payload;
                 if (_translator != null)
                 {
                     _wallEditor = new(_session, new(ShowOptions));

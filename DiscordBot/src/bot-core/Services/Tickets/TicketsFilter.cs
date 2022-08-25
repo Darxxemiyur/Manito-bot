@@ -56,7 +56,7 @@ namespace Manito.Discord.Tickets
             {
                 messageId = await CheckMessage(chnlId, messageId);
                 var inter = await _service.MyDiscordClient.ActivityTools
-                    .WaitForComponentInteraction(x => x.Message.Id == messageId, TimeSpan.FromDays(1));
+                    .WaitForComponentInteraction(x => x.Message.Id == messageId);
 
                 var payload = (inter.Interaction, inter.Message.ChannelId);
                 await _queue.Handle(_service.MyDiscordClient.Client, payload);
@@ -89,7 +89,7 @@ namespace Manito.Discord.Tickets
         }
         private async Task HandleAsCommand(DiscordInteraction args, ulong channelId)
         {
-            
+
         }
     }
 

@@ -24,7 +24,6 @@ namespace Manito.Discord.Inventory
 
         public override async Task QuitSession()
         {
-            _controller.StopSession(this);
 
             await base.QuitSession();
         }

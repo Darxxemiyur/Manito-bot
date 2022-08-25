@@ -73,6 +73,13 @@ namespace Manito.Discord.PermanentMessage
                 .AddComponents(wallLine, wall, wallTranslator, CreateTestButton)
                 .AddComponents(exitBtn));
 
+            var intr = _session.RespondAndWait(new DiscordInteractionResponseBuilder()
+                .WithContent("Выбор изменения информации")
+                .AddComponents(wallLine.Disable(), wall.Disable(), wallTranslator.Disable(), CreateTestButton.Disable())
+                .AddComponents(exitBtn.Disable()));
+
+
+
             if (response.CompareButton(wallLine))
             {
                 var next = new MsgWallPanelWallLine(_session);

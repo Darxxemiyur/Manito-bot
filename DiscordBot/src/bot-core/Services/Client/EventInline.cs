@@ -83,7 +83,7 @@ namespace Manito.Discord.Client
             var handled = false;
             foreach (var chk in input)
             {
-                if (!await chk.IsFitting(client, args) || (handled && !chk.RunIfHandled)) continue;
+                if (!await chk.IsFitting(client, args) || handled && !chk.RunIfHandled) continue;
                 handled = true;
                 rrr = rrr.Append(chk);
                 args.Handled = true;
@@ -128,16 +128,42 @@ namespace Manito.Discord.Client
         protected Predictator() => _eventProxy = new();
         public Task Handle(DiscordClient client, TEvent args) =>
             _eventProxy.Handle(client, (this, args));
+        public virtual Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout, CancellationToken token)
+        {
+            return GetEvent(x => Task.Delay(timeout, token));
+        }
+        public virtual Task<(DiscordClient, TEvent)> GetEvent(CancellationToken token)
+        {
+            return GetEvent(x => Task.Delay(-1, token));
+        }
+        /// <summary>
+        /// Get event in specific period of time
+        /// </summary>
+        /// <param name="timeout">The time period</param>
+        /// <returns></returns>
+        /// <exception cref="TimeoutException"></exception>
         public virtual async Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout)
         {
-            var timeoutTask = Task.Delay(timeout);
-
+            try { return await GetEvent(x => Task.Delay(timeout)); }
+            catch (TaskCanceledException e)
+            { throw new TimeoutException($"Event awaiting for {timeout} has timed out!", e); }
+        }
+        /// <summary>
+        /// Gets event
+        /// </summary>
+        /// <param name="cancelTask"></param>
+        /// <returns></returns>
+        /// <exception cref="TaskCanceledException"></exception>
+        public async Task<(DiscordClient, TEvent)> GetEvent(
+            Func<Task<(DiscordClient, (Predictator<TEvent>, TEvent))>, Task> genCancel)
+        {
             var gettingData = _eventProxy.GetData();
+            var cancelTask = genCancel(gettingData);
+            var either = await Task.WhenAny(cancelTask, gettingData);
 
-            var either = await Task.WhenAny(timeoutTask, gettingData);
+            if (either == cancelTask)
+                throw new TaskCanceledException($"Event awaiting has been cancelled!");
 
-            if (either == timeoutTask)
-                throw new TimeoutException($"Event awaiting for {timeout} has timed out!");
 
             var result = await gettingData;
 
@@ -147,7 +173,7 @@ namespace Manito.Discord.Client
         public virtual async Task<(DiscordClient, TEvent)> GetEvent()
         {
             var result = await _eventProxy.GetData();
-            
+
             return (result.Item1, result.Item2.Item2);
         }
     }

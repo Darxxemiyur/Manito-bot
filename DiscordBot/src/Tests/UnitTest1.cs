@@ -7,5 +7,10 @@ namespace Tests
         public void TestMethod1()
         {
         }
+        [TestMethod("TaskTest")]
+        public async Task TestMethod2()
+        {
+
+        }
     }
 }

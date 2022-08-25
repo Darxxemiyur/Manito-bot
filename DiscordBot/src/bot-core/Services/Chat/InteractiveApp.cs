@@ -21,14 +21,24 @@ namespace Manito.Discord.Client
         public DiscordInteraction Interaction { get; }
         private DiscordInteractionData Data => Interaction.Data;
         public IEnumerable<DiscordComponent> _components;
-        public static implicit operator InteractiveInteraction(DiscordInteraction interaction) => new(interaction);
+        public static implicit operator InteractiveInteraction(ComponentInteractionCreateEventArgs x) => new(x);
         public InteractiveInteraction(DiscordInteraction interaction)
         {
             Interaction = interaction;
         }
-        public void UpdateComponentCheckList(IEnumerable<DiscordComponent> components) => _components = components;
-        public bool CompareButton(string name) => ButtonId == name && (_components == null ? true :
-            _components.First(x => x.CustomId == ButtonId) is DiscordButtonComponent btn && !btn.Disabled);
+        public InteractiveInteraction(ComponentInteractionCreateEventArgs interaction)
+        {
+            Interaction = interaction.Interaction;
+            _components = interaction.Message.Components.SelectMany(x => x.Components).ToArray();
+        }
+        public InteractiveInteraction UpdateComponentCheckList(IEnumerable<DiscordComponent> components)
+        {
+            _components = components;
+            return this;
+        }
+
+        public bool CompareButton(string name) => ButtonId == name && (_components == null
+            || _components.First(x => x.CustomId == ButtonId) is DiscordButtonComponent btn && !btn.Disabled);
         public bool CompareButton(DiscordButtonComponent btn) => CompareButton(btn.CustomId);
         public bool IsSelected(string option) => Data.Values.Any(x => x == option);
         public string[] GetSelected() => Data.Values;

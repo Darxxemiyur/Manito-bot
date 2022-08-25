@@ -52,8 +52,8 @@ namespace Manito.Discord.Client
                 await _sync.WaitAsync();
 
                 //Forward all exceptions to the stderr-ish
-                if (completedTask?.Exception != null)
-                    await Console.Error.WriteLineAsync($"{completedTask?.Exception?.InnerException}");
+                //if (completedTask?.Exception != null)
+                //    await Console.Error.WriteLineAsync($"{completedTask?.Exception?.InnerException}");
 
                 //Returns false if it tries to remove 'timeout' task, and true if succeeds
                 _executingTasks.Remove(completedTask);
