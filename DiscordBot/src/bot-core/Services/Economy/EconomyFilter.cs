@@ -35,7 +35,7 @@ namespace Manito.Discord.Economy
         public EconomyFilter(MyDomain service, EventBuffer eventBuffer)
         {
             _commands = new EconomyCommands(service.Economy);
-            service.MyDiscordClient.AppCommands.Add("Economy", _commands.GetCommands());
+            //service.MyDiscordClient.AppCommands.Add("Economy", _commands.GetCommands());
             _queue = new();
             eventBuffer.Interact.OnMessage += _queue.Handle;
         }

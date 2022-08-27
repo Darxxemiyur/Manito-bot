@@ -76,19 +76,12 @@ namespace Manito.Discord.Shop
 				false, new DiscordComponentEmoji(_wallet.CurrencyEmojiId)));
 			return new DiscordSelectComponent("Selection", "Выберите товар", items);
 		}
-		private IDialogueNet DialogNetwork(ShopItem item)
-		{
-			switch (item.Category)
-			{
-				case ShopItemCategory.SatiationCarcass:
-				case ShopItemCategory.Carcass:
-					return new BuyingStepsForMeatFood(this, item);
-				case ShopItemCategory.Plant:
-					return new BuyingStepsForPlantFood(this, item);
-				default:
-					return new BuyingStepsForError(this);
-			}
-		}
+		private IDialogueNet DialogNetwork(ShopItem item) => item.Category switch {
+			ShopItemCategory.SatiationCarcass or ShopItemCategory.Carcass =>
+				new BuyingStepsForMeatFood(this, item),
+			ShopItemCategory.Plant => new BuyingStepsForPlantFood(this, item),
+			_ => new BuyingStepsForError(this),
+		};
 		private async Task ItemSelected(ShopItem item)
 		{
 			var chain = DialogNetwork(item);

@@ -120,8 +120,15 @@ namespace Manito.Discord.Chat.DialogueNet
 		{
 			_cancellation.Cancel();
 			await _controller(this);
-			await SendExceptionMessage(e);
-			throw e;
+			try
+			{
+				await SendExceptionMessage(e);
+			}
+			catch (Exception err)
+			{
+				e = new AggregateException(e, err).Flatten();
+			}
+			throw new AggregateException(e).Flatten();
 		}
 		protected async Task SendExceptionMessage(Exception e)
 		{

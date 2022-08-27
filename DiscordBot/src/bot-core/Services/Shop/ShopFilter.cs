@@ -22,21 +22,24 @@ namespace Manito.Discord.Shop
 	public class ShopFilter : IModule
 	{
 		public Task RunModule() => Task.WhenAll(HandleLoop(), RunHooked());
-		private async Task HandleLoop() {
+		private async Task HandleLoop()
+		{
 			while (true)
 			{
 				var data = (await _queue.GetData()).Item2;
 				await HandleAsCommand(data);
 			}
 		}
-		private async Task<ulong> CheckMessage(ulong chnlId, ulong msgId) {
+		private async Task<ulong> CheckMessage(ulong chnlId, ulong msgId)
+		{
 			var clnt = _service.MyDiscordClient.Client;
 			var chnl = await clnt.GetChannelAsync(chnlId);
 
 			try
 			{
 				var msg = await chnl.GetMessageAsync(msgId);
-			} catch (DSharpPlus.Exceptions.NotFoundException)
+			}
+			catch (DSharpPlus.Exceptions.NotFoundException)
 			{
 				return (await chnl.SendMessageAsync(GetMsg())).Id;
 			}
@@ -44,7 +47,8 @@ namespace Manito.Discord.Shop
 			return msgId;
 		}
 		private DiscordMessageBuilder GetMsg() => _shopService.GetEnterMessage();
-		private async Task RunHooked() {
+		private async Task RunHooked()
+		{
 			ulong chnlId = 965561900517716008;
 			ulong messageId = 966798532990345276;
 			while (true)
@@ -61,27 +65,31 @@ namespace Manito.Discord.Shop
 		private MyDomain _service;
 		private List<DiscordApplicationCommand> _commandList;
 		private DiscordEventProxy<DiscordInteraction> _queue;
-		public ShopFilter(MyDomain service, EventBuffer eventBuffer) {
+		public ShopFilter(MyDomain service, EventBuffer eventBuffer)
+		{
 			_service = service;
 			_shopService = service.ShopService;
 			_commandList = GetCommands().ToList();
-			service.MyDiscordClient.AppCommands.Add("Shop", _commandList);
+			//service.MyDiscordClient.AppCommands.Add("Shop", _commandList);
 			_queue = new();
 			eventBuffer.Interact.OnMessage += FilterMessage;
 		}
-		private IEnumerable<DiscordApplicationCommand> GetCommands() {
+		private IEnumerable<DiscordApplicationCommand> GetCommands()
+		{
 			yield return new DiscordApplicationCommand("shopping",
 			 "Начать шоппинг", defaultPermission: true);
 		}
 
-		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args) {
+		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
+		{
 			if (!_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))
 				return;
 
 			await _queue.Handle(client, args.Interaction);
 			args.Handled = true;
 		}
-		private async Task HandleAsCommand(DiscordInteraction args) {
+		private async Task HandleAsCommand(DiscordInteraction args)
+		{
 			var res = await _shopService.Atomary(async (x) => {
 				if (x.SessionExists(args.User))
 					return false;

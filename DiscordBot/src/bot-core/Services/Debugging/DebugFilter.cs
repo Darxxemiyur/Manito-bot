@@ -12,14 +12,12 @@ using DSharpPlus.SlashCommands.EventArgs;
 using DSharpPlus.SlashCommands.Attributes;
 
 using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.Shop;
 using Manito.Discord.Economy;
 
-
-namespace Manito.Discord.Inventory
+namespace Manito.Discord.Economy
 {
-	public class InventoryFilter : IModule
+
+	public class DebugFilter : IModule
 	{
 
 		public Task RunModule() => HandleLoop();
@@ -31,28 +29,37 @@ namespace Manito.Discord.Inventory
 				await FilterMessage(data.Item1, data.Item2);
 			}
 		}
-		private InventoryCommands _commands;
-		private InventoryController _controller;
-		public InventoryController Controller => _controller;
-		private List<DiscordApplicationCommand> _commandList;
+		private DebugCommands _commands;
 		private DiscordEventProxy<InteractionCreateEventArgs> _queue;
-		public InventoryFilter(MyDomain service, EventBuffer eventBuffer)
+		private MyDomain _service;
+		public DebugFilter(MyDomain service, EventBuffer eventBuffer)
 		{
-			_controller = new(service);
-			_commands = new InventoryCommands(_controller, service.Inventory);
-			_commandList = _commands.GetCommands().ToList();
-			//service.MyDiscordClient.AppCommands.Add("Inventory", _commandList);
+			_commands = new DebugCommands(service);
+			service.MyDiscordClient.AppCommands.Add("Debug", _commands.GetCommands());
 			_queue = new();
+			_service = service;
 			eventBuffer.Interact.OnMessage += _queue.Handle;
 		}
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{
-			var res = _commands.Search(args.Interaction);
-			if (res != null)
+			try
 			{
+				var res = _commands.Search(args.Interaction);
+				if (res == null)
+					return;
+
+				var guild = await _service.MyDiscordClient.ManitoGuild;
+
+				var user = await guild.GetMemberAsync(args.Interaction.User.Id);
+
+				if (!user.Permissions.HasPermission(Permissions.Administrator))
+					return;
+
 				await res(args.Interaction);
 				args.Handled = true;
 			}
+			catch { }
 		}
 	}
+
 }
