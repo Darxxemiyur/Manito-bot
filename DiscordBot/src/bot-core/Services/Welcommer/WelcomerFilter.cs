@@ -46,14 +46,11 @@ namespace Manito.Discord.Welcommer
 				try
 				{
 					var member = await _toAddQueue.GetData();
-					await member.SendMessageAsync(string.Format(WelcomeMessage, member.Id,
-						member.Guild.Name));
-					await member.GrantRoleAsync(member.Guild.GetRole(NimfaRole));
+					var guild = await _client.ManitoGuild;
+					await member.SendMessageAsync(string.Format(WelcomeMessage, member.Id, guild.Name));
+					await member.GrantRoleAsync(guild.GetRole(NimfaRole));
 				}
-				catch (Exception)
-				{
-
-				}
+				catch { }
 			}
 		}
 	}

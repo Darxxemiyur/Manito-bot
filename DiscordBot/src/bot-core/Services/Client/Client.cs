@@ -30,7 +30,11 @@ namespace Manito.Discord.Client
 		public EventInline EventInliner => _eventInliner;
 		private DiscordClient _client;
 		public DiscordClient Client => _client;
+#if DEBUG
 		public Task<DiscordGuild> ManitoGuild => _client.GetGuildAsync(958095775324336198, true);
+#elif !DEBUG
+		public Task<DiscordGuild> ManitoGuild => _client.GetGuildAsync(915355370673811486, true);
+#endif
 		private ActivitiesTools _activitiesTools;
 		public ActivitiesTools ActivityTools => _activitiesTools;
 		public MyDiscordClient(MyDomain collection, RootConfig rconfig)
