@@ -32,7 +32,6 @@ namespace Manito.Discord.Welcommer
 		{
 			if (e.Guild.Id == (await _client.ManitoGuild).Id)
 				await _toAddQueue.Handle(e.Member);
-
 			e.Handled = true;
 		}
 
