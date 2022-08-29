@@ -32,8 +32,7 @@ namespace Manito.Discord.PermanentMessage
 		private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArgument arg)
 		{
 			var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Единицу");
-			var wall = new DiscordButtonComponent(ButtonStyle.Primary, "wall", "Набор единиц")
-			var link = new DiscordLinkButtonComponent("h", "Набор единиц");
+			var wall = new DiscordButtonComponent(ButtonStyle.Primary, "wall", "Набор единиц");
 			var wallTranslator = new DiscordButtonComponent(ButtonStyle.Primary, "wallTranslator", "Переводчик");
 
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");

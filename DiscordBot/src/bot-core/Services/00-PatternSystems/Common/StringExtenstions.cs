@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Manito.Services._00_PatternSystems.Common
+namespace Manito.Discord._00_PatternSystems.Common
 {
 	public static class StringExtenstions
 	{

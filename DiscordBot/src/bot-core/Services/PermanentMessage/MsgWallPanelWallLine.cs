@@ -10,7 +10,7 @@ using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using Manito.Services._00_PatternSystems.Common;
+using Manito.Discord._00_PatternSystems.Common;
 using Cyriller;
 
 namespace Manito.Discord.PermanentMessage
@@ -149,10 +149,14 @@ namespace Manito.Discord.PermanentMessage
 				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
 					.WithContent("Напишите содержимое стены сообщением"));
 
-				var msg = await _session.GetSessionMessage();
+				var message = await _session.GetSessionMessage();
+
+				var msg = message.Content;
+
+				msg = msg.Replace("```ff", "").Trim();
 
 				using var db = await _session.DBFactory.CreateMyDbContextAsync();
-				_line.SetLine(msg.Content);
+				_line.SetLine(msg);
 				db.MessageWallLines.Update(_line);
 
 				try

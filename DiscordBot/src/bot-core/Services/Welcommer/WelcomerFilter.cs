@@ -17,6 +17,7 @@ namespace Manito.Discord.Welcommer
 {
 	public class WelcomerFilter : IModule
 	{
+
 		public const ulong NimfaRole = 915918629172822036;
 		public const string WelcomeMessage = "Добро пожаловать <@{0}> на наш {1} проект!";
 		private MyDiscordClient _client;
@@ -25,7 +26,10 @@ namespace Manito.Discord.Welcommer
 		{
 			_client = client;
 			_toAddQueue = new();
+#if !DEBUG
 			client.Client.GuildMemberAdded += OnNewNymfJoin;
+#endif
+
 		}
 
 		private async Task OnNewNymfJoin(DiscordClient sender, GuildMemberAddEventArgs e)

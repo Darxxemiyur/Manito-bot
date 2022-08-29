@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Database;
 using Manito.Discord.Config;
+using Manito.Discord.Welcommer;
 
 namespace Manito.Discord
 {
@@ -25,6 +26,7 @@ namespace Manito.Discord
 		private ExecThread _executionThread;
 		private ServerEconomy _economy;
 		private IInventorySystem _inventory;
+		private WelcomerFilter _welcomer;
 		private ShopService _shopService;
 		private RootConfig _rootConfig;
 		private MessageController _msgWallCtr;
@@ -56,6 +58,7 @@ namespace Manito.Discord
 			_myDiscordClient = new MyDiscordClient(this, _rootConfig);
 			_msgWallCtr = new(this);
 			_shopService = new ShopService(this);
+			_welcomer = new WelcomerFilter(_myDiscordClient);
 			_appCommands = _myDiscordClient.AppCommands;
 			_executionThread = new ExecThread();
 			_filters = new EventFilters(this, _myDiscordClient.EventsBuffer);
@@ -77,6 +80,7 @@ namespace Manito.Discord
 			yield return _filters.RunModule();
 			yield return _economy.RunModule();
 			yield return _msgWallCtr.RunModule();
+			yield return _welcomer.RunModule();
 		}
 	}
 }
