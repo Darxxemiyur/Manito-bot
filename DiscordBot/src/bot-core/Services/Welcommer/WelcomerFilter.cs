@@ -27,10 +27,11 @@ namespace Manito.Discord.Welcommer
 		public const ulong PunishChannel = 915690112531198012;
 		public const ulong LimitsChannel = 915693337783185429;
 		public const ulong RolesChannel = 916297964073385984;
+		public const ulong PrayChannel = 915691397061935204;
 
 		public static string M1Ch => $"<#{WayChannel}>\n<#{NewsChannel}>\n<#{RestartsChannel}>";
 		public static string M2Ch => $"<#{DRulesChannel}>\n<#{GRulesChannel}>\n<#{PunishChannel}>";
-		public static string M3Ch => $"<#{LimitsChannel}>\n<#{RolesChannel}>";
+		public static string M3Ch => $"<#{LimitsChannel}>\n<#{RolesChannel}>\n<#{PrayChannel}>";
 		public static string MCh => $"Так-же для вашего удобства ознакомьтесь с\n{M1Ch}\n{M2Ch}\n{M3Ch}";
 		public static string WelcomeMessage => "Добро пожаловать <@{0}> на наш {1} проект!\n" + MCh;
 		private MyDiscordClient _client;
