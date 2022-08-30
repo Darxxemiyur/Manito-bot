@@ -19,7 +19,20 @@ namespace Manito.Discord.Welcommer
 	{
 
 		public const ulong NimfaRole = 915918629172822036;
-		public const string WelcomeMessage = "Добро пожаловать <@{0}> на наш {1} проект!";
+		public const ulong WayChannel = 1006205301206306847;
+		public const ulong NewsChannel = 915691089082581032;
+		public const ulong RestartsChannel = 915691265016877078;
+		public const ulong DRulesChannel = 915690019476348948;
+		public const ulong GRulesChannel = 915689991441621025;
+		public const ulong PunishChannel = 915690112531198012;
+		public const ulong LimitsChannel = 915693337783185429;
+		public const ulong RolesChannel = 916297964073385984;
+
+		public static string M1Ch => $"<#{WayChannel}>\n<#{NewsChannel}>\n<#{RestartsChannel}>";
+		public static string M2Ch => $"<#{DRulesChannel}>\n<#{GRulesChannel}>\n<#{PunishChannel}>";
+		public static string M3Ch => $"<#{LimitsChannel}>\n<#{RolesChannel}>";
+		public static string MCh => $"Так-же для вашего удобства ознакомьтесь с\n{M1Ch}\n{M2Ch}\n{M3Ch}";
+		public static string WelcomeMessage => "Добро пожаловать <@{0}> на наш {1} проект!\n" + MCh;
 		private MyDiscordClient _client;
 		private TaskEventProxy<DiscordMember> _toAddQueue;
 		public WelcomerFilter(MyDiscordClient client)
