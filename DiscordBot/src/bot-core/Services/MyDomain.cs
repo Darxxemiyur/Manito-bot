@@ -35,6 +35,7 @@ namespace Manito.Discord
 		public ExecThread ExecutionThread => _executionThread;
 		public ServerEconomy Economy => _economy;
 		public IInventorySystem Inventory => _inventory;
+		public WelcomerFilter Welcomer => _welcomer;
 		public ShopService ShopService => _shopService;
 		public MessageController MsgWallCtr => _msgWallCtr;
 		public static async Task<MyDomain> Create()
