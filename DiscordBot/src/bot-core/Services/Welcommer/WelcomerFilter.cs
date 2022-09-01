@@ -33,19 +33,21 @@ namespace Manito.Discord.Welcommer
 		public const ulong HelpChannel = 915692365048578099;
 
 		public static ulong ManitoGuild = 915355370673811486;
+		public static ulong PeaceMSG = 1013102906951606393;
 		public static ulong TrailerMSG = 1014143520744939541;
 		public static ulong NoticeMSG = 1013114270331969606;
 		public static string ChannelLink => $"https://discord.com/channels/{ManitoGuild}";
 		public static string NewsChannelLink => $"{ChannelLink}/{NewsChannel}";
 		public static string TrailerlLink => $"{NewsChannelLink}/{TrailerMSG}";
+		public static string PeaceLink => $"{NewsChannelLink}/{PeaceMSG}";
+		public static string NoticeLink => $"{NewsChannelLink}/{NoticeMSG}";
+		public static string HelpChannelLink = $"{ChannelLink}/{ManitoGuild}/{HelpChannel}/1013056576719949895";
 #if DEBUG
 		public static string Er => "1007397905654620260";
 #else
 		public static string Er => "1007401635443638432";
 #endif
 		public static string E => $"<:{Er}:{Er}>";
-		public static string NoticeLink => $"{NewsChannelLink}/{NoticeMSG}";
-		public static string HelpChannelLink = $"{ChannelLink}/{ManitoGuild}/{HelpChannel}/1013056576719949895";
 		public static string M1Ch => $"{E}<#{WayChannel}>\n{E}<#{NewsChannel}>\n{E}<#{RestartsChannel}>";
 		public static string M2Ch => $"{E}<#{DRulesChannel}>\n{E}<#{GRulesChannel}>\n{E}<#{PunishChannel}>";
 		public static string M3Ch => $"{E}<#{LimitsChannel}>\n{E}<#{RolesChannel}>\n{E}<#{PrayChannel}>";
@@ -77,9 +79,9 @@ namespace Manito.Discord.Welcommer
 
 			var msg1 = new DiscordMessageBuilder();
 
-			var n1 = new DiscordLinkButtonComponent(NoticeLink, "Новость касательно экономики");
+			var n0 = new DiscordLinkButtonComponent(PeaceLink, "О перемирии на сервере");
+			var n1 = new DiscordLinkButtonComponent(NoticeLink, "Касательно экономики");
 			var n2 = new DiscordLinkButtonComponent(TrailerlLink, "Трейлер функционала бота");
-			var n3 = new DiscordLinkButtonComponent(HelpChannelLink, "Обратиться за помощью в нашем канале!", false, new DiscordComponentEmoji("⛪"));
 
 			var icon = guild.GetIconUrl(ImageFormat.Auto);
 
@@ -89,10 +91,11 @@ namespace Manito.Discord.Welcommer
 				.WithThumbnail(icon)
 				.WithColor(new DiscordColor("#a91dde")));
 
-			msg1.AddComponents(n1, n2);
+			msg1.AddComponents(n0, n1, n2);
 
 			var msg2 = new DiscordMessageBuilder();
 
+			var n3 = new DiscordLinkButtonComponent(HelpChannelLink, "Обратиться за помощью в нашем канале!", false, new DiscordComponentEmoji("⛪"));
 			var m1 = "В случае возникновения вопросов __**не**__ стоит обращаться к Администрации в личные сообщения.";
 			var m2 = $"Следует обратиться в <#{HelpChannel}> чтобы вам помог свободный администратор!";
 			msg2.WithEmbed(new DiscordEmbedBuilder()
