@@ -10,7 +10,7 @@ using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using Manito.Discord._00_PatternSystems.Common;
+using Manito.Discord.PatternSystems.Common;
 using Cyriller;
 
 namespace Manito.Discord.PermanentMessage

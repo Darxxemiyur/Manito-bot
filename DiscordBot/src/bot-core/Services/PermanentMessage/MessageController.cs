@@ -23,12 +23,16 @@ namespace Manito.Discord.PermanentMessage
 		private IPermMessageDbFactory _dbFactory;
 		private MyDomain _domain;
 		private MessageWallSessionController _service;
+		public List<ImportedMessage> ImportedMessages {
+			get; private set;
+		}
 		public MessageController(MyDomain domain)
 		{
 			_service = new(domain);
 			_domain = domain;
 			_dbFactory = domain.DbFactory;
 			_postMessageUpdateQueue = new();
+			ImportedMessages = new();
 		}
 		public async Task RunModule()
 		{

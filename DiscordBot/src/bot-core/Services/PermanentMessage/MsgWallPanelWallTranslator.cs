@@ -75,7 +75,7 @@ namespace Manito.Discord.PermanentMessage
 				var linkChnlBtn = new DiscordButtonComponent(ButtonStyle.Primary, "linkc", "Привязать к каналу");
 				var linkWallBtn = new DiscordButtonComponent(ButtonStyle.Primary, "linkw", "Привязать к стене");
 				var openWallBtn = new DiscordButtonComponent(ButtonStyle.Primary, "select",
-				 "Открыть стену строки", _translator.MessageWall == null);
+				 "Открыть стену транслятора", _translator.MessageWall == null);
 				var remBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "Удалить");
 				var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
@@ -294,7 +294,7 @@ namespace Manito.Discord.PermanentMessage
 				_selectMenu = new InteractiveSelectMenu<MessageWallTranslator>(_session,
 					new QueryablePageReturner<MessageWallTranslator>(new MyQuerrier(_session.DBFactory)));
 				EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
-				MkNewButton = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
+				MkNewButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
 			}
 			private async Task<NextNetworkInstruction> CreateNew(NetworkInstructionArgument args)
 			{
@@ -339,13 +339,11 @@ namespace Manito.Discord.PermanentMessage
 			}
 		}
 		private MessageWallSession _session;
-		private NextNetworkInstruction _ret;
 		private Editor _editor;
 		private Selector _selector;
-		public MsgWallPanelWallTranslator(MessageWallSession session, NextNetworkInstruction ret)
+		public MsgWallPanelWallTranslator(MessageWallSession session)
 		{
 			_session = session;
-			_ret = ret;
 			_selector = new(session, Decider, null);
 			_editor = new(session, new(_selector.SelectToEdit));
 		}

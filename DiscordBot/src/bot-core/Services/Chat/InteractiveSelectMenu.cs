@@ -245,12 +245,25 @@ namespace Manito.Discord.Client
 			get; set;
 		}
 	}
-	public interface IQuerrier<TItem>
+	public class EnumerablePageReturner<TItem> : IPageReturner<TItem>
 	{
-		IEnumerable<TItem> GetSection(int skip, int take);
-		int GetPages(int perPage);
-		int GetTotalCount();
-		IItemDescriptor<TItem> Convert(TItem item);
+		public IList<IItemDescriptor<TItem>> ListablePage => _list
+			.Skip((Page - 1) * PerPage).Take(PerPage).Select(x => _convert(x)).ToList();
+		public Int32 PerPage { get; set; } = 25;
+		public Int32 OnPage => ListablePage.Count;
+		public Int32 Total => _list.Count;
+		public Int32 GetPages => Math.Max((int)Math.Ceiling((float)Total / PerPage), 1);
+		private int _page;
+		public int Page {
+			get => _page; set => _page = Math.Clamp(value, 1, GetPages);
+		}
+		private List<TItem> _list;
+		private Func<TItem, IItemDescriptor<TItem>> _convert;
+		public EnumerablePageReturner(List<TItem> list, Func<TItem, IItemDescriptor<TItem>> converter)
+		{
+			_list = list;
+			_convert = converter;
+		}
 	}
 	public class QueryablePageReturner<TItem> : IPageReturner<TItem>
 	{
@@ -272,5 +285,12 @@ namespace Manito.Discord.Client
 		public IQuerrier<TItem> Querrier {
 			get;
 		}
+	}
+	public interface IQuerrier<TItem>
+	{
+		IEnumerable<TItem> GetSection(int skip, int take);
+		int GetPages(int perPage);
+		int GetTotalCount();
+		IItemDescriptor<TItem> Convert(TItem item);
 	}
 }

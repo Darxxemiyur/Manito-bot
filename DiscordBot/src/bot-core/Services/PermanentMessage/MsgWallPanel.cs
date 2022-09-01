@@ -31,15 +31,16 @@ namespace Manito.Discord.PermanentMessage
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
 		private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArgument arg)
 		{
-			var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Единицу");
-			var wall = new DiscordButtonComponent(ButtonStyle.Primary, "wall", "Набор единиц");
-			var wallTranslator = new DiscordButtonComponent(ButtonStyle.Primary, "wallTranslator", "Переводчик");
+			var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Строки-сироты");
+			var wall = new DiscordButtonComponent(ButtonStyle.Primary, "wall", "Стены");
+			var imported = new DiscordButtonComponent(ButtonStyle.Primary, "import", "Импортированые соо-ния");
+			var wallTranslator = new DiscordButtonComponent(ButtonStyle.Primary, "wallTranslator", "Трансляторы");
 
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
 			var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
-				.WithContent("Выбор изменения информации")
-				.AddComponents(wallLine, wall, wallTranslator)
+				.WithContent("Выберите что хотите изменять")
+				.AddComponents(wallLine, wall, wallTranslator, imported)
 				.AddComponents(exitBtn));
 
 
@@ -57,7 +58,13 @@ namespace Manito.Discord.PermanentMessage
 
 			if (response.CompareButton(wallTranslator))
 			{
-				var next = new MsgWallPanelWallTranslator(_session, new(SelectWhatToDo));
+				var next = new MsgWallPanelWallTranslator(_session);
+				await NetworkCommon.RunNetwork(next);
+			}
+
+			if (response.CompareButton(imported))
+			{
+				var next = new MsgWallPanelWallLineImport(_session);
 				await NetworkCommon.RunNetwork(next);
 			}
 
