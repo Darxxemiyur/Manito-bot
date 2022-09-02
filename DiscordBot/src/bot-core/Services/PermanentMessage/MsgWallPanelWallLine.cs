@@ -77,27 +77,21 @@ namespace Manito.Discord.PermanentMessage
 			}
 			private async Task<NextNetworkInstruction> ImportMessage(NetworkInstructionArgument arg)
 			{
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-					.AddEmbed(new DiscordEmbedBuilder().WithDescription("Введите id канала")));
+				var selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
+					new EnumerablePageReturner<ImportedMessage>(
+					_session.Client.Domain.MsgWallCtr.ImportedMessages,
+					(x) => new MsgWallPanelWallLineImport.Descriptor(x)));
 
-				var channelStrId = (await _session.GetSessionMessage()).Content;
+				var line = (await selectMenu.EvaluateItem())?.GetCarriedItem();
 
-				if (!ulong.TryParse(channelStrId, out var channelId))
+				if (line == null)
+				{
+					await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
 					return new(ShowOptions);
+				}
 
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
-					.AddEmbed(new DiscordEmbedBuilder().WithDescription($"Выбран канал <#{channelId}>\nВведите id сообщения")));
-
-				var messageStrId = (await _session.GetSessionMessage()).Content;
-
-				if (!ulong.TryParse(messageStrId, out var messageId))
-					return new(ShowOptions);
-
-				var chnl = await _session.Client.Client.GetChannelAsync(channelId);
-				var msg = await chnl.GetMessageAsync(messageId);
-
-				_line.SetLine(msg.Embeds?.ElementAtOrDefault(0)?.Description ?? msg.Content);
-
+				_line.SetLine(line.Message);
+				_session.Client.Domain.MsgWallCtr.ImportedMessages.Remove(line);
 				using var db = await _session.DBFactory.CreateMyDbContextAsync();
 				try
 				{

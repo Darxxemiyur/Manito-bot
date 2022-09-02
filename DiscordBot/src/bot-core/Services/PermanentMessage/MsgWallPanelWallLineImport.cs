@@ -93,7 +93,7 @@ namespace Manito.Discord.PermanentMessage
 				return new(ShowOptions);
 			}
 		}
-		private class Descriptor : IItemDescriptor<ImportedMessage>
+		public class Descriptor : IItemDescriptor<ImportedMessage>
 		{
 			private readonly ImportedMessage _wallLine;
 			public Descriptor(ImportedMessage wallLine) => _wallLine = wallLine;
