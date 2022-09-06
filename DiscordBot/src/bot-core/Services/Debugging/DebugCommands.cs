@@ -85,13 +85,18 @@ namespace Manito.Discord.Economy
 		}
 		private async Task ResetDatabase(DiscordInteraction args)
 		{
+			await args.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
 			using var fdb = await _bot.DbFactory.CreateMyDbContextAsync();
-			var db = fdb.ImplementedContext;
+			var db = fdb.ImplementedContext.Database;
 
-			await db.Database.EnsureDeletedAsync();
-			await db.Database.EnsureCreatedAsync();
+			await db.EnsureDeletedAsync();
+			await db.EnsureCreatedAsync();
+		}
 
-			await args.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+		private async Task CopyStructure()
+		{
+
 		}
 
 		/// <summary>

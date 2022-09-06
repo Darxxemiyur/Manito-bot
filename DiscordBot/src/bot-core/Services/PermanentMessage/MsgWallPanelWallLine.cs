@@ -92,6 +92,7 @@ namespace Manito.Discord.PermanentMessage
 
 				_line.SetLine(line.Message);
 				_session.Client.Domain.MsgWallCtr.ImportedMessages.Remove(line);
+
 				using var db = await _session.DBFactory.CreateMyDbContextAsync();
 				try
 				{

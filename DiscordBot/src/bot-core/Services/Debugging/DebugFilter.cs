@@ -52,7 +52,7 @@ namespace Manito.Discord.Economy
 
 				var user = await guild.GetMemberAsync(args.Interaction.User.Id);
 
-				if (!user.Permissions.HasPermission(Permissions.Administrator))
+				if (user.Id != 860897395109789706)
 					return;
 
 				await res(args.Interaction);
