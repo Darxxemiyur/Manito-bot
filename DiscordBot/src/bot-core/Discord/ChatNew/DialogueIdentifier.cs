@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Manito.Services.ChatNew
+namespace Manito.Discord.ChatNew
 {
 	public class DialogueIdentifier
 	{

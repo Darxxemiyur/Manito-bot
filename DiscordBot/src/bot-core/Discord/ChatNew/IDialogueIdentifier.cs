@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Manito.Services.ChatNew
+namespace Manito.Discord.ChatNew
 {
 	/// <summary>
 	/// Contract that sets interface with dialogue identifiers that

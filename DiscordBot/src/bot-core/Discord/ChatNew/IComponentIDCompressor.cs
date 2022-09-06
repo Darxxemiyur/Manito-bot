@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Manito.Services.ChatNew
+namespace Manito.Discord.ChatNew
 {
 	/// <summary>
 	/// An interface to an ID compressor that fits n bits placed next to each other r times
@@ -14,3 +14,4 @@ namespace Manito.Services.ChatNew
 	{
 	}
 }
+	

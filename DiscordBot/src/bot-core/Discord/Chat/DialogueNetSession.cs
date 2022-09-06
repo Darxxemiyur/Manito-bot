@@ -158,8 +158,8 @@ namespace Manito.Discord.Chat.DialogueNet
 		public async Task<InteractiveInteraction> GetInteraction(
 		 Func<InteractiveInteraction, bool> checker)
 		{
-			var theEvent = await _client.ActivityTools.WaitForComponentInteraction(x =>
-				 x.User.Id == Args.User.Id && x.Message.ChannelId == _chId
+			var theEvent = await _client.ActivityTools.WaitForComponentInteraction(
+				x => x.User.Id == Args.User.Id && x.Message.ChannelId == _chId
 			&& (IsEphemeral || x.Message.Id == _msId) && checker(new(x)), _cancellation.Token);
 
 			return _iargs = new(theEvent);
