@@ -49,10 +49,7 @@ namespace Manito.Discord.PermanentMessage
 
 				await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
 
-				if (response.CompareButton(remBtn))
-					return new(RemoveLine);
-
-				return new(_ret);
+				return response.CompareButton(remBtn) ? new(RemoveLine) : _ret;
 			}
 			private async Task<NextNetworkInstruction> RemoveLine(NetworkInstructionArgument args)
 			{

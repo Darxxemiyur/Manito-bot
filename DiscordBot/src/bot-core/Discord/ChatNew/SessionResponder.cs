@@ -18,9 +18,13 @@ namespace Manito.Discord.ChatNew
 		} = InteractionResponseType.Pong;
 
 		public InteractiveInteraction Interactive {
-			get;
+			get; private set;
 		}
 
+		public SessionResponder(InteractiveInteraction interaction)
+		{
+
+		}
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			switch (LastType)

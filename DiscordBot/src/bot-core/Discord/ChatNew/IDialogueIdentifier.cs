@@ -1,5 +1,7 @@
 ﻿using DSharpPlus.Entities;
 
+using Manito.Discord.Client;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,6 @@ namespace Manito.Discord.ChatNew
 		/// </summary>
 		/// <param name="interaction">The interaction being checked</param>
 		/// <returns>true if it does, false if it doesn't</returns>
-		bool DoesBelongToSession(DiscordInteraction interaction);
+		bool DoesBelongToUs(InteractiveInteraction interaction);
 	}
 }

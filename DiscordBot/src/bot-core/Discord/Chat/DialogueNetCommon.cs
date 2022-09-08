@@ -13,7 +13,6 @@ namespace Manito.Discord.Chat.DialogueNet
 {
     public static class Common
     {
-
         public static (DiscordButtonComponent, int)[][] Generate(
          int[] nums, int[] muls) => muls.Select(y => nums.Select(x => (new DiscordButtonComponent(
             ButtonStyle.Secondary, $"{(x > 0 ? "add" : "sub")}{Math.Abs(x * y)}r_{Math.Abs(y)}",
