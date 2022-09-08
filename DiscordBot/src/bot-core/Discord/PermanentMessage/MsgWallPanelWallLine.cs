@@ -272,7 +272,7 @@ namespace Manito.Discord.PermanentMessage
 
 					var input = db.MessageWallLines.Where(x => x.MessageWall == _getWall())
 						.OrderBy(x => x.ID).Skip(skip).Take(take);
-					return input.Include(x => x.MessageWall);
+					return input.Include(x => x.MessageWall).ToArray();
 				}
 				public Int32 GetTotalCount()
 				{

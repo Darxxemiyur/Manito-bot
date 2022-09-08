@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Numerics;
 using DSharpPlus.Exceptions;
+using Manito.Discord.PatternSystems.Common;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -26,8 +27,7 @@ namespace Manito.Discord.PermanentMessage
 			public string GetButtonId() => $"Translator{_lid}_{_wallLine.ID}";
 
 			private string GetMyThing(string str) => $"Транслятор {str} ID:<#{_wallLine.ChannelId}>";
-			public string GetButtonName() => GetMyThing(_wallLine.MessageWall?.WallName
-				[..Math.Min(_wallLine.MessageWall?.WallName?.Length ?? 0, 80 - GetMyThing("").Length)]);
+			public string GetButtonName() => GetMyThing(_wallLine.MessageWall?.WallName.DoAtMax(80 - GetMyThing("").Length));
 
 			public MessageWallTranslator GetCarriedItem() => _wallLine;
 
@@ -243,7 +243,7 @@ namespace Manito.Discord.PermanentMessage
 				_translator = (MessageWallTranslator)payload;
 				if (_translator != null)
 				{
-					_wallEditor = new(_session, new(_ret));
+					_wallEditor = new(_session, new(ShowOptions));
 					_wallSelector = new(_session, ChangeWall);
 				}
 				return new(ShowOptions);
@@ -277,15 +277,13 @@ namespace Manito.Discord.PermanentMessage
 				{
 					using var db = _factory.CreateMyDbContext();
 
-					var input = db.MessageWallTranslators
-						.OrderBy(x => x.ID).Skip(skip).Take(take);
-					return input.Include(x => x.MessageWall);
+					var input = db.MessageWallTranslators.OrderBy(x => x.ID).Skip(skip).Take(take);
+					return input.Include(x => x.MessageWall).ToArray();
 				}
 				public int GetTotalCount()
 				{
 					using var db = _factory.CreateMyDbContext();
-					return db.MessageWallTranslators
-						.OrderBy(x => x.ID).Count();
+					return db.MessageWallTranslators.OrderBy(x => x.ID).Count();
 				}
 			}
 			public Selector(MessageWallSession session, Node ret, MessageWall wall)

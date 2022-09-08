@@ -254,13 +254,12 @@ namespace Manito.Discord.PermanentMessage
 				{
 					using var db = _factory.CreateMyDbContext();
 
-					return db.MessageWalls.OrderBy(x => x.ID).Skip(skip).Take(take).ToList();
+					return db.MessageWalls.OrderBy(x => x.ID).Skip(skip).Take(take).ToArray();
 				}
 				public Int32 GetTotalCount()
 				{
 					using var db = _factory.CreateMyDbContext();
-					return db.MessageWalls
-						.OrderBy(x => x.ID).Count();
+					return db.MessageWalls.OrderBy(x => x.ID).Count();
 				}
 			}
 			public Selector(MessageWallSession session, Node ret)
