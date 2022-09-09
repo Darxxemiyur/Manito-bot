@@ -22,9 +22,12 @@ namespace Manito.Discord.ChatNew
 		}
 		public SessionResponder(SessionInformation information)
 		{
-
+			information.OnInteractionUpdate += UpdateInteractiveInteraction;
 		}
-
+		private void UpdateInteractiveInteraction(object sender, InteractiveInteraction interaction)
+		{
+			Interactive = interaction;
+		}
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			switch (LastType)

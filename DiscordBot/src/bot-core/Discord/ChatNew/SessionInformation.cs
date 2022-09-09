@@ -24,13 +24,9 @@ namespace Manito.Discord.ChatNew
 		}
 		public event EventHandler<InteractiveInteraction> OnInteractionUpdate;
 		public void UpdateInteraction(InteractiveInteraction interaction) => OnInteractionUpdate?.Invoke(this, Interaction = interaction);
-		public SessionInformation(IDialogueIdentifier identifier) => Identifier = identifier;
 		public MyDiscordClient Client {
 			get; private set;
 		}
-		public SessionInformation(MyDiscordClient client)
-		{
-			Client = client;
-		}
+		public SessionInformation(MyDiscordClient client) => Client = client;
 	}
 }

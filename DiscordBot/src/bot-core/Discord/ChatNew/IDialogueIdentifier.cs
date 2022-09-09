@@ -22,5 +22,12 @@ namespace Manito.Discord.ChatNew
 		/// <param name="interaction">The interaction being checked</param>
 		/// <returns>true if it does, false if it doesn't</returns>
 		bool DoesBelongToUs(InteractiveInteraction interaction);
+		/// <summary>
+		/// Describes how much it wants the interaction;
+		/// </summary>
+		/// <param name="interaction">The interaction to be checked</param>
+		/// <returns>Want value</returns>
+		int HowBadWants(InteractiveInteraction interaction);
+		int HowBadIfWants(InteractiveInteraction interaction) => DoesBelongToUs(interaction) ? HowBadWants(interaction) : -1;
 	}
 }
