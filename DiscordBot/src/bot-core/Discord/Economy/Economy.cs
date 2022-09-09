@@ -23,7 +23,6 @@ namespace Manito.Discord.Economy
             _economy = economy;
             _userId = userId;
         }
-
         public PlayerEconomyDeposit GetDeposit() => _economy.GetDeposit(_userId);
         public Task<long> TransferFunds(ulong to, long amount, string msg = null) =>
          _economy.TransferFunds(_userId, to, amount, msg);
