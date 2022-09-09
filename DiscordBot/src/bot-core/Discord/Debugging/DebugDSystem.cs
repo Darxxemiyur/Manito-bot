@@ -10,7 +10,7 @@ namespace Manito.Discord.Debugging
 {
 	public class DebugDSystem
 	{
-		public DialogueSession Session {
+		public DialogueSession<Object> Session {
 			get; private set;
 		}
 

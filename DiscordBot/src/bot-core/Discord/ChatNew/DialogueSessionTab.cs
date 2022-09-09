@@ -27,14 +27,14 @@ namespace Manito.Discord.ChatNew
 		{
 			_sync = new(1, 1);
 			_sessions = new();
-			this.Client = client;
+			Client = client;
 		}
 
 		public async Task<DialogueSession<T>> Create(InteractiveInteraction interactive, T context)
 		{
 			await _sync.WaitAsync();
 
-			_sessions.All(x => x.Information.Identifier.DoesBelongToUs(interactive));
+			//_sessions.All(x => !x.Information.Identifier.DoesBelongToUs(interactive));
 			var session = new DialogueSession<T>(this, interactive, context);
 			_sessions.Add(session);
 

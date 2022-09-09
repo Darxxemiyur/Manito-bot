@@ -15,67 +15,77 @@ namespace Manito.Discord.ChatNew
 	{
 		public InteractionResponseType LastType {
 			get; private set;
-		} = InteractionResponseType.Pong;
+		}
 
 		public InteractiveInteraction Interactive {
 			get; private set;
 		}
-		public SessionResponder(SessionInformation information)
+		private SessionInformation Information {
+			get; set;
+		}
+		public SessionResponder(SessionInformation information, InteractiveInteraction interaction)
 		{
 			information.OnInteractionUpdate += UpdateInteractiveInteraction;
+			Information = information;
+			Interactive = interaction;
+			LastType = InteractionResponseType.ChannelMessageWithSource;
 		}
 		private void UpdateInteractiveInteraction(object sender, InteractiveInteraction interaction)
 		{
 			Interactive = interaction;
+			LastType = InteractionResponseType.UpdateMessage;
 		}
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			switch (LastType)
 			{
-				case InteractionResponseType.Pong:
-					LastType = InteractionResponseType.ChannelMessageWithSource;
-					await Interactive.Interaction.CreateResponseAsync(LastType, message);
-					break;
 				case InteractionResponseType.ChannelMessageWithSource:
-					LastType = InteractionResponseType.UpdateMessage;
-					await Interactive.Interaction.CreateResponseAsync(LastType, message);
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
+					await UpdateIdentifier();
+					LastType = InteractionResponseType.Pong;
 					break;
 				case InteractionResponseType.UpdateMessage:
-					await Interactive.Interaction.CreateResponseAsync(LastType, message);
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, message);
+					LastType = InteractionResponseType.Pong;
 					break;
-				case InteractionResponseType.DeferredChannelMessageWithSource:
-				case InteractionResponseType.DeferredMessageUpdate:
+				case InteractionResponseType.Pong:
 					await Interactive.Interaction.EditOriginalResponseAsync(message);
-					break;
-				default:
-					LastType = LastType;
 					break;
 			}
 
 		}
+		private async Task UpdateIdentifier()
+		{
+			var msg = await Interactive.Interaction.GetOriginalResponseAsync();
+			Information.UpdateId(new DialogueMessageIdentifier(new(Interactive.Interaction, msg)));
+		}
 		private async Task CancelClickability()
 		{
-			//var msg = Interactive.Message
+			var builder = new UniversalMessageBuilder(Interactive.Message);
 
-			//await SendMessage();
-			LastType = InteractionResponseType.DeferredMessageUpdate;
+			var components = builder.Components.Select(x => x.Where(x => x is DiscordButtonComponent)
+			.Select(x => ((DiscordButtonComponent)x).Disable()).ToArray()).ToArray();
+
+			builder.SetComponents(components);
+
+			await SendMessage(builder);
+			LastType = InteractionResponseType.Pong;
 		}
 		private async Task RespondToAnInteraction()
 		{
 			switch (LastType)
 			{
-				case InteractionResponseType.Pong:
-					LastType = InteractionResponseType.DeferredChannelMessageWithSource;
+				case InteractionResponseType.ChannelMessageWithSource:
+					await Interactive.Interaction
+						.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+					LastType = InteractionResponseType.Pong;
+					await UpdateIdentifier();
 					break;
-				case InteractionResponseType.DeferredChannelMessageWithSource:
-				case InteractionResponseType.DeferredMessageUpdate:
-					return;
-				default:
-					LastType = InteractionResponseType.DeferredMessageUpdate;
+				case InteractionResponseType.UpdateMessage:
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+					LastType = InteractionResponseType.Pong;
 					break;
 			}
-
-			await Interactive.Interaction.CreateResponseAsync(LastType);
 		}
 		public async Task DoLaterReply()
 		{

@@ -49,9 +49,9 @@ namespace Manito.Discord.ChatNew
 		{
 			Tab = tab;
 			Context = context;
-			Information = new(start);
+			Information = new(tab.Client);
 			Puller = new InteractionPuller(Information);
-			Responder = new SessionResponder(Information);
+			Responder = new SessionResponder(Information, start);
 		}
 	}
 }

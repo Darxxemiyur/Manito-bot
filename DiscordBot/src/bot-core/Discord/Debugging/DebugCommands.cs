@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus.SlashCommands.EventArgs;
 
+using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
 namespace Manito.Discord.Economy
 {
@@ -17,7 +18,8 @@ namespace Manito.Discord.Economy
 	{
 		private const string Locale = "ru";
 		private MyDomain _bot;
-		public DebugCommands(MyDomain dom) => _bot = dom;
+		private DialogueSessionTab<Object> _sessions;
+		public DebugCommands(MyDomain dom) => (_sessions, _bot) = (new(dom.MyDiscordClient), dom);
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -32,12 +34,6 @@ namespace Manito.Discord.Economy
 				}
 			}
 			return null;
-			/*
-            return GetCommands().Where(x => command.Data.Name.Contains(x.Name))
-            .SelectMany(x => GetSubCommands()).Distinct()
-            .FirstOrDefault(x => command.Data.Options.First().Name.Contains(x.Item1.Name))
-            .Item2;
-            */
 		}
 		private Dictionary<string, string> GetLoc(string trans) => new Dictionary<string, string>() { { Locale, trans } };
 
@@ -74,6 +70,36 @@ namespace Manito.Discord.Economy
 			 name_localizations: GetLoc("проверить_пс"),
 			 description_localizations: GetLoc("Проверить приветственное сообщение")),
 			 CheckMessage);
+			yield return (new DiscordApplicationCommandOption("check_ds", "Check dialogue system",
+			 ApplicationCommandOptionType.SubCommand, null, null, null,
+			 name_localizations: GetLoc("проверить_дс"),
+			 description_localizations: GetLoc("Проверить диалоговую систему")),
+			 CheckDialogue);
+		}
+		private async Task CheckDialogue(DiscordInteraction args)
+		{
+			var session = await _sessions.Create(new(args), "Cock");
+
+			try
+			{
+				var comp = new DiscordButtonComponent(ButtonStyle.Success, "custem", "К");
+				for (int i = 0; i < 20; i++)
+				{
+					await session.Responder.SendMessage(new DiscordMessageBuilder().WithContent($"{i}"));
+					await Task.Delay(2000);
+					await session.Responder.SendMessage(new DiscordMessageBuilder().AddComponents(comp).WithContent($"{i}+"));
+					var intr = await session.Puller.GetComponentInteraction();
+					if (intr.CompareButton(comp))
+						await session.Responder.DoLaterReply();
+					await Task.Delay(500);
+					await session.Responder.SendMessage(new DiscordMessageBuilder().WithContent("ffff"));
+					await Task.Delay(500);
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine($"{e}");
+			}
 		}
 		private async Task CheckMessage(DiscordInteraction args)
 		{

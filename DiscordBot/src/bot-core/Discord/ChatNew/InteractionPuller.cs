@@ -30,6 +30,7 @@ namespace Manito.Discord.ChatNew
 		{
 			information.OnIdentifierUpdate += UpdateIdentifier;
 			Client = information.Client;
+			Information = information;
 		}
 		private void UpdateIdentifier(object sender, IDialogueIdentifier id) => Identifier = id;
 

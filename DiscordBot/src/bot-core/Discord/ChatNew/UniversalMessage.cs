@@ -16,53 +16,53 @@ namespace Manito.Discord.ChatNew
 	public class UniversalMessageBuilder
 	{
 		private List<List<DiscordComponent>> _components;
+		public IReadOnlyList<IReadOnlyList<DiscordComponent>> Components => _components;
 		private List<DiscordEmbedBuilder> _embeds;
+		public IReadOnlyList<DiscordEmbedBuilder> Embeds => _embeds;
 		private Dictionary<string, Stream> _files;
+		public IReadOnlyDictionary<string, Stream> Files => _files;
 		private List<IMention> _mentions;
+		public IReadOnlyList<IMention> Mentions => _mentions;
 		private string _content;
+		public string Content => _content;
 		public UniversalMessageBuilder(DiscordMessage msg)
 		{
-			_components = msg.Components.Select(x => x.Components.ToList()).ToList();
-			_embeds = msg.Embeds.Select(x => new DiscordEmbedBuilder(x)).ToList();
-			_mentions = new();
+			_components = msg.Components?.Select(x => x.Components.ToList())?.ToList();
+			_embeds = msg.Embeds?.Select(x => new DiscordEmbedBuilder(x))?.ToList();
+			_mentions = null;
 			_content = msg.Content;
 		}
 		public UniversalMessageBuilder(params UniversalMessageBuilder[] um)
 		{
-
-			_embeds = um.SelectMany(x => x._embeds).ToList();
-
-			_components = um.SelectMany(x => x._components).ToList();
-
-			_files = um.SelectMany(x => x._files).ToDictionary(x => x.Key, x => x.Value);
-
-			_mentions = um.SelectMany(x => x._mentions).ToList();
-
-			_content = string.Concat(um.Select(x => x._content));
+			_embeds = um?.Where(x => x._embeds != null).SelectMany(x => x._embeds)?.ToList();
+			_components = um?.Where(x => x._components != null).SelectMany(x => x._components)?.ToList();
+			_files = um?.SelectMany(x => x._files)?.ToDictionary(x => x.Key, x => x.Value);
+			_mentions = um?.Where(x => x._mentions != null).SelectMany(x => x._mentions)?.ToList();
+			_content = string.Concat(um?.Select(x => x._content)?.Where(x => x != null));
 		}
 		public UniversalMessageBuilder(DiscordWebhookBuilder builder)
 		{
-			_components = builder.Components.Select(x => x.Components.ToList()).ToList();
-			_embeds = builder.Embeds.Select(x => new DiscordEmbedBuilder(x)).ToList();
-			_files = builder.Files.ToDictionary(x => x.FileName, x => x.Stream);
-			_mentions = builder.Mentions.ToList();
-			_content = builder.Content;
+			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
+			_embeds = builder?.Embeds?.Select(x => new DiscordEmbedBuilder(x))?.ToList();
+			_files = builder?.Files?.ToDictionary(x => x.FileName, x => x.Stream);
+			_mentions = builder?.Mentions?.ToList();
+			_content = builder?.Content;
 		}
 		public UniversalMessageBuilder(DiscordMessageBuilder builder)
 		{
-			_components = builder.Components.Select(x => x.Components.ToList()).ToList();
-			_embeds = builder.Embeds.Select(x => new DiscordEmbedBuilder(x)).ToList();
-			_files = builder.Files.ToDictionary(x => x.FileName, x => x.Stream);
-			_mentions = builder.Mentions.ToList();
-			_content = builder.Content;
+			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
+			_embeds = builder?.Embeds?.Select(x => new DiscordEmbedBuilder(x))?.ToList();
+			_files = builder?.Files?.ToDictionary(x => x.FileName, x => x.Stream);
+			_mentions = builder?.Mentions?.ToList();
+			_content = builder?.Content;
 		}
 		public UniversalMessageBuilder(DiscordInteractionResponseBuilder builder)
 		{
-			_components = builder.Components.Select(x => x.Components.ToList()).ToList();
-			_embeds = builder.Embeds.Select(x => new DiscordEmbedBuilder(x)).ToList();
-			_files = builder.Files.ToDictionary(x => x.FileName, x => x.Stream);
-			_mentions = builder.Mentions.ToList();
-			_content = builder.Content;
+			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
+			_embeds = builder?.Embeds?.Select(x => new DiscordEmbedBuilder(x)).ToList();
+			_files = builder?.Files?.ToDictionary(x => x.FileName, x => x.Stream);
+			_mentions = builder?.Mentions?.ToList();
+			_content = builder?.Content;
 		}
 		public UniversalMessageBuilder() => ResetBuilder();
 		public UniversalMessageBuilder SetContent(string content)
@@ -83,6 +83,11 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+		public UniversalMessageBuilder SetComponents(params DiscordComponent[][] components)
+		{
+			_components = components.Select(x => x.ToList()).ToList();
+			return this;
+		}
 		public UniversalMessageBuilder AddEmbed(DiscordEmbedBuilder embed)
 		{
 			_embeds.Add(embed);
@@ -95,13 +100,25 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+		public UniversalMessageBuilder SetEmbeds(params DiscordEmbedBuilder[] components)
+		{
+			_embeds = components.ToList();
+
+			return this;
+		}
 		public UniversalMessageBuilder SetFile(string name, Stream file)
 		{
 			_files[name] = file;
 
 			return this;
 		}
-		public UniversalMessageBuilder AddEmbeds(Dictionary<string, Stream> files)
+		public UniversalMessageBuilder OverrideFiles(Dictionary<string, Stream> files)
+		{
+			_files = files;
+
+			return this;
+		}
+		public UniversalMessageBuilder SetFiles(Dictionary<string, Stream> files)
 		{
 			foreach (var file in files)
 				_files[file.Key] = file.Value;
@@ -130,42 +147,75 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+		public static implicit operator UniversalMessageBuilder(DiscordWebhookBuilder msg) => new(msg);
+		public static implicit operator UniversalMessageBuilder(DiscordMessageBuilder msg) => new(msg);
+		public static implicit operator UniversalMessageBuilder(DiscordInteractionResponseBuilder msg) => new(msg);
 		public static implicit operator DiscordWebhookBuilder(UniversalMessageBuilder msg)
 		{
 			var wbh = new DiscordWebhookBuilder();
-			foreach (var row in msg._components)
-				wbh.AddComponents(row);
 
-			wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
-			wbh.WithContent(msg._content);
-			wbh.AddFiles(msg._files);
-			wbh.AddMentions(msg._mentions);
+			if (msg._components != null)
+				foreach (var row in msg._components)
+					wbh.AddComponents(row);
+
+
+			if (msg._embeds != null)
+				wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
+
+			if (msg._content != null)
+				wbh.WithContent(msg._content);
+
+			if (msg._files != null)
+				wbh.AddFiles(msg._files);
+
+			if (msg._mentions != null)
+				wbh.AddMentions(msg._mentions);
 
 			return wbh;
 		}
 		public static implicit operator DiscordMessageBuilder(UniversalMessageBuilder msg)
 		{
 			var wbh = new DiscordMessageBuilder();
-			foreach (var row in msg._components)
-				wbh.AddComponents(row);
 
-			wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
-			wbh.WithContent(msg._content);
-			wbh.WithFiles(msg._files);
-			wbh.WithAllowedMentions(msg._mentions);
+			if (msg._components != null)
+				foreach (var row in msg._components)
+					wbh.AddComponents(row);
+
+
+			if (msg._embeds != null)
+				wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
+
+			if (msg._embeds != null)
+				wbh.WithContent(msg._content);
+
+			if (msg._embeds != null)
+				wbh.WithFiles(msg._files);
+
+			if (msg._embeds != null)
+				wbh.WithAllowedMentions(msg._mentions);
 
 			return wbh;
 		}
 		public static implicit operator DiscordInteractionResponseBuilder(UniversalMessageBuilder msg)
 		{
 			var dirb = new DiscordInteractionResponseBuilder();
-			foreach (var row in msg._components)
-				dirb.AddComponents(row);
 
-			dirb.AddEmbeds(msg._embeds.Select(x => x.Build()));
-			dirb.WithContent(msg._content);
-			dirb.AddFiles(msg._files);
-			dirb.AddMentions(msg._mentions);
+			if (msg._components != null)
+				foreach (var row in msg._components)
+					dirb.AddComponents(row);
+
+
+			if (msg._embeds != null)
+				dirb.AddEmbeds(msg._embeds.Select(x => x.Build()));
+
+			if (msg._content != null)
+				dirb.WithContent(msg._content);
+
+			if (msg._files != null)
+				dirb.AddFiles(msg._files);
+
+			if (msg._mentions != null)
+				dirb.AddMentions(msg._mentions);
 
 			return dirb;
 		}

@@ -41,6 +41,11 @@ namespace Manito.Discord.Client
 			Interaction = interaction.Interaction;
 			Message = interaction.Message;
 		}
+		public InteractiveInteraction(DiscordInteraction interaction, DiscordMessage message)
+		{
+			Interaction = interaction;
+			Message = message;
+		}
 		public bool CompareButton(string name) => ButtonId == name && (Components == null
 			|| Components.First(x => x.CustomId == ButtonId) is DiscordButtonComponent btn && !btn.Disabled);
 		public bool CompareButton(DiscordButtonComponent btn) => CompareButton(btn.CustomId);
