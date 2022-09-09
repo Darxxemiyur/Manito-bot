@@ -43,7 +43,7 @@ namespace Manito.Discord.ChatNew
 		/// <summary>
 		/// Used to inform subscribers about session status change.
 		/// </summary>
-		public event Func<DialogueSession<T>, Task> OnStatusChange;
+		public event Func<DialogueSession<T>, string, Task> OnStatusChange;
 		public event Func<DialogueSession<T>, string, Task> OnSessionEnd;
 		public DialogueSession(DialogueSessionTab<T> tab, InteractiveInteraction start, T context)
 		{
