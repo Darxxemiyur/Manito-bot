@@ -23,10 +23,7 @@ namespace Manito.Discord.ChatNew
 		public IDialogueIdentifier Identifier {
 			get; private set;
 		}
-		public InteractionPuller(MyDiscordClient client)
-		{
-			Client = client;
-		}
+		public InteractionPuller(MyDiscordClient client) => Client = client;
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
@@ -42,6 +39,11 @@ namespace Manito.Discord.ChatNew
 
 			return intr;
 		}
+		/// <summary>
+		/// Get any interaction, andd remove hooks if one arrived faster than the rest.
+		/// </summary>
+		/// <param name="types"></param>
+		/// <returns></returns>
 		public async Task<GeneralInteraction> GetInteraction(InteractionTypes types)
 		{
 			CancellationTokenSource cancellation = new();
@@ -61,7 +63,6 @@ namespace Manito.Discord.ChatNew
 			cancellation.Cancel();
 
 			var couple = tasks.First(x => x.Item2 == first);
-
 
 
 			return new GeneralInteraction(couple.Item1,

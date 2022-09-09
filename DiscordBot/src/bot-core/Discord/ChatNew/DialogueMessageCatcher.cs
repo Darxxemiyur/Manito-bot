@@ -12,10 +12,11 @@ namespace Manito.Discord.ChatNew
 	{
 		public override Task<Boolean> AreWeDone()
 		{
-
+			throw new NotImplementedException();
 		}
 		public override Task<Boolean> DoWeCatchIt(DiscordMessage ev)
 		{
+			throw new NotImplementedException();
 		}
 	}
 }
