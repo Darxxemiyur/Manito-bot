@@ -10,7 +10,6 @@ namespace Manito.Discord.ChatNew
 {
 	public class DialogueSession<T>
 	{
-		public IDialogueIdentifier Identifier => Puller.Identifier;
 		/// <summary>
 		/// Responder that is used to generalize responding.
 		/// </summary>
@@ -21,6 +20,12 @@ namespace Manito.Discord.ChatNew
 		/// Puller of events for this Session
 		/// </summary>
 		public InteractionPuller Puller {
+			get; private set;
+		}
+		/// <summary>
+		/// Session information.
+		/// </summary>
+		public SessionInformation Information {
 			get; private set;
 		}
 		/// <summary>
@@ -44,8 +49,9 @@ namespace Manito.Discord.ChatNew
 		{
 			Tab = tab;
 			Context = context;
-			Puller = new InteractionPuller();
-			Responder = new SessionResponder(start);
+			Information = new(start);
+			Puller = new InteractionPuller(Information);
+			Responder = new SessionResponder(Information);
 		}
 	}
 }

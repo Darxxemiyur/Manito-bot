@@ -23,7 +23,15 @@ namespace Manito.Discord.ChatNew
 		public IDialogueIdentifier Identifier {
 			get; private set;
 		}
-		public InteractionPuller(MyDiscordClient client) => Client = client;
+		public SessionInformation Information {
+			get; private set;
+		}
+		public InteractionPuller(SessionInformation information)
+		{
+			information.OnIdentifierUpdate += UpdateIdentifier;
+			Client = information.Client;
+		}
+		private void UpdateIdentifier(object sender, IDialogueIdentifier id) => Identifier = id;
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
@@ -35,7 +43,10 @@ namespace Manito.Discord.ChatNew
 		}
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{
-			var intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
+			InteractiveInteraction intr = await Client.ActivityTools
+				.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
+
+			Information.UpdateInteraction(intr);
 
 			return intr;
 		}

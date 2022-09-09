@@ -20,11 +20,11 @@ namespace Manito.Discord.ChatNew
 		public InteractiveInteraction Interactive {
 			get; private set;
 		}
-
-		public SessionResponder(InteractiveInteraction interaction)
+		public SessionResponder(SessionInformation information)
 		{
 
 		}
+
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			switch (LastType)
