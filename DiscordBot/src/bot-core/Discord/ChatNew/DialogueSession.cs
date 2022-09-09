@@ -50,8 +50,8 @@ namespace Manito.Discord.ChatNew
 			Tab = tab;
 			Context = context;
 			Information = new(tab.Client);
-			Puller = new InteractionPuller(Information);
 			Responder = new SessionResponder(Information, start);
+			Puller = new InteractionPuller(Information);
 		}
 	}
 }

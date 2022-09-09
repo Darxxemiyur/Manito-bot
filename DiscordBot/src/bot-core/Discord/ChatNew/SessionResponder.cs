@@ -13,10 +13,9 @@ namespace Manito.Discord.ChatNew
 {
 	public class SessionResponder
 	{
-		public InteractionResponseType LastType {
+		public InteractionResponseType NextType {
 			get; private set;
 		}
-
 		public InteractiveInteraction Interactive {
 			get; private set;
 		}
@@ -28,25 +27,25 @@ namespace Manito.Discord.ChatNew
 			information.OnInteractionUpdate += UpdateInteractiveInteraction;
 			Information = information;
 			Interactive = interaction;
-			LastType = InteractionResponseType.ChannelMessageWithSource;
+			NextType = InteractionResponseType.ChannelMessageWithSource;
 		}
 		private void UpdateInteractiveInteraction(object sender, InteractiveInteraction interaction)
 		{
 			Interactive = interaction;
-			LastType = InteractionResponseType.UpdateMessage;
+			NextType = InteractionResponseType.UpdateMessage;
 		}
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
-			switch (LastType)
+			switch (NextType)
 			{
 				case InteractionResponseType.ChannelMessageWithSource:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
 					await UpdateIdentifier();
-					LastType = InteractionResponseType.Pong;
+					NextType = InteractionResponseType.Pong;
 					break;
 				case InteractionResponseType.UpdateMessage:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, message);
-					LastType = InteractionResponseType.Pong;
+					NextType = InteractionResponseType.Pong;
 					break;
 				case InteractionResponseType.Pong:
 					await Interactive.Interaction.EditOriginalResponseAsync(message);
@@ -69,21 +68,21 @@ namespace Manito.Discord.ChatNew
 			builder.SetComponents(components);
 
 			await SendMessage(builder);
-			LastType = InteractionResponseType.Pong;
+			NextType = InteractionResponseType.Pong;
 		}
 		private async Task RespondToAnInteraction()
 		{
-			switch (LastType)
+			switch (NextType)
 			{
 				case InteractionResponseType.ChannelMessageWithSource:
 					await Interactive.Interaction
 						.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-					LastType = InteractionResponseType.Pong;
+					NextType = InteractionResponseType.Pong;
 					await UpdateIdentifier();
 					break;
 				case InteractionResponseType.UpdateMessage:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-					LastType = InteractionResponseType.Pong;
+					NextType = InteractionResponseType.Pong;
 					break;
 			}
 		}

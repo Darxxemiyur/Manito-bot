@@ -21,20 +21,20 @@ namespace Manito.Discord.ChatNew
 		}
 		// Keeps list of created sessions.
 		private List<DialogueSession<T>> _sessions;
+		private IReadOnlyList<DialogueSession<T>> Sessions => _sessions;
 		// Used to sync creation and deletion of sessions
 		private SemaphoreSlim _sync;
+		public SemaphoreSlim Sync => _sync;
 		public DialogueSessionTab(MyDiscordClient client)
 		{
 			_sync = new(1, 1);
 			_sessions = new();
 			Client = client;
 		}
-
 		public async Task<DialogueSession<T>> Create(InteractiveInteraction interactive, T context)
 		{
 			await _sync.WaitAsync();
 
-			//_sessions.All(x => !x.Information.Identifier.DoesBelongToUs(interactive));
 			var session = new DialogueSession<T>(this, interactive, context);
 			_sessions.Add(session);
 
