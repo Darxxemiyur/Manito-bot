@@ -13,6 +13,7 @@ using DSharpPlus;
 using DSharpPlus.Exceptions;
 using Cyriller;
 using System.Collections.Immutable;
+using Manito.Discord.PatternSystems.Common;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -28,6 +29,7 @@ namespace Manito.Discord.PermanentMessage
 		public ulong ChannelId {
 			get; set;
 		}
+		public const int MaxCharsPerLine = 2000;
 		private static string Rp => ":YYvYYgYYvYY:";
 		public string CTranslation {
 			get => string.Join(Rp, Translation ?? new List<ulong>());
@@ -75,8 +77,7 @@ namespace Manito.Discord.PermanentMessage
 			for (var i = 0; i < length; i++)
 			{
 				var slv = oldDict.ElementAtOrDefault(i);
-				var tgt = mwDict.ElementAtOrDefault(i).WallLine;
-				tgt = tgt[..Math.Min(2000, tgt.Length)];
+				var tgt = mwDict.ElementAtOrDefault(i)?.WallLine?.DoAtMax(MaxCharsPerLine) ?? "";
 
 				DiscordMessage msg = null;
 				string content = null;
