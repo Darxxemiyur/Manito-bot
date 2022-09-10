@@ -45,6 +45,14 @@ namespace Manito.Discord.ChatNew
 		/// </summary>
 		public event Func<DialogueSession<T>, string, Task> OnStatusChange;
 		public event Func<DialogueSession<T>, string, Task> OnSessionEnd;
+		public event Func<DialogueSession<T>, Task<bool>> OnRemove;
+		public async Task EndSession()
+		{
+			if (OnSessionEnd != null)
+				await OnSessionEnd(this, "Ended");
+			if (OnRemove != null)
+				await OnRemove(this);
+		}
 		public DialogueSession(DialogueSessionTab<T> tab, InteractiveInteraction start, T context)
 		{
 			Tab = tab;

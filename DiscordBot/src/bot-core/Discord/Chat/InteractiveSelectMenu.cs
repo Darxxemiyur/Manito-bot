@@ -12,6 +12,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 
 using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.ChatNew;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +26,8 @@ namespace Manito.Discord.Client
 	/// </summary>
 	public class InteractiveSelectMenu<TItem> : IDialogueNet
 	{
-		private DialogueNetSession _session;
+		private InteractionPuller _puller;
+		private SessionResponder _responder;
 		private const int max = 25;
 		private const int rows = 5;
 		private int Page {
@@ -45,10 +47,10 @@ namespace Manito.Discord.Client
 		private string _othPrefix;
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 		private IPageReturner<TItem> _paginater;
-		public InteractiveSelectMenu(DialogueNetSession session,
-		 IPageReturner<TItem> paginater)
+		public InteractiveSelectMenu(InteractionPuller puller, SessionResponder responder, IPageReturner<TItem> paginater)
 		{
-			_session = session;
+			_responder = responder;
+			_puller = puller;
 			_paginater = paginater;
 			_navPrefix = "nav";
 			_itmPrefix = "item";
@@ -126,7 +128,7 @@ namespace Manito.Discord.Client
 			foreach (var btnsr in btns.Concat(_btnDef).Chunk(rows))
 				_msg.AddComponents(btnsr);
 
-			await _session.Args.EditOriginalResponseAsync(_msg.AddEmbed(emb));
+			await _responder.SendMessage(_msg.AddEmbed(emb));
 
 			return new(WaitForResponse, itms);
 		}
@@ -134,7 +136,8 @@ namespace Manito.Discord.Client
 		{
 			var inv = (IEnumerable<IItemDescriptor<TItem>>)args.Payload;
 
-			var resp = await _session.GetInteraction(_msg.Components);
+			//var resp = await _puller.GetComponentInteraction(_msg.Components);
+			var resp = await _puller.GetComponentInteraction();
 
 
 			if (resp.ButtonId.StartsWith(_itmPrefix))
@@ -150,7 +153,7 @@ namespace Manito.Discord.Client
 		{
 			var resp = ((InteractiveInteraction, IEnumerable<IItemDescriptor<TItem>>))args.Payload;
 
-			await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+			await _responder.DoLaterReply();
 
 			var item = resp.Item2.FirstOrDefault(x => resp
 				.Item1.ButtonId.Contains($"_{x.GetButtonId()}"));
@@ -164,7 +167,7 @@ namespace Manito.Discord.Client
 			if (resp.CompareButton(_exBtn))
 				return new();
 
-			await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+			await _responder.DoLaterReply();
 
 			if (resp.CompareButton(_firstList))
 				Page = 0;

@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Manito.Discord.PatternSystems.Common;
 using Cyriller;
+using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -19,19 +20,20 @@ namespace Manito.Discord.PermanentMessage
 	{
 		public class Editor : INodeNetwork
 		{
-			private MessageWallSession _session;
+			private DialogueSession<MsgContext> _session;
 			private MessageWallLine _line;
 			private MsgWallPanelWall.Selector _wallSelector;
 			private MsgWallPanelWall.Editor _wallEditor;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(MessageWallSession session, NextNetworkInstruction ret)
+			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
 			}
 			private async Task<NextNetworkInstruction> ShowOptions(NetworkInstructionArgument args)
 			{
+				throw new NotImplementedException();
 				var editContentBtn = new DiscordButtonComponent(ButtonStyle.Primary,
 				 "editc", "Редактировать содержимое");
 				var changeWallBtn = new DiscordButtonComponent(ButtonStyle.Primary, "editw", "Привязать к стене");
@@ -49,14 +51,14 @@ namespace Manito.Discord.PermanentMessage
 
 				emb.AddField("Что сделать?", "** **");
 
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(editContentBtn, changeWallBtn)
 					.AddComponents(importBtn, openWallBtn)
 					.AddComponents(remBtn, exitBtn));
 
-				var response = await _session.GetInteraction();
+				var response = await _session.Puller.GetComponentInteraction();
 
-				await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+				await _session.Responder.DoLaterReply();
 
 				if (response.CompareButton(remBtn))
 					return new(RemoveLine);
@@ -77,23 +79,23 @@ namespace Manito.Discord.PermanentMessage
 			}
 			private async Task<NextNetworkInstruction> ImportMessage(NetworkInstructionArgument arg)
 			{
-				var selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
+				var selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session.Puller, _session.Responder,
 					new EnumerablePageReturner<ImportedMessage>(
-					_session.Client.Domain.MsgWallCtr.ImportedMessages,
+					_session.Context.Domain.MsgWallCtr.ImportedMessages,
 					(x) => new MsgWallPanelWallLineImport.Descriptor(x)));
 
 				var line = (await selectMenu.EvaluateItem())?.GetCarriedItem();
 
 				if (line == null)
 				{
-					await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+					await _session.Responder.DoLaterReply();
 					return new(ShowOptions);
 				}
 
 				_line.SetLine(line.Message);
-				_session.Client.Domain.MsgWallCtr.ImportedMessages.Remove(line);
+				_session.Context.Domain.MsgWallCtr.ImportedMessages.Remove(line);
 
-				using var db = await _session.DBFactory.CreateMyDbContextAsync();
+				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
 				try
 				{
 					db.MessageWallLines.Update(_line);
@@ -110,22 +112,21 @@ namespace Manito.Discord.PermanentMessage
 
 				var emb = new DiscordEmbedBuilder();
 				emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ {_line.ID}?**");
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(returnBtn, removeBtn));
 
-				var response = await _session.GetInteraction();
+				var response = await _session.Puller.GetComponentInteraction();
 
 				if (!response.CompareButton(removeBtn))
 				{
-					await _session.Respond(InteractionResponseType.UpdateMessage,
-						new DiscordInteractionResponseBuilder()
+					await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
 						.AddComponents(returnBtn.Disable(), removeBtn.Disable()));
 				}
 
 				if (response.CompareButton(returnBtn))
 					return new(ShowOptions);
 
-				using var db = await _session.DBFactory.CreateMyDbContextAsync();
+				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
 				try
 				{
 					db.MessageWallLines.Remove(_line);
@@ -135,22 +136,22 @@ namespace Manito.Discord.PermanentMessage
 
 				_line = null;
 
-				await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+				await _session.Responder.DoLaterReply();
 
 				return new(_ret);
 			}
 			private async Task<NextNetworkInstruction> EditContent(NetworkInstructionArgument args)
 			{
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 					.WithContent("Напишите содержимое стены сообщением"));
 
-				var message = await _session.GetSessionMessage();
+				var message = await _session.Puller.GetMessageInteraction();
 
 				var msg = message.Content;
 
 				msg = msg.Replace("```ff", "").Trim();
 
-				using var db = await _session.DBFactory.CreateMyDbContextAsync();
+				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
 				_line.SetLine(msg);
 				db.MessageWallLines.Update(_line);
 
@@ -160,7 +161,7 @@ namespace Manito.Discord.PermanentMessage
 				}
 				catch (DbUpdateConcurrencyException)
 				{
-					await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+					await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 						.WithContent("Строка была удалена во время редактирования."));
 				}
 
@@ -172,13 +173,13 @@ namespace Manito.Discord.PermanentMessage
 
 				if (itm == null)
 				{
-					await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+					await _session.Responder.DoLaterReply();
 					return new(ShowOptions);
 				}
 
 				_line.MessageWall = itm;
 
-				using var db = await _session.DBFactory.CreateMyDbContextAsync();
+				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
 				db.MessageWalls.Update(itm);
 				db.MessageWallLines.Update(_line);
 				await db.SaveChangesAsync();
@@ -243,7 +244,7 @@ namespace Manito.Discord.PermanentMessage
 				}
 			}
 
-			private MessageWallSession _session;
+			private DialogueSession<MsgContext> _session;
 			private InteractiveSelectMenu<MessageWallLine> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
@@ -281,17 +282,17 @@ namespace Manito.Discord.PermanentMessage
 						.OrderBy(x => x.ID).Count();
 				}
 			}
-			public Selector(MessageWallSession session, Node ret, MessageWall wall)
+			public Selector(DialogueSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
-				_selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session,
-					new QueryablePageReturner<MessageWallLine>(new MyQuerrier(_session.DBFactory, () => _wall)));
+				_selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session.Puller, _session.Responder,
+					new QueryablePageReturner<MessageWallLine>(new MyQuerrier(_session.Context.Factory, () => _wall)));
 				EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
 				MkNewButton = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
 			}
 			private async Task<NextNetworkInstruction> CreateNew(NetworkInstructionArgument args)
 			{
-				using var db = await _session.DBFactory.CreateMyDbContextAsync();
+				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
 				var line = new MessageWallLine();
 
 				if (_wall != null)
@@ -331,10 +332,10 @@ namespace Manito.Discord.PermanentMessage
 				throw new NotImplementedException();
 			}
 		}
-		private MessageWallSession _session;
+		private DialogueSession<MsgContext> _session;
 		private Editor _editor;
 		private Selector _selector;
-		public MsgWallPanelWallLine(MessageWallSession session)
+		public MsgWallPanelWallLine(DialogueSession<MsgContext> session)
 		{
 			_selector = new(session, Decider, null);
 			_editor = new(session, new(_selector.SelectToEdit));
@@ -344,18 +345,16 @@ namespace Manito.Discord.PermanentMessage
 		{
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
-			await _session.Respond(InteractionResponseType.UpdateMessage,
-				new DiscordInteractionResponseBuilder()
+			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Добро пожаловать в меню управления строками!")
 				.AddComponents(_selector.MkNewButton.Enable(), _selector.EditButton.Enable(), exitBtn));
 
-			var response = await _session.GetInteraction();
+			var response = await _session.Puller.GetComponentInteraction();
 
 			if (response.CompareButton(exitBtn))
 				return new();
 
-			await _session.Respond(InteractionResponseType.UpdateMessage,
-				new DiscordInteractionResponseBuilder()
+			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Добро пожаловать в меню управления строками!")
 				.AddComponents(_selector.MkNewButton.Disable(),
 				 _selector.EditButton.Disable(), exitBtn.Disable()));

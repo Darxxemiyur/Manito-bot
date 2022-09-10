@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -20,11 +21,11 @@ namespace Manito.Discord.PermanentMessage
 	{
 		public class Editor : INodeNetwork
 		{
-			private MessageWallSession _session;
+			private DialogueSession<MsgContext> _session;
 			private ImportedMessage _line;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(MessageWallSession session, NextNetworkInstruction ret)
+			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
@@ -42,12 +43,12 @@ namespace Manito.Discord.PermanentMessage
 
 				emb.AddField("Что сделать?", "** **");
 
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(remBtn, exitBtn));
 
-				var response = await _session.GetInteraction();
+				var response = await _session.Puller.GetComponentInteraction();
 
-				await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+				await _session.Responder.DoLaterReply();
 
 				return response.CompareButton(remBtn) ? new(RemoveLine) : _ret;
 			}
@@ -58,24 +59,23 @@ namespace Manito.Discord.PermanentMessage
 
 				var emb = new DiscordEmbedBuilder();
 				emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ {_line.MessageId}?**");
-				await _session.Args.EditOriginalResponseAsync(new DiscordWebhookBuilder()
+				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(returnBtn, removeBtn));
 
-				var response = await _session.GetInteraction();
+				var response = await _session.Puller.GetComponentInteraction();
 
 				if (!response.CompareButton(removeBtn))
 				{
-					await _session.Respond(InteractionResponseType.UpdateMessage,
-						new DiscordInteractionResponseBuilder()
+					await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
 						.AddComponents(returnBtn.Disable(), removeBtn.Disable()));
 				}
 
 				if (response.CompareButton(returnBtn))
 					return new(ShowOptions);
 
-				_session.Client.Domain.MsgWallCtr.ImportedMessages.Remove(_line);
+				_session.Context.Domain.MsgWallCtr.ImportedMessages.Remove(_line);
 
-				await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+				await _session.Responder.DoLaterReply();
 
 				return new(_ret);
 			}
@@ -124,20 +124,19 @@ namespace Manito.Discord.PermanentMessage
 		}
 		private InteractiveSelectMenu<ImportedMessage> _selectMenu;
 
-		private MessageWallSession _session;
+		private DialogueSession<MsgContext> _session;
 		private Editor _editor;
-		public MsgWallPanelWallLineImport(MessageWallSession session)
+		public MsgWallPanelWallLineImport(DialogueSession<MsgContext> session)
 		{
 			_editor = new(session, new(Choose));
 			_session = session;
-			_selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
+			_selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session.Puller, _session.Responder,
 				new EnumerablePageReturner<ImportedMessage>(
-					_session.Client.Domain.MsgWallCtr.ImportedMessages,
-					(x) => new Descriptor(x)));
+					_session.Context.Domain.MsgWallCtr.ImportedMessages, (x) => new Descriptor(x)));
 		}
 		private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
 		{
-			await _session.Respond(InteractionResponseType.DeferredMessageUpdate);
+			await _session.Responder.DoLaterReply();
 			return new(Choose);
 		}
 		private async Task<NextNetworkInstruction> Choose(NetworkInstructionArgument arg)

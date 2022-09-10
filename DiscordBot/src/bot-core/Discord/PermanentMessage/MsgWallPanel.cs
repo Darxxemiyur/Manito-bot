@@ -11,6 +11,7 @@ using Manito.Discord.Inventory;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using System.Diagnostics;
 using System;
+using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -19,8 +20,8 @@ namespace Manito.Discord.PermanentMessage
 	/// </summary>
 	public class MsgWallPanel : IDialogueNet
 	{
-		private MessageWallSession _session;
-		public MsgWallPanel(MessageWallSession session)
+		private DialogueSession<MsgContext> _session;
+		public MsgWallPanel(DialogueSession<MsgContext> session)
 		{
 			_session = session;
 		}
@@ -38,11 +39,11 @@ namespace Manito.Discord.PermanentMessage
 
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
-			var response = await _session.RespondAndWait(new DiscordInteractionResponseBuilder()
+			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Выберите что хотите изменять")
 				.AddComponents(wallLine, wall, wallTranslator, imported)
 				.AddComponents(exitBtn));
-
+			var response = await _session.Puller.GetComponentInteraction();
 
 			if (response.CompareButton(wallLine))
 			{

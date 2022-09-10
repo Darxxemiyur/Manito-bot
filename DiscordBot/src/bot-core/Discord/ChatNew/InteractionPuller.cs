@@ -36,11 +36,9 @@ namespace Manito.Discord.ChatNew
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
-			throw new NotImplementedException();
+			var msg = await Client.ActivityTools.WaitForMessage(x => Identifier.DoesBelongToUs(x.Message));
 
-			//var msg = await Client.ActivityTools.WaitForMessage(x => Identifier.DoesBelongToUs(x), token);
-
-			//return msg.;
+			return msg.Message;
 		}
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{

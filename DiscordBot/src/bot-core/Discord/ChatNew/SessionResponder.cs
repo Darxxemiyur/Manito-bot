@@ -40,7 +40,6 @@ namespace Manito.Discord.ChatNew
 			{
 				case InteractionResponseType.ChannelMessageWithSource:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
-					await UpdateIdentifier();
 					NextType = InteractionResponseType.Pong;
 					break;
 				case InteractionResponseType.UpdateMessage:
@@ -51,7 +50,7 @@ namespace Manito.Discord.ChatNew
 					await Interactive.Interaction.EditOriginalResponseAsync(message);
 					break;
 			}
-
+			await UpdateIdentifier();
 		}
 		private async Task UpdateIdentifier()
 		{
@@ -63,7 +62,7 @@ namespace Manito.Discord.ChatNew
 			var builder = new UniversalMessageBuilder(Interactive.Message);
 
 			var components = builder.Components.Select(x => x.Where(x => x is DiscordButtonComponent)
-			.Select(x => ((DiscordButtonComponent)x).Disable()).ToArray()).ToArray();
+			.Select(x => new DiscordButtonComponent((DiscordButtonComponent)x).Disable()).ToArray()).ToArray();
 
 			builder.SetComponents(components);
 
@@ -78,13 +77,13 @@ namespace Manito.Discord.ChatNew
 					await Interactive.Interaction
 						.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 					NextType = InteractionResponseType.Pong;
-					await UpdateIdentifier();
 					break;
 				case InteractionResponseType.UpdateMessage:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 					NextType = InteractionResponseType.Pong;
 					break;
 			}
+			await UpdateIdentifier();
 		}
 		public async Task DoLaterReply()
 		{

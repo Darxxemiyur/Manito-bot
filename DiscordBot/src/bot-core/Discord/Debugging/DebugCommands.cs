@@ -18,8 +18,7 @@ namespace Manito.Discord.Economy
 	{
 		private const string Locale = "ru";
 		private MyDomain _bot;
-		private DialogueSessionTab<Object> _sessions;
-		public DebugCommands(MyDomain dom) => (_sessions, _bot) = (new(dom.MyDiscordClient), dom);
+		public DebugCommands(MyDomain dom) => ( _bot) = ( dom);
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -78,28 +77,7 @@ namespace Manito.Discord.Economy
 		}
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
-			var session = await _sessions.Create(new(args), "Cock");
 
-			try
-			{
-				var comp = new DiscordButtonComponent(ButtonStyle.Success, "custem", "К");
-				for (int i = 0; i < 20; i++)
-				{
-					await session.Responder.SendMessage(new DiscordMessageBuilder().WithContent($"{i}"));
-					await Task.Delay(2000);
-					await session.Responder.SendMessage(new DiscordMessageBuilder().AddComponents(comp).WithContent($"{i}+"));
-					var intr = await session.Puller.GetComponentInteraction();
-					if (intr.CompareButton(comp))
-						await session.Responder.DoLaterReply();
-					await Task.Delay(500);
-					await session.Responder.SendMessage(new DiscordMessageBuilder().WithContent("ffff"));
-					await Task.Delay(500);
-				}
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine($"{e}");
-			}
 		}
 		private async Task CheckMessage(DiscordInteraction args)
 		{
