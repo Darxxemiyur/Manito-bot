@@ -14,43 +14,38 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Threading;
 using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.Shop
 {
 
-	public class ShopService : DialogueNetSessionControls<ShopSession>
+	public class ShopService
 	{
 		private MyDomain _service;
 		private MyDiscordClient _client;
-		private IShopDb _myDb;
 		private ShopCashRegister _cashRegister;
-		private List<ShopSession> _shopSessions;
+		private DialogueTabSessionTab<ShopContext> _shopTab;
 		private SemaphoreSlim _lock;
-		public ShopService(MyDomain service) : base(service)
+		public ShopService(MyDomain service)
 		{
-			_myDb = null;
+			_lock = new SemaphoreSlim(1, 1);
 			_service = service;
 			_client = service.MyDiscordClient;
-			_cashRegister = new(_myDb);
-			_lock = new(1, 1);
+			_cashRegister = new(null);
 		}
-		public bool SessionExists(DiscordUser customer) => SessionExists(x => x.Customer == customer);
-
-		public async Task<T> Atomary<T>(Func<ShopService, Task<T>> run)
+		public async Task<DialogueTabSession<ShopContext>> StartSession(DiscordUser customer, DiscordInteraction intr)
 		{
 			await _lock.WaitAsync();
-			var res = await run(this);
-			_lock.Release();
-			return res;
-		}
-		public async Task<ShopSession> StartSession(DiscordUser customer,
-			DiscordInteraction intr)
-		{
-			var sess = new ShopSession(new(intr), _client, customer, _service.Economy.GetPlayerWallet(customer),
-			 _service.Inventory.GetPlayerInventory(customer), _cashRegister);
-			await StartSession(() => sess, x => x);
 
-			return sess;
+			DialogueTabSession<ShopContext> session = null;
+
+			if (_shopTab.Sessions.All(x => x.Context.CustomerId != customer.Id))
+				session = await _shopTab.CreateSync(new(intr), new(customer.Id,
+				new Economy.PlayerWallet(_service.Economy, customer.Id), _cashRegister, this));
+
+			_lock.Release();
+
+			return session;
 		}
 		public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
 			_cashRegister.Default(bld);

@@ -16,26 +16,27 @@ namespace Manito.Discord.ChatNew
 	/// Controls creation of new sessions and keeps the created ones.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class DialogueSessionTab<T>
+	public class DialogueTabSessionTab<T>
 	{
 		public MyDiscordClient Client {
 			get; private set;
 		}
 		// Keeps list of created sessions.
-		private List<DialogueSession<T>> _sessions;
+		private List<DialogueTabSession<T>> _sessions;
+		public IReadOnlyList<DialogueTabSession<T>> Sessions => _sessions;
 		// Used to sync creation and deletion of sessions
 		private SemaphoreSlim _sync;
-		public DialogueSessionTab(MyDiscordClient client)
+		public DialogueTabSessionTab(MyDiscordClient client)
 		{
 			_sync = new(1, 1);
 			_sessions = new();
 			Client = client;
 		}
-		public async Task<DialogueSession<T>> CreateSync(InteractiveInteraction interactive, T context)
+		public async Task<DialogueTabSession<T>> CreateSync(InteractiveInteraction interactive, T context)
 		{
 			await _sync.WaitAsync();
 
-			var session = new DialogueSession<T>(this, interactive, context);
+			var session = new DialogueTabSession<T>(this, interactive, context);
 			session.OnRemove += RemoveSession;
 			_sessions.Add(session);
 
@@ -43,7 +44,7 @@ namespace Manito.Discord.ChatNew
 
 			return session;
 		}
-		public async Task<bool> RemoveSession(DialogueSession<T> session)
+		public async Task<bool> RemoveSession(DialogueTabSession<T> session)
 		{
 			await _sync.WaitAsync();
 			session.OnRemove -= RemoveSession;

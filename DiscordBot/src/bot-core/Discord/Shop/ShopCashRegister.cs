@@ -16,9 +16,9 @@ namespace Manito.Discord.Shop
 
     public class ShopCashRegister
     {
-        private IShopDb _myDb;
+        private IShopDbFactory _myDb;
 
-        public ShopCashRegister(IShopDb myDb)
+        public ShopCashRegister(IShopDbFactory myDb)
         {
             _myDb = myDb;
         }

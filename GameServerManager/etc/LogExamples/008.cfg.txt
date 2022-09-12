@@ -1,0 +1,1338 @@
+﻿[2022.09.10-08.53.36228][620]LogTemp Display decoded pitch mod 126, Drift 0, Total 0.875000
+[2022.09.10-08.53.36230][620]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36258][621]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36292][622]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36327][623]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36359][624]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36393][625]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36427][626]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36461][627]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36493][628]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36526][629]LogTemp Display decoded pitch mod 42, Drift 0, Total 1.000000
+[2022.09.10-08.53.36528][629]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36559][630]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36593][631]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36627][632]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36659][633]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36693][634]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36726][635]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36732][635]LogMap Display Carcass Selected Spawn Size 50.928677
+[2022.09.10-08.53.36762][636]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36794][637]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36828][638]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36862][639]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36893][640]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36927][641]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36960][642]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.36993][643]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37026][644]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37060][645]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37093][646]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37126][647]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37160][648]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37194][649]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37226][650]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37260][651]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37292][652]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37326][653]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37360][654]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37393][655]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37426][656]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37460][657]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37493][658]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37526][659]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37559][660]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37593][661]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37626][662]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37659][663]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37692][664]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37726][665]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37760][666]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37793][667]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37826][668]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37859][669]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37892][670]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37927][671]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37960][672]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.37993][673]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38027][674]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38060][675]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38094][676]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38127][677]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38161][678]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38193][679]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38226][680]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38259][681]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38294][682]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38328][683]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38358][684]LogTemp Display decoded pitch mod 126, Drift 0, Total 0.875000
+[2022.09.10-08.53.38360][684]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38393][685]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38427][686]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38460][687]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38493][688]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38527][689]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38561][690]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38596][691]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38629][692]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38662][693]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38695][694]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38728][695]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38733][695]LogMap Display Carcass Selected Spawn Size 49.406681
+[2022.09.10-08.53.38762][696]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38798][697]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38828][698]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38861][699]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38894][700]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38929][701]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38962][702]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.38995][703]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39028][704]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39062][705]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39095][706]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39129][707]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39162][708]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39276][709]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39307][710]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39340][711]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39374][712]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39407][713]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39443][714]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39473][715]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39507][716]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39542][717]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39574][718]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39607][719]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39643][720]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39674][721]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39707][722]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39740][723]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39744][723]LogMap Display Carcass Selected Spawn Size 52.39196
+[2022.09.10-08.53.39773][724]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39807][725]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39841][726]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39873][727]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39907][728]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39940][729]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.39974][730]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40007][731]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40038][732]LogUserCommands Display  PLAYER= ~ḾÏlky Ẅãy~  ID= 76561199076855800  Owning Account ID = 76561199076855800  CMD= SpawnCarcass 2500 2500 true  
+[2022.09.10-08.53.40042][732]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40072][733]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40109][734]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40140][735]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40173][736]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40206][737]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40239][738]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40273][739]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40307][740]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40338][741]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40342][741]LogSaveSystem Warning Could not find tracking data match for entity 166279550500408
+[2022.09.10-08.53.40342][741]LogSaveSystem Warning Could not find tracking data match for entity 166279550500408
+[2022.09.10-08.53.40374][742]LogTemp Display decoded pitch mod 126, Drift 0, Total 0.875000
+[2022.09.10-08.53.40376][742]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40404][743]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40438][744]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40472][745]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40505][746]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40539][747]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40571][748]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40605][749]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40640][750]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40673][751]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40706][752]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40739][753]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40744][753]LogMap Display Carcass Selected Spawn Size 46.377796
+[2022.09.10-08.53.40780][754]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40807][755]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40843][756]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40876][757]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40909][758]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40945][759]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.40976][760]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41011][761]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41042][762]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41076][763]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41109][764]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41142][765]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41176][766]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41209][767]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41242][768]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41277][769]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41309][770]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41342][771]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41374][772]LogBeastsOfBermuda Display Server Client is ready. OnPrepared() called. Sending Cookie.
+[2022.09.10-08.53.41376][772]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41409][773]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41442][774]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41474][775]LogBeastsOfBermuda Display Server Received an other Cookie from client. Handling logon.
+[2022.09.10-08.53.41474][775]LogTemp Warning Admin config list [(UserSteamId64 = 76561198920937340, AdminRank = Event-Demetra), (UserSteamId64 = 76561198982357518, AdminRank = Event-Demetra), (UserSteamId64 = 76561198368674144, AdminRank = Hermes), (UserSteamId64 = 76561199174190984, AdminRank = Hermes), (UserSteamId64 = 76561199184494505, AdminRank = Hermes), (UserSteamId64 = 76561199217888865, AdminRank = Hermes), (UserSteamId64 = 76561199217965400, AdminRank = Hermes), (UserSteamId64 = 76561199308884873, AdminRank = Event-Demetra), (UserSteamId64 = 76561199228758230, AdminRank = Demetra), (UserSteamId64 = 76561199228738230, AdminRank = Demetra), (UserSteamId64 = 76561199274022239, AdminRank = Demetra), (UserSteamId64 = 76561199214435387, AdminRank = ZeusPoseidon), (UserSteamId64 = 76561199217277827, AdminRank = Root), (UserSteamId64 = 76561199322567866, AdminRank = Event-Demetra), (UserSteamId64 = 76561198332769545, AdminRank = ZeusPoseidon), (UserSteamId64 = 76561199227749398, AdminRank = ZeusPoseidon), (UserSteamId64 = 76561199228627701, AdminRank = ZeusPoseidon), (UserSteamId64 = 76561199232227361, AdminRank = ZeusPoseidon), (UserSteamId64 = 76561198322877945, AdminRank = Demetra), (UserSteamId64 = 76561199219092479, AdminRank = Demetra), (UserSteamId64 = 76561197987191721, AdminRank = Demetra), (UserSteamId64 = 76561199186854805, AdminRank = Hermes), (UserSteamId64 = 76561199066352110, AdminRank = Hestia), (UserSteamId64 = 76561198077858282, AdminRank = Hestia), (UserSteamId64 = 76561199072606356, AdminRank = Hestia), (UserSteamId64 = 76561198134065289, AdminRank = Hestia), (UserSteamId64 = 76561199076855800, AdminRank = Hestia), (UserSteamId64 = 76561198803689859, AdminRank = Hestia), (UserSteamId64 = 76561198843142647, AdminRank = Hestia), (UserSteamId64 = 76561198963083966, AdminRank = NesterInactive), (UserSteamId64 = 76561198154282318, AdminRank = NesterInactive), (UserSteamId64 = 76561199079749932, AdminRank = Demetra), (UserSteamId64 = 76561199015622552, AdminRank = Demetra), (UserSteamId64 = 76561198151465325, AdminRank = Hestia), (UserSteamId64 = 76561199151877641, AdminRank = Hestia), (UserSteamId64 = 76561199192943248, AdminRank = Hestia)]
+[2022.09.10-08.53.41475][775]LogTemp Warning Ran line @55, file LoginManager.cpp, func SetPlayerStatusOnServer
+[2022.09.10-08.53.41475][775]LogPlayerManager Display Getting new profile for new player 76561199171248425  Owning account ID 76561199171248425
+[2022.09.10-08.53.41475][775]LogBeastsOfBermuda Display Loaded player profile for player. Success 1
+[2022.09.10-08.53.41475][775]LogBeastsOfBermuda Display Existing profile found for 76561199171248425, loaded=1, EntityCount=1
+[2022.09.10-08.53.41475][775]LogPlayerManager Display DinosaurSurvivor_Controller_C_2141940835 wants to go to their saved pawns menu.
+[2022.09.10-08.53.41475][775]LogBeastsOfBermuda Display Already using starter pawn, player does not need to be restarted.
+[2022.09.10-08.53.41475][775]LogBeastsOfBermuda Display Starting post login streaming process for player Верховный.Limon with ID 76561199171248425
+[2022.09.10-08.53.41480][775]LogTemp Warning UFileLoaderLoadStringFromFile Target Path = ......BeastsOfBermudaConfigServer
+[2022.09.10-08.53.41481][775]LogTemp Warning UFileLoaderLoadStringFromFile Loading ......BeastsOfBermudaConfigServerMessageOfTheDay.txt
+[2022.09.10-08.53.41481][775]LogBeastsOfBermuda Warning MotD was loaded 1  MotD enabled 1 - If loaded is 0 and MotD enabled is 1, make sure the message file is properly located in GameConfigServer
+[2022.09.10-08.53.41481][775]LogBeastsOfBermuda Display Server Player logged in. PlayerId64=76561199171248425, OwnerId64=76561199171248425
+[2022.09.10-08.53.41483][775]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41509][776]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41542][777]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41575][778]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41606][779]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 5 remaining...
+[2022.09.10-08.53.41611][779]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41642][780]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41676][781]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41709][782]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41742][783]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41746][783]LogMap Display Carcass Selected Spawn Size 54.458141
+[2022.09.10-08.53.41775][784]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41808][785]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41846][786]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41875][787]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41908][788]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41941][789]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.41974][790]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42009][791]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42041][792]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42075][793]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42107][794]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42140][795]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42175][796]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42207][797]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42238][798]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 4 remaining...
+[2022.09.10-08.53.42244][798]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42273][799]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42307][800]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42340][801]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42373][802]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42406][803]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42439][804]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42473][805]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42506][806]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42540][807]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42573][808]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42605][809]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42639][810]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42672][811]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42705][812]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42738][813]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42742][813]LogMap Display Carcass Selected Spawn Size 50.835293
+[2022.09.10-08.53.42772][814]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42805][815]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 3 remaining...
+[2022.09.10-08.53.42809][815]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42838][816]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42872][817]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42905][818]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42940][819]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.42973][820]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43006][821]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43039][822]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43072][823]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43105][824]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43139][825]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43172][826]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43205][827]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43238][828]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43271][829]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43305][830]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43338][831]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43372][832]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43406][833]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43438][834]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43472][835]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43502][836]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 2 remaining...
+[2022.09.10-08.53.43508][836]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43538][837]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43571][838]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43604][839]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43637][840]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43672][841]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43708][842]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43739][843]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43743][843]LogMap Display Carcass Selected Spawn Size 47.201454
+[2022.09.10-08.53.43772][844]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43807][845]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43839][846]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43871][847]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43906][848]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43940][849]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.43973][850]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44008][851]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44041][852]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44076][853]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44108][854]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44140][855]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 1 remaining...
+[2022.09.10-08.53.44147][855]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44177][856]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44209][857]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44242][858]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44274][859]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44307][860]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44341][861]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44375][862]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44408][863]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44442][864]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44476][865]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44509][866]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44542][867]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44576][868]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44609][869]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44642][870]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44676][871]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44707][872]LogTemp Display decoded pitch mod 126, Drift 0, Total 0.875000
+[2022.09.10-08.53.44709][872]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44742][873]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44746][873]LogMap Display Carcass Selected Spawn Size 54.000824
+[2022.09.10-08.53.44773][874]LogBeastsOfBermuda Display Sending next packet for 76561199171248425, 0 remaining...
+[2022.09.10-08.53.44775][874]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44808][875]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44842][876]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44875][877]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44909][878]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44942][879]LogScript Warning Script Msg Divide by zero detected 0.000000  0
+Script call stack
+	Function GameBlueprintsWeatherController.WeatherController_CReceiveTick
+	Function GameBlueprintsWeatherController.WeatherController_CExecuteUbergraph_WeatherController
+
+[2022.09.10-08.53.44973][880]LogBeastsOfBermuda Display Finished Post login loading process for player Верховный.Limon with ID 76561199171248425
+[2022.09.10-08.53.44973][880]LogBeastsOfBermuda Display Destroying PostLoginLoader

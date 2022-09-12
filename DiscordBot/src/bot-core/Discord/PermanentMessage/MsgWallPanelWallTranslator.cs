@@ -58,13 +58,13 @@ namespace Manito.Discord.PermanentMessage
 		}
 		public class Editor : INodeNetwork
 		{
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private MessageWallTranslator _translator;
 			private MsgWallPanelWall.Selector _wallSelector;
 			private MsgWallPanelWall.Editor _wallEditor;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
+			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
@@ -252,7 +252,7 @@ namespace Manito.Discord.PermanentMessage
 		}
 		public class Selector : INodeNetwork
 		{
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private InteractiveSelectMenu<MessageWallTranslator> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
@@ -287,7 +287,7 @@ namespace Manito.Discord.PermanentMessage
 					return db.MessageWallTranslators.OrderBy(x => x.ID).Count();
 				}
 			}
-			public Selector(DialogueSession<MsgContext> session, Node ret, MessageWall wall)
+			public Selector(DialogueTabSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
 				_selectMenu = new InteractiveSelectMenu<MessageWallTranslator>(_session.Puller, _session.Responder,
@@ -337,10 +337,10 @@ namespace Manito.Discord.PermanentMessage
 				throw new NotImplementedException();
 			}
 		}
-		private DialogueSession<MsgContext> _session;
+		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
 		private Selector _selector;
-		public MsgWallPanelWallTranslator(DialogueSession<MsgContext> session)
+		public MsgWallPanelWallTranslator(DialogueTabSession<MsgContext> session)
 		{
 			_session = session;
 			_selector = new(session, Decider, null);

@@ -27,13 +27,13 @@ namespace Manito.Discord.PermanentMessage
 		/// </summary>
 		public class Editor : INodeNetwork
 		{
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private MessageWall _wall;
 			private MsgWallPanelWallLine.Selector _lineSelector;
 			private MsgWallPanelWallLine.Editor _lineEditor;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
+			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
@@ -228,7 +228,7 @@ namespace Manito.Discord.PermanentMessage
 				}
 			}
 
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private InteractiveSelectMenu<MessageWall> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
@@ -260,7 +260,7 @@ namespace Manito.Discord.PermanentMessage
 					return db.MessageWalls.OrderBy(x => x.ID).Count();
 				}
 			}
-			public Selector(DialogueSession<MsgContext> session, Node ret)
+			public Selector(DialogueTabSession<MsgContext> session, Node ret)
 			{
 				CreateButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
 				SelectButton = new DiscordButtonComponent(ButtonStyle.Primary, "select", "Выбрать");
@@ -314,10 +314,10 @@ namespace Manito.Discord.PermanentMessage
 				throw new NotImplementedException();
 			}
 		}
-		private DialogueSession<MsgContext> _session;
+		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
 		private Selector _selector;
-		public MsgWallPanelWall(DialogueSession<MsgContext> session)
+		public MsgWallPanelWall(DialogueTabSession<MsgContext> session)
 		{
 			_session = session;
 			_selector = new(session, Decider);

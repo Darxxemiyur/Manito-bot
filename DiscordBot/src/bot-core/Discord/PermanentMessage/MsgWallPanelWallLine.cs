@@ -20,13 +20,13 @@ namespace Manito.Discord.PermanentMessage
 	{
 		public class Editor : INodeNetwork
 		{
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private MessageWallLine _line;
 			private MsgWallPanelWall.Selector _wallSelector;
 			private MsgWallPanelWall.Editor _wallEditor;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
+			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
@@ -244,7 +244,7 @@ namespace Manito.Discord.PermanentMessage
 				}
 			}
 
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private InteractiveSelectMenu<MessageWallLine> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
@@ -282,7 +282,7 @@ namespace Manito.Discord.PermanentMessage
 						.OrderBy(x => x.ID).Count();
 				}
 			}
-			public Selector(DialogueSession<MsgContext> session, Node ret, MessageWall wall)
+			public Selector(DialogueTabSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
 				_selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session.Puller, _session.Responder,
@@ -332,10 +332,10 @@ namespace Manito.Discord.PermanentMessage
 				throw new NotImplementedException();
 			}
 		}
-		private DialogueSession<MsgContext> _session;
+		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
 		private Selector _selector;
-		public MsgWallPanelWallLine(DialogueSession<MsgContext> session)
+		public MsgWallPanelWallLine(DialogueTabSession<MsgContext> session)
 		{
 			_selector = new(session, Decider, null);
 			_editor = new(session, new(_selector.SelectToEdit));

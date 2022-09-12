@@ -20,8 +20,8 @@ namespace Manito.Discord.PermanentMessage
 	/// </summary>
 	public class MsgWallPanel : IDialogueNet
 	{
-		private DialogueSession<MsgContext> _session;
-		public MsgWallPanel(DialogueSession<MsgContext> session)
+		private DialogueTabSession<MsgContext> _session;
+		public MsgWallPanel(DialogueTabSession<MsgContext> session)
 		{
 			_session = session;
 		}

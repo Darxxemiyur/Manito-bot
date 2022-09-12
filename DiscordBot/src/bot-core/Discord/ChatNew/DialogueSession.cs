@@ -29,12 +29,6 @@ namespace Manito.Discord.ChatNew
 			get; private set;
 		}
 		/// <summary>
-		/// Tab this session belongs to
-		/// </summary>
-		public DialogueSessionTab<T> Tab {
-			get; private set;
-		}
-		/// <summary>
 		/// Session context
 		/// </summary>
 		public T Context {
@@ -53,11 +47,10 @@ namespace Manito.Discord.ChatNew
 			if (OnRemove != null)
 				await OnRemove(this);
 		}
-		public DialogueSession(DialogueSessionTab<T> tab, InteractiveInteraction start, T context)
+		public DialogueSession(MyDiscordClient client, InteractiveInteraction start, T context)
 		{
-			Tab = tab;
 			Context = context;
-			Information = new(tab.Client);
+			Information = new(client);
 			Responder = new SessionResponder(Information, start);
 			Puller = new InteractionPuller(Information);
 		}

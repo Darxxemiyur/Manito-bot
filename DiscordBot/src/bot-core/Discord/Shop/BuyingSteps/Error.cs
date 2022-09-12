@@ -12,14 +12,14 @@ using Microsoft.EntityFrameworkCore;
 
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
+using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.Shop
 {
 	public class BuyingStepsForError : IDialogueNet
 	{
-		private ShopSession _session;
-
-		public BuyingStepsForError(ShopSession session) => _session = session;
+		private DialogueTabSession<ShopContext> _session;
+		public BuyingStepsForError(DialogueTabSession<ShopContext> session) => _session = session;
 
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();

@@ -90,16 +90,9 @@ namespace Manito.Discord.Shop
 		}
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
-			var res = await _shopService.Atomary(async (x) => {
-				if (x.SessionExists(args.User))
-					return false;
+			var res = _shopService.StartSession(args.User, args);
 
-				await x.StartSession(args.User, args);
-				return true;
-			});
-
-
-			if (!res)
+			if (res == null)
 			{
 				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
 					new DiscordInteractionResponseBuilder().AddEmbed(_shopService.Default()

@@ -21,11 +21,11 @@ namespace Manito.Discord.PermanentMessage
 	{
 		public class Editor : INodeNetwork
 		{
-			private DialogueSession<MsgContext> _session;
+			private DialogueTabSession<MsgContext> _session;
 			private ImportedMessage _line;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public Editor(DialogueSession<MsgContext> session, NextNetworkInstruction ret)
+			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
@@ -124,9 +124,9 @@ namespace Manito.Discord.PermanentMessage
 		}
 		private InteractiveSelectMenu<ImportedMessage> _selectMenu;
 
-		private DialogueSession<MsgContext> _session;
+		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
-		public MsgWallPanelWallLineImport(DialogueSession<MsgContext> session)
+		public MsgWallPanelWallLineImport(DialogueTabSession<MsgContext> session)
 		{
 			_editor = new(session, new(Choose));
 			_session = session;

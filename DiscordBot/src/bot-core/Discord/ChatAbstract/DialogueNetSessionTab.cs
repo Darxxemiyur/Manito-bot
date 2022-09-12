@@ -16,7 +16,7 @@ namespace Manito.Discord.ChatAbstract
 {
 	public class DialogueNetSessionTab<T>
 	{
-		private DialogueSessionTab<T> _sessionTab;
+		private DialogueTabSessionTab<T> _sessionTab;
 		private MyDomain _domain;
 
 		public DialogueNetSessionTab(MyDomain domain)
@@ -26,7 +26,7 @@ namespace Manito.Discord.ChatAbstract
 		}
 
 		public async Task CreateSession(InteractiveInteraction interactive, T context,
-			Func<DialogueSession<T>, Task<IDialogueNet>> builder)
+			Func<DialogueTabSession<T>, Task<IDialogueNet>> builder)
 		{
 			var session = await _sessionTab.CreateSync(interactive, context);
 
