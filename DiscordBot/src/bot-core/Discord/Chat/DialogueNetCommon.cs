@@ -86,17 +86,17 @@ namespace Manito.Discord.Chat.DialogueNet
 
 				mg2.AddComponents(exbtn, sbmbtn);
 
-				await session.Respond(mg2);
+				await respondr.SendMessage(mg2);
 
-				await session.GetInteraction(mg2.Components);
+				var comp = await puller.GetComponentInteraction();
 
-				if (session.IArgs.CompareButton(exbtn))
+				if (comp.CompareButton(exbtn))
 					return null;
 
-				if (session.IArgs.CompareButton(sbmbtn))
+				if (comp.CompareButton(sbmbtn))
 					return quantity;
 
-				var pressed = session.IArgs.GetButton(btns.SelectMany(x => x)
+				var pressed = comp.GetButton(btns.SelectMany(x => x)
 					.Select(x => x.Item1).ToDictionary(x => x.CustomId));
 				var change = int.Parse(pressed.Label);
 

@@ -70,7 +70,7 @@ namespace Manito.Discord.Shop
 			_service = service;
 			_shopService = service.ShopService;
 			_commandList = GetCommands().ToList();
-			//service.MyDiscordClient.AppCommands.Add("Shop", _commandList);
+			service.MyDiscordClient.AppCommands.Add("Shop", _commandList);
 			_queue = new();
 			eventBuffer.Interact.OnMessage += FilterMessage;
 		}

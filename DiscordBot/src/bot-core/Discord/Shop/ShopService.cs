@@ -15,6 +15,7 @@ using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Threading;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.ChatAbstract;
 
 namespace Manito.Discord.Shop
 {
@@ -24,13 +25,14 @@ namespace Manito.Discord.Shop
 		private MyDomain _service;
 		private MyDiscordClient _client;
 		private ShopCashRegister _cashRegister;
-		private DialogueTabSessionTab<ShopContext> _shopTab;
+		private DialogueNetSessionTab<ShopContext> _shopTab;
 		private SemaphoreSlim _lock;
 		public ShopService(MyDomain service)
 		{
 			_lock = new SemaphoreSlim(1, 1);
 			_service = service;
 			_client = service.MyDiscordClient;
+			_shopTab = new(service);
 			_cashRegister = new(null);
 		}
 		public async Task<DialogueTabSession<ShopContext>> StartSession(DiscordUser customer, DiscordInteraction intr)
@@ -40,8 +42,9 @@ namespace Manito.Discord.Shop
 			DialogueTabSession<ShopContext> session = null;
 
 			if (_shopTab.Sessions.All(x => x.Context.CustomerId != customer.Id))
-				session = await _shopTab.CreateSync(new(intr), new(customer.Id,
-				new Economy.PlayerWallet(_service.Economy, customer.Id), _cashRegister, this));
+				session = await _shopTab.CreateSession(new(intr), new(customer.Id,
+				new Economy.PlayerWallet(_service.Economy, customer.Id), _cashRegister, this),
+				(x) => Task.FromResult((IDialogueNet)new ShopDialogue(x)));
 
 			_lock.Release();
 

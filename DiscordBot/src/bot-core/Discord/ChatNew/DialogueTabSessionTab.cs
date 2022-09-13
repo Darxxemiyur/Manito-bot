@@ -44,11 +44,11 @@ namespace Manito.Discord.ChatNew
 
 			return session;
 		}
-		public async Task<bool> RemoveSession(DialogueTabSession<T> session)
+		public async Task<bool> RemoveSession(DialogueSession<T> session)
 		{
 			await _sync.WaitAsync();
 			session.OnRemove -= RemoveSession;
-			var res = _sessions.Remove(session);
+			var res = _sessions.Remove(session as DialogueTabSession<T>);
 			_sync.Release();
 
 			return res;

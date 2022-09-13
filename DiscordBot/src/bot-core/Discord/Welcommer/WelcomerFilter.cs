@@ -41,7 +41,7 @@ namespace Manito.Discord.Welcommer
 		public static string TrailerlLink => $"{NewsChannelLink}/{TrailerMSG}";
 		public static string PeaceLink => $"{NewsChannelLink}/{PeaceMSG}";
 		public static string NoticeLink => $"{NewsChannelLink}/{NoticeMSG}";
-		public static string HelpChannelLink = $"{ChannelLink}/{ManitoGuild}/{HelpChannel}/1013056576719949895";
+		public static string HelpChannelLink = $"{ChannelLink}/{HelpChannel}/1013056576719949895";
 #if DEBUG
 		public static string Er => "1007397905654620260";
 #else
@@ -79,7 +79,7 @@ namespace Manito.Discord.Welcommer
 
 			var msg1 = new DiscordMessageBuilder();
 
-			var n0 = new DiscordLinkButtonComponent(PeaceLink, "О перемирии на сервере");
+			var n0 = new DiscordLinkButtonComponent(PeaceLink, "О часах безмятежности на сервере");
 			var n1 = new DiscordLinkButtonComponent(NoticeLink, "Касательно экономики");
 			var n2 = new DiscordLinkButtonComponent(TrailerlLink, "Трейлер функционала бота");
 

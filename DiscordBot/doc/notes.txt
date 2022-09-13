@@ -1,0 +1,4 @@
+Dialogues system is a complex of context and session systems
+Session system is independent of contexts as it only provides tools and methods for interacting with discord
+Context system provides tools and methods for storing session related data, and is optional for session
+Dialogues decide it for themselves, from case to case

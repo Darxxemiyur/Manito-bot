@@ -97,4 +97,8 @@
     <Content Remove="C:\Users\mutex\.nuget\packages\mongodb.driver.core\2.17.1\build\..\runtimes\win\native\snappy64.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="System\" />
+  </ItemGroup>
+
 </Project>

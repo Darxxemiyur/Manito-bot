@@ -37,7 +37,8 @@ namespace Manito.Discord.Shop
 			var ms1 = $"Выберите количество {_food.Name}";
 			var price = _food.Price;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session.,
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
+				_session.Responder, _session.Puller,
 			 async (x, y) => y < 0 || await _session.Context.Wallet.CanAfford((x + y) * price),
 			 async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
 			 .WithDescription($"{ms1}\nВыбранное количество {x} кг за {x * price}.")), _quantity);
@@ -53,20 +54,24 @@ namespace Manito.Discord.Shop
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
-			var inventory = _session.Context.Inventory;
+			var resp = _session.Context.Format;
+			//var inventory = _session.Context.Inventory;
 			var price = _quantity * _food.Price;
 
 			if (!await wallet.CanAfford(price))
 				return new NextNetworkInstruction(ForceChange, NextNetworkActions.Continue);
 
 			await wallet.Withdraw(price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {price}");
-			await inventory.AddItem(x => (x.ItemType, x.Owner, x.Quantity)
-			 = ($"{_food.Category}", _session.Customer.Id, _quantity));
+			//await inventory.AddItem(x => (x.ItemType, x.Owner, x.Quantity)
+			// = ($"{_food.Category}", _session.Customer.Id, _quantity));
 
 			return new NextNetworkInstruction(null, NextNetworkActions.Stop);
 		}
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
+			var wallet = _session.Context.Wallet;
+			var resp = _session.Context.Format;
+			//var inventory = _session.Context.Inventory;
 			var price = _quantity * _food.Price;
 			var ms1 = $"Вы не можете позволить {_quantity} {_food.Name} за {price}.";
 			var ms2 = $"Пожалуйста измените выбранное количество {_food.Name} и попробуйте снова.";
