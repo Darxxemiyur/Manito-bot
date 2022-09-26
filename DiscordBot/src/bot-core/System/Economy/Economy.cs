@@ -58,7 +58,7 @@ namespace Manito.Discord.Economy
             DiscordID = id,
             Currency = 5000
         };
-        public PlayerWallet GetPlayerWallet(ulong id) => new PlayerWallet(this, id);
+        public PlayerWallet GetPlayerWallet(ulong id) => new(this, id);
         public PlayerWallet GetPlayerWallet(DiscordUser user) => GetPlayerWallet(user.Id);
         private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Транзакция: {msg}");
         public async Task<long> TransferFunds(ulong from, ulong to, long amount, string msg = null)

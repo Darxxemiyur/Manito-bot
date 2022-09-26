@@ -13,15 +13,18 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Linkable
         Task Run();
     }
     /// <summary>
-    /// Pipe that can act both as a sink and a source
+    /// Node interface that describes what it is capable of.
     /// </summary>
-    public interface IBiNode : ISinkNode, ISourceNode, INode { }
     public interface INode : IRunnable
     {
         bool IsSink { get; }
         bool IsSource { get; }
         bool IsBi { get; }
     }
+    /// <summary>
+    /// Pipe that can act both as a sink and a source
+    /// </summary>
+    public interface IBiNode : ISinkNode, ISourceNode, INode { }
     /// <summary>
     /// Pipe that can act as a sink.
     /// </summary>
