@@ -1,18 +1,19 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Database;
 using System.Threading.Tasks;
 using Manito.Discord.Client;
 using System.Collections.Generic;
 using System.Linq;
-using DSharpPlus;
+using DisCatSharp;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using DSharpPlus.EventArgs;
+using DisCatSharp.EventArgs;
 using Cyriller;
 
 namespace Manito.Discord.PermanentMessage
@@ -33,13 +34,13 @@ namespace Manito.Discord.PermanentMessage
 			buffer.ContInteract.OnMessage += FilterMessage;
 		}
 		private const string Locale = "ru";
-		private Dictionary<string, string> GetLoc(string trans) => new() { { Locale, trans } };
+		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
 		private IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
-			yield return new DiscordApplicationCommand("msgwall", "Edit wall", null, true,
-				ApplicationCommandType.SlashCommand, GetLoc("стенасооб"), GetLoc("Редактировать стены"));
-			yield return new DiscordApplicationCommand("Message wall import", "", null, true,
-				ApplicationCommandType.MessageContextMenu, GetLoc("Импорт сообщения в строку стены"));
+			yield return new DiscordApplicationCommand("msgwall", "Edit wall", null, 
+				ApplicationCommandType.ChatInput, GetLoc("стенасооб"), GetLoc("Редактировать стены"));
+			yield return new DiscordApplicationCommand("Message wall import", "", null, 
+				ApplicationCommandType.Message, GetLoc("Импорт сообщения в строку стены"));
 		}
 
 		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
@@ -88,10 +89,10 @@ namespace Manito.Discord.PermanentMessage
 		}
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
-			if (args.Data.Type == ApplicationCommandType.SlashCommand)
+			if (args.Data.Type == ApplicationCommandType.ChatInput)
 				await _domain.MsgWallCtr.StartSession(args);
 
-			if (args.Data.Type == ApplicationCommandType.MessageContextMenu)
+			if (args.Data.Type == ApplicationCommandType.Message)
 				await ImportMessage(args);
 		}
 		private async Task ImportMessage(DiscordInteraction args)

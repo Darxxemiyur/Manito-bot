@@ -4,12 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.EventArgs;
-using DSharpPlus.SlashCommands.Attributes;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.EventArgs;
+using DisCatSharp.ApplicationCommands.Attributes;
 
 using Manito.Discord.Client;
 using Manito.Discord.Economy;

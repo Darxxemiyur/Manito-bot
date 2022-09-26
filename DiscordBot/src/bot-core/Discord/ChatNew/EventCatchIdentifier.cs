@@ -1,4 +1,4 @@
-﻿using DSharpPlus.EventArgs;
+﻿using DisCatSharp.EventArgs;
 
 using System;
 using System.Collections.Generic;

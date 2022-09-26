@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
+using DisCatSharp;
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Manito.Discord

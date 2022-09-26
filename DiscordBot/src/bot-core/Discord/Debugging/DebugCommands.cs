@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using DSharpPlus.SlashCommands.EventArgs;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.Attributes;
+using DisCatSharp.ApplicationCommands.EventArgs;
+using DisCatSharp.Enums;
 
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
@@ -34,13 +35,13 @@ namespace Manito.Discord.Economy
 			}
 			return null;
 		}
-		private Dictionary<string, string> GetLoc(string trans) => new Dictionary<string, string>() { { Locale, trans } };
+		private DiscordApplicationCommandLocalization GetLoc(string trans) => new DiscordApplicationCommandLocalization(new Dictionary<string, string>() { { Locale, trans } });
 
 		public IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
 			yield return new DiscordApplicationCommand("debug", "Debug",
-			 GetSubCommands().Select(x => x.Item1), true,
-			 ApplicationCommandType.SlashCommand,
+			 GetSubCommands().Select(x => x.Item1),
+			 ApplicationCommandType.ChatInput,
 			 GetLoc("дебаг"),
 			 GetLoc("Дебаг"));
 
@@ -48,31 +49,31 @@ namespace Manito.Discord.Economy
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
 		{
 			yield return (new DiscordApplicationCommandOption("test_time", "Test time",
-			 ApplicationCommandOptionType.SubCommand, null, null, new[] {
+			 ApplicationCommandOptionType.SubCommand, false, null, new[] {
 				new DiscordApplicationCommandOption("time", "Time", ApplicationCommandOptionType.String,
-				 false, name_localizations: GetLoc( "время"),
-				 description_localizations: GetLoc( "Время")),
+				 false, nameLocalizations: GetLoc( "время"),
+				 descriptionLocalizations: GetLoc( "Время")),
 				new DiscordApplicationCommandOption("msg", "Msg", ApplicationCommandOptionType.String,
-				 false, name_localizations: GetLoc( "msg"),
-				 description_localizations: GetLoc( "Msg"))
+				 false, nameLocalizations: GetLoc( "msg"),
+				 descriptionLocalizations: GetLoc( "Msg"))
 			 },
-			 name_localizations: GetLoc("проверить_время"),
-			 description_localizations: GetLoc("Проверить формат времени")),
+			 nameLocalizations: GetLoc("проверить_время"),
+			 descriptionLocalizations: GetLoc("Проверить формат времени")),
 			 GetAccountDeposit);
 			yield return (new DiscordApplicationCommandOption("reset_db", "Reset database",
-			 ApplicationCommandOptionType.SubCommand, null, null, null,
-			 name_localizations: GetLoc("сбросить_бд"),
-			 description_localizations: GetLoc("Сбросить базу данных")),
+			 ApplicationCommandOptionType.SubCommand,
+			 nameLocalizations: GetLoc("сбросить_бд"),
+			 descriptionLocalizations: GetLoc("Сбросить базу данных")),
 			 ResetDatabase);
 			yield return (new DiscordApplicationCommandOption("check_wm", "Check welcomming message",
-			 ApplicationCommandOptionType.SubCommand, null, null, null,
-			 name_localizations: GetLoc("проверить_пс"),
-			 description_localizations: GetLoc("Проверить приветственное сообщение")),
+			 ApplicationCommandOptionType.SubCommand,
+			 nameLocalizations: GetLoc("проверить_пс"),
+			 descriptionLocalizations: GetLoc("Проверить приветственное сообщение")),
 			 CheckMessage);
 			yield return (new DiscordApplicationCommandOption("check_ds", "Check dialogue system",
-			 ApplicationCommandOptionType.SubCommand, null, null, null,
-			 name_localizations: GetLoc("проверить_дс"),
-			 description_localizations: GetLoc("Проверить диалоговую систему")),
+			 ApplicationCommandOptionType.SubCommand,
+			 nameLocalizations: GetLoc("проверить_дс"),
+			 descriptionLocalizations: GetLoc("Проверить диалоговую систему")),
 			 CheckDialogue);
 		}
 		private async Task CheckDialogue(DiscordInteraction args)

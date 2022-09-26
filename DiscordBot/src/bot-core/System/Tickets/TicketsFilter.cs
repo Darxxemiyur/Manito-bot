@@ -5,12 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.EventArgs;
-using DSharpPlus.SlashCommands.Attributes;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.ApplicationCommands.EventArgs;
+using DisCatSharp.ApplicationCommands.Attributes;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
@@ -37,7 +37,7 @@ namespace Manito.Discord.Tickets
             {
                 var msg = await chnl.GetMessageAsync(msgId);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (DisCatSharp.Exceptions.NotFoundException)
             {
                 return (await chnl.SendMessageAsync(GetMsg())).Id;
             }
@@ -75,8 +75,7 @@ namespace Manito.Discord.Tickets
         }
         private IEnumerable<DiscordApplicationCommand> GetCommands()
         {
-            yield return new DiscordApplicationCommand("shopping", "Начать шоппинг",
-            defaultPermission: true);
+            yield return new DiscordApplicationCommand("shopping", "Начать шоппинг");
         }
 
         private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

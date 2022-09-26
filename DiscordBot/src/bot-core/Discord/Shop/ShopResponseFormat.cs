@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+﻿using DisCatSharp.Entities;
 
 using Manito.Discord.Economy;
 

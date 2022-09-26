@@ -1,6 +1,6 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
 
 using Manito.Discord;
 using Manito.Discord.Client;
@@ -83,7 +83,7 @@ namespace Manito.Discord.Welcommer
 			var n1 = new DiscordLinkButtonComponent(NoticeLink, "Касательно экономики");
 			var n2 = new DiscordLinkButtonComponent(TrailerlLink, "Трейлер функционала бота");
 
-			var icon = guild.GetIconUrl(ImageFormat.Auto);
+			var icon = guild.IconUrl;
 
 			msg1.WithEmbed(new DiscordEmbedBuilder()
 				.WithDescription(string.Format(WelcomeMessage, member, guild.Name))

@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using DSharpPlus.EventArgs;
+using DisCatSharp.EventArgs;
 
 namespace Name.Bayfaderix.Darxxemiyur.Node.Linkable
 {

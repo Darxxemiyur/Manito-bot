@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Microsoft.EntityFrameworkCore;
 using Manito.Discord.ChatNew;
+using DisCatSharp.Enums;
 
 namespace Manito.Discord.Chat.DialogueNet
 {

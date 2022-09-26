@@ -1,8 +1,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 
 using Manito.Discord.Database;
 

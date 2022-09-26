@@ -2,10 +2,11 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
+using DisCatSharp;
+using DisCatSharp.Entities;
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
+using DisCatSharp.Enums;
 
 namespace Manito.Discord.Tickets
 {

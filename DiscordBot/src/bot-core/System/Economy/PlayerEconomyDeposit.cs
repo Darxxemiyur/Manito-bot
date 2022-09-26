@@ -2,8 +2,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 
 
 namespace Manito.Discord.Economy

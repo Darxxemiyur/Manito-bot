@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 using Microsoft.EntityFrameworkCore;
 
 namespace Manito.Discord.Shop

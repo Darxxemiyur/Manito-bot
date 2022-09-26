@@ -2,9 +2,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
 using Manito.Discord.Client;
 
 namespace Manito.Discord.UserAssociaton

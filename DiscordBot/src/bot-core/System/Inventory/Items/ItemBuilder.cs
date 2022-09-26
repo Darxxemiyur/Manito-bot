@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
+using DisCatSharp.Entities;
 
 namespace Manito.Discord.Inventory.Items
 {

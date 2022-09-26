@@ -4,12 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.SlashCommands;
-using Emzi0767.Utilities;
-using DSharpPlus.Interactivity.EventHandling;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.Common.Utilities;
+using DisCatSharp.Interactivity.EventHandling;
 
 namespace Manito.Discord.Client
 {

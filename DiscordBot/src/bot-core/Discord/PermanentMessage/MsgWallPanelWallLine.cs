@@ -2,8 +2,9 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
 using Manito.Discord.Chat.DialogueNet;

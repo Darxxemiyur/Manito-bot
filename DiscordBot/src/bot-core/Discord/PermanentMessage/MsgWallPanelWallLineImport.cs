@@ -1,9 +1,10 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
 
 using Manito.Discord.PatternSystems.Common;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Client;
+using DisCatSharp.Enums;
 
 using Microsoft.EntityFrameworkCore;
 

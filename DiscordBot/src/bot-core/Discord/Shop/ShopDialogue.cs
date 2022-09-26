@@ -1,5 +1,6 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus;
+﻿using DisCatSharp.Entities;
+using DisCatSharp;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;

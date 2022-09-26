@@ -1,16 +1,16 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 
 using Manito.Discord.Database;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using Manito.Discord.Client;
-using DSharpPlus;
-using DSharpPlus.Exceptions;
+using DisCatSharp;
+using DisCatSharp.Exceptions;
 using Cyriller;
 using System.Collections.Immutable;
 using Manito.Discord.PatternSystems.Common;

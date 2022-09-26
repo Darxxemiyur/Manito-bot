@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using DSharpPlus.EventArgs;
+using DisCatSharp.EventArgs;
 
 
 namespace Name.Bayfaderix.Darxxemiyur.Common

@@ -2,8 +2,9 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
 using Manito.Discord.Chat.DialogueNet;
@@ -11,7 +12,7 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Numerics;
-using DSharpPlus.Exceptions;
+using DisCatSharp.Exceptions;
 using Manito.Discord.PatternSystems.Common;
 using Manito.Discord.ChatNew;
 

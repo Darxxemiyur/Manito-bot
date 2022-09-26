@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.EventArgs;
+using DisCatSharp;
+using DisCatSharp.EventArgs;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;

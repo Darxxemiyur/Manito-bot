@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Manito.Discord.Shop;
 using Manito.Discord.Economy;
 using Manito.Discord.PermanentMessage;
-using Emzi0767.Utilities;
+using DisCatSharp.Common.Utilities;
 using System.Linq;
 
 namespace Manito.Discord.Database

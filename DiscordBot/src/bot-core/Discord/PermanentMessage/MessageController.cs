@@ -1,18 +1,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.ApplicationCommands;
 
 using Manito.Discord.Database;
 using System.Threading.Tasks;
 using Manito.Discord.Client;
 using System.Collections.Generic;
 using System.Linq;
-using DSharpPlus;
+using DisCatSharp;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using DSharpPlus.EventArgs;
+using DisCatSharp.EventArgs;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.ChatNew;
 using Manito.Discord.ChatAbstract;

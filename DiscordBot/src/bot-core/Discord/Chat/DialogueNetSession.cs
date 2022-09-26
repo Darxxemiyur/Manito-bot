@@ -2,17 +2,18 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-using DSharpPlus;
-using DSharpPlus.Entities;
+using DisCatSharp;
+using DisCatSharp.Entities;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
 using Manito.Discord.Economy;
-using DSharpPlus.EventArgs;
+using DisCatSharp.EventArgs;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Inventory;
 using System.Threading;
+using DisCatSharp.Enums;
 
 namespace Manito.Discord.Chat.DialogueNet
 {
