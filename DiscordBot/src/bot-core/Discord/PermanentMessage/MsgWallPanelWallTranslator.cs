@@ -90,16 +90,16 @@ namespace Manito.Discord.PermanentMessage
 				emb.AddField("Что сделать?", "** **");
 
 
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(syncBtn, linkChnlBtn, linkWallBtn)
 					.AddComponents(openWallBtn, remBtn, exitBtn));
 
-				var response = await _session.Puller.GetComponentInteraction();
+				var response = await _session.GetComponentInteraction();
 
 				if (response.CompareButton(linkChnlBtn))
 					return new(LinkChannel);
 
-				await _session.Responder.DoLaterReply();
+				await _session.DoLaterReply();
 
 				if (response.CompareButton(remBtn))
 					return new(RemoveTranslator);
@@ -118,13 +118,13 @@ namespace Manito.Discord.PermanentMessage
 
 			private async Task<NextNetworkInstruction> ForceSyncTranslator(NetworkInstructionArgument arg)
 			{
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.WithContent("Работаем..."));
 				var result = await _session.Context.Domain.MsgWallCtr.PostMessageUpdate(_translator.ID, _session.Context);
 
 
 				var changed = await result;
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.WithContent($"Обновлено {changed}"));
 				await Task.Delay(TimeSpan.FromSeconds(5));
 
@@ -133,18 +133,18 @@ namespace Manito.Discord.PermanentMessage
 
 			private async Task<NextNetworkInstruction> LinkChannel(NetworkInstructionArgument arg)
 			{
-				await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder().WithContent("Введите id канала"));
+				await _session.SendMessage(new DiscordInteractionResponseBuilder().WithContent("Введите id канала"));
 
 				return new(WaitAndRetryLink);
 			}
 
 			private async Task<NextNetworkInstruction> WaitAndRetryLink(NetworkInstructionArgument arg)
 			{
-				var msg = await _session.Puller.GetMessageInteraction();
+				var msg = await _session.GetMessageInteraction();
 
 				if (!ulong.TryParse(msg.Content, out var id))
 				{
-					await _session.Responder.SendMessage(new DiscordWebhookBuilder().WithContent("Ошибка!"));
+					await _session.SendMessage(new DiscordWebhookBuilder().WithContent("Ошибка!"));
 					return new(WaitAndRetryLink);
 				}
 
@@ -165,17 +165,17 @@ namespace Manito.Discord.PermanentMessage
 
 				var emb = new DiscordEmbedBuilder();
 				emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ ТРАНСЛЯТОР №{_translator.ID}?**");
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(returnBtn, removeBtn));
 
-				var response = await _session.Puller.GetComponentInteraction();
+				var response = await _session.GetComponentInteraction();
 
-				await _session.Responder.DoLaterReply();
+				await _session.DoLaterReply();
 
 
 				if (!response.CompareButton(removeBtn))
 				{
-					await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
+					await _session.SendMessage(new DiscordInteractionResponseBuilder()
 						.AddComponents(returnBtn.Disable(), removeBtn.Disable()));
 				}
 
@@ -216,7 +216,7 @@ namespace Manito.Discord.PermanentMessage
 
 				if (itm == null)
 				{
-					await _session.Responder.DoLaterReply();
+					await _session.DoLaterReply();
 					return new(ShowOptions);
 				}
 
@@ -291,7 +291,7 @@ namespace Manito.Discord.PermanentMessage
 			public Selector(DialogueTabSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
-				_selectMenu = new InteractiveSelectMenu<MessageWallTranslator>(_session.Puller, _session.Responder,
+				_selectMenu = new InteractiveSelectMenu<MessageWallTranslator>(_session,
 					new QueryablePageReturner<MessageWallTranslator>(new MyQuerrier(_session.Context.Factory)));
 				EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
 				MkNewButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
@@ -352,16 +352,16 @@ namespace Manito.Discord.PermanentMessage
 			var syncBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "syncall", "Синхронизировать всех");
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
-			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
+			await _session.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Добро пожаловать в меню управления транслятора стены строк!")
 				.AddComponents(_selector.MkNewButton.Enable(), _selector.EditButton.Enable())
 				.AddComponents(syncBtn, exitBtn));
-			var response = await _session.Puller.GetComponentInteraction();
+			var response = await _session.GetComponentInteraction();
 
 			if (response.CompareButton(exitBtn))
 				return new();
 
-			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
+			await _session.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Добро пожаловать в меню управления транслятора стены строк!")
 				.AddComponents(_selector.MkNewButton.Disable(), _selector.EditButton.Disable())
 				.AddComponents(syncBtn.Disable(), exitBtn.Disable()));
@@ -374,7 +374,7 @@ namespace Manito.Discord.PermanentMessage
 		}
 		private async Task<NextNetworkInstruction> ForceSyncAll(NetworkInstructionArgument arg)
 		{
-			var sent = _session.Responder.SendMessage(new DiscordWebhookBuilder()
+			var sent = _session.SendMessage(new DiscordWebhookBuilder()
 				.WithContent($"Работаем..."));
 
 			var list = new List<ulong>();
@@ -391,11 +391,11 @@ namespace Manito.Discord.PermanentMessage
 			}
 
 			await sent;
-			await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+			await _session.SendMessage(new DiscordWebhookBuilder()
 				.WithContent($"Всего изменено {changedAll} строк у {list.Count} стен сообщений.")
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "ok", "Ок")));
 
-			await _session.Puller.GetComponentInteraction();
+			await _session.GetComponentInteraction();
 
 			return new(EnterMenu);
 		}

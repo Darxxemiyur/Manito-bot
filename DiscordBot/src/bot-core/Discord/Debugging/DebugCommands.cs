@@ -19,7 +19,7 @@ namespace Manito.Discord.Economy
 	{
 		private const string Locale = "ru";
 		private MyDomain _bot;
-		public DebugCommands(MyDomain dom) => ( _bot) = ( dom);
+		public DebugCommands(MyDomain dom) => (_bot) = (dom);
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -78,7 +78,33 @@ namespace Manito.Discord.Economy
 		}
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
+			try
+			{
+				var at = _bot.MyDiscordClient.ActivityTools;
 
+				var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
+
+				await rs.DoLaterReply();
+				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Good job!"));
+
+				await Task.WhenAll(Enumerable.Range(1, 8).Select(x => DoTheThing(args)));
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine($"{e}");
+			}
+		}
+		private async Task DoTheThing(DiscordInteraction args)
+		{
+			var btn = new DiscordButtonComponent(ButtonStyle.Primary, "gfff", "fggg");
+			var msg = new UniversalSession(new SessionFromMessage(_bot.MyDiscordClient,
+				await args.Channel.SendMessageAsync(
+				new UniversalMessageBuilder().SetContent("DDDD").AddComponents(btn)), args.User.Id));
+
+			var intr = await msg.GetComponentInteraction();
+
+			await msg.DoLaterReply();
+			await msg.SendMessage(new UniversalMessageBuilder().SetContent("Good job!"));
 		}
 		private async Task CheckMessage(DiscordInteraction args)
 		{

@@ -27,8 +27,7 @@ namespace Manito.Discord.Client
 	/// </summary>
 	public class InteractiveSelectMenu<TItem> : IDialogueNet
 	{
-		private InteractionPuller _puller;
-		private SessionResponder _responder;
+		private IDialogueSession _session;
 		private const int max = 25;
 		private const int rows = 5;
 		private int Page {
@@ -48,10 +47,9 @@ namespace Manito.Discord.Client
 		private string _othPrefix;
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 		private IPageReturner<TItem> _paginater;
-		public InteractiveSelectMenu(InteractionPuller puller, SessionResponder responder, IPageReturner<TItem> paginater)
+		public InteractiveSelectMenu(IDialogueSession session, IPageReturner<TItem> paginater)
 		{
-			_responder = responder;
-			_puller = puller;
+			_session = session;
 			_paginater = paginater;
 			_navPrefix = "nav";
 			_itmPrefix = "item";
@@ -129,7 +127,7 @@ namespace Manito.Discord.Client
 			foreach (var btnsr in btns.Concat(_btnDef).Chunk(rows))
 				_msg.AddComponents(btnsr);
 
-			await _responder.SendMessage(_msg.AddEmbed(emb));
+			await _session.SendMessage(_msg.AddEmbed(emb));
 
 			return new(WaitForResponse, itms);
 		}
@@ -138,7 +136,7 @@ namespace Manito.Discord.Client
 			var inv = (IEnumerable<IItemDescriptor<TItem>>)args.Payload;
 
 			//var resp = await _puller.GetComponentInteraction(_msg.Components);
-			var resp = await _puller.GetComponentInteraction();
+			var resp = await _session.GetComponentInteraction();
 
 
 			if (resp.ButtonId.StartsWith(_itmPrefix))
@@ -154,7 +152,7 @@ namespace Manito.Discord.Client
 		{
 			var resp = ((InteractiveInteraction, IEnumerable<IItemDescriptor<TItem>>))args.Payload;
 
-			await _responder.DoLaterReply();
+			await _session.DoLaterReply();
 
 			var item = resp.Item2.FirstOrDefault(x => resp
 				.Item1.ButtonId.Contains($"_{x.GetButtonId()}"));
@@ -168,7 +166,7 @@ namespace Manito.Discord.Client
 			if (resp.CompareButton(_exBtn))
 				return new();
 
-			await _responder.DoLaterReply();
+			await _session.DoLaterReply();
 
 			if (resp.CompareButton(_firstList))
 				Page = 0;

@@ -44,7 +44,7 @@ namespace Manito.Discord.ChatNew
 
 			return session;
 		}
-		public async Task<bool> RemoveSession(DialogueSession<T> session)
+		public async Task<bool> RemoveSession(IDialogueSession session)
 		{
 			await _sync.WaitAsync();
 			session.OnRemove -= RemoveSession;

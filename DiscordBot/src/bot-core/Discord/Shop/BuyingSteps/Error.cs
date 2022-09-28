@@ -27,7 +27,8 @@ namespace Manito.Discord.Shop
 
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
-			throw new NotImplementedException();
+			await _session.DoLaterReply();
+			return new(null);
 		}
 	}
 }

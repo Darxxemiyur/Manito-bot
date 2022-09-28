@@ -11,14 +11,13 @@ namespace Manito.Discord.ChatNew
 	/// <summary>
 	/// Used to hold and describe session and its information.
 	/// </summary>
-	public class SessionInformation
+	public class SessionInformation1
 	{
 		public IDialogueIdentifier Identifier {
 			get; private set;
 		}
 		public event EventHandler<IDialogueIdentifier> OnIdentifierUpdate;
 		public void UpdateId(IDialogueIdentifier id) => OnIdentifierUpdate?.Invoke(this, Identifier = id);
-
 		public InteractiveInteraction Interaction {
 			get; private set;
 		}
@@ -27,6 +26,6 @@ namespace Manito.Discord.ChatNew
 		public MyDiscordClient Client {
 			get; private set;
 		}
-		public SessionInformation(MyDiscordClient client) => Client = client;
+		public SessionInformation1(MyDiscordClient client, InteractiveInteraction interaction) => (Client, Interaction) = (client, interaction);
 	}
 }

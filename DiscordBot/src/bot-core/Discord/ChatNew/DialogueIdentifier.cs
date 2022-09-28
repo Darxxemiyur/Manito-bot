@@ -13,6 +13,38 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
 {
+	/// <summary>
+	/// Secondary Message Identifier
+	/// </summary>
+	public class DialogueMsgIdentifier : IDialogueIdentifier
+	{
+		public DialogueMsgIdentifier(DiscordMessage message, ulong userId)
+		{
+			_usId = userId;
+			_chId = message.ChannelId;
+			_msId = message.Id;
+		}
+		private ulong _usId;
+		private ulong _chId;
+		private ulong _msId;
+		public Boolean DoesBelongToUs(InteractiveInteraction interaction)
+		{
+			var mid = interaction.Message.Id;
+			var cid = interaction.Message.ChannelId;
+			var uid = interaction.Interaction.User.Id;
+
+			return _chId == cid && mid == _msId && uid == _usId;
+		}
+		public Int32 HowBadWants(InteractiveInteraction interaction) => 10;
+		public Boolean DoesBelongToUs(DiscordMessage interaction)
+		{
+			var cid = interaction.ChannelId;
+			var uid = interaction.Author.Id;
+
+			return _chId == cid && uid == _usId;
+		}
+		public Int32 HowBadWants(DiscordMessage interaction) => 10;
+	}
 	public class DialogueMessageIdentifier : IDialogueIdentifier
 	{
 		public DialogueMessageIdentifier(InteractiveInteraction interaction)

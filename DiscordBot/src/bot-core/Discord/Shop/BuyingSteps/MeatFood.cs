@@ -39,7 +39,7 @@ namespace Manito.Discord.Shop
 			var price = _food.Price;
 
 			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
-				_session.Responder, _session.Puller,
+				_session,
 			 async (x, y) => y < 0 || await _session.Context.Wallet.CanAfford((x + y) * price),
 			 async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
 			 .WithDescription($"{ms1}\nВыбранное количество {x} кг за {x * price}.")), _quantity);
@@ -82,9 +82,9 @@ namespace Manito.Discord.Shop
 			var chnamt = new DiscordButtonComponent(ButtonStyle.Primary, "Back", "Изменить кол-во");
 			rsp.AddComponents(cancel, chnamt);
 
-			await _session.Responder.SendMessage(rsp);
+			await _session.SendMessage(rsp);
 
-			var argv = await _session.Puller.GetComponentInteraction();
+			var argv = await _session.GetComponentInteraction();
 
 			if (argv.CompareButton(chnamt))
 				return new(SelectQuantity, NextNetworkActions.Continue);

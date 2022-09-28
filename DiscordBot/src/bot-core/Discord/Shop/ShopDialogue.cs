@@ -38,10 +38,10 @@ namespace Manito.Discord.Shop
 					var items = _session.Context.Format.GetSelector(shopItems);
 					var mg = _session.Context.Format.GetResponse(_session.Context.Format.GetShopItems(null, shopItems))
 						.AddComponents(items).AddComponents(exbtn).WithContent("");
-					await _session.Responder.SendMessage(mg);
+					await _session.SendMessage(mg);
 
 
-					var argv = await _session.Puller.GetComponentInteraction();
+					var argv = await _session.GetComponentInteraction();
 
 					if (argv.CompareButton(exbtn))
 						break;
@@ -50,18 +50,18 @@ namespace Manito.Discord.Shop
 					await ItemSelected(argv.GetOption(shopItems.ToDictionary(x => x.Name)));
 				}
 
-				await _session.Responder.SendMessage(_session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена.")));
+				await _session.SendMessage(_session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена.")));
 				await Task.Delay(10000);
-				await _session.Responder.Interactive.Interaction.DeleteOriginalResponseAsync();
+				await _session.RemoveMessage();
 
 				await StopSession();
 			}
 			catch (TimeoutException)
 			{
 				var ms = "Сессия завершена по причине привышения времени ожидания взаимодействия.";
-				await _session.Responder.SendMessage(_session.Context.Format.GetDResponse(_session.Context.Format.BaseContent().WithDescription(ms)));
+				await _session.SendMessage(_session.Context.Format.GetDResponse(_session.Context.Format.BaseContent().WithDescription(ms)));
 				await Task.Delay(5000);
-				await _session.Responder.Interactive.Interaction.DeleteOriginalResponseAsync();
+				await _session.RemoveMessage();
 				await StopSession();
 			}
 

@@ -40,11 +40,11 @@ namespace Manito.Discord.PermanentMessage
 
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
 
-			await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
+			await _session.SendMessage(new DiscordInteractionResponseBuilder()
 				.WithContent("Выберите что хотите изменять")
 				.AddComponents(wallLine, wall, wallTranslator, imported)
 				.AddComponents(exitBtn));
-			var response = await _session.Puller.GetComponentInteraction();
+			var response = await _session.GetComponentInteraction();
 
 			if (response.CompareButton(wallLine))
 			{

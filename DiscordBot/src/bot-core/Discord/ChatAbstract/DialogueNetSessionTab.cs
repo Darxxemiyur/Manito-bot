@@ -38,7 +38,7 @@ namespace Manito.Discord.ChatAbstract
 				}
 				catch (Exception e)
 				{
-					await session.Responder.SendMessage(new UniversalMessageBuilder()
+					await session.SendMessage(new UniversalMessageBuilder()
 						.SetContent("Сессия завершена из-за ошибки!"));
 					await session.EndSession();
 

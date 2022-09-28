@@ -33,6 +33,7 @@ namespace Manito.Discord.Client
 			 x => client.MessageReactionAdded -= x);
 			ContInteract = new(x => client.ContextMenuInteractionCreated += x,
 			 x => client.ContextMenuInteractionCreated -= x);
+			
 		}
 		public EventBuffer(EventInline client)
 		{

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -95,10 +95,6 @@
 
   <ItemGroup>
     <Content Remove="C:\Users\mutex\.nuget\packages\mongodb.driver.core\2.17.1\build\..\runtimes\win\native\snappy64.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="System\" />
   </ItemGroup>
 
 </Project>

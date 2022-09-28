@@ -61,8 +61,7 @@ namespace Manito.Discord.Chat.DialogueNet
 				quantity = Math.Clamp(quantity + change, 0, int.MaxValue);
 			}
 		}
-		public static async Task<int?> GetQuantity(int[] nums, int[] muls, SessionResponder respondr,
-		 InteractionPuller puller,
+		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session,
 		 Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder,
 		 int starting = 0)
 		{
@@ -87,9 +86,9 @@ namespace Manito.Discord.Chat.DialogueNet
 
 				mg2.AddComponents(exbtn, sbmbtn);
 
-				await respondr.SendMessage(mg2);
+				await session.SendMessage(mg2);
 
-				var comp = await puller.GetComponentInteraction();
+				var comp = await session.GetComponentInteraction();
 
 				if (comp.CompareButton(exbtn))
 					return null;

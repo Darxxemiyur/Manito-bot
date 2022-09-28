@@ -44,12 +44,12 @@ namespace Manito.Discord.PermanentMessage
 
 				emb.AddField("Что сделать?", "** **");
 
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(remBtn, exitBtn));
 
-				var response = await _session.Puller.GetComponentInteraction();
+				var response = await _session.GetComponentInteraction();
 
-				await _session.Responder.DoLaterReply();
+				await _session.DoLaterReply();
 
 				return response.CompareButton(remBtn) ? new(RemoveLine) : _ret;
 			}
@@ -60,14 +60,14 @@ namespace Manito.Discord.PermanentMessage
 
 				var emb = new DiscordEmbedBuilder();
 				emb.WithDescription($"**ВЫ УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ {_line.MessageId}?**");
-				await _session.Responder.SendMessage(new DiscordWebhookBuilder()
+				await _session.SendMessage(new DiscordWebhookBuilder()
 					.AddEmbed(emb).AddComponents(returnBtn, removeBtn));
 
-				var response = await _session.Puller.GetComponentInteraction();
+				var response = await _session.GetComponentInteraction();
 
 				if (!response.CompareButton(removeBtn))
 				{
-					await _session.Responder.SendMessage(new DiscordInteractionResponseBuilder()
+					await _session.SendMessage(new DiscordInteractionResponseBuilder()
 						.AddComponents(returnBtn.Disable(), removeBtn.Disable()));
 				}
 
@@ -76,7 +76,7 @@ namespace Manito.Discord.PermanentMessage
 
 				_session.Context.Domain.MsgWallCtr.ImportedMessages.Remove(_line);
 
-				await _session.Responder.DoLaterReply();
+				await _session.DoLaterReply();
 
 				return new(_ret);
 			}
@@ -131,13 +131,13 @@ namespace Manito.Discord.PermanentMessage
 		{
 			_editor = new(session, new(Choose));
 			_session = session;
-			_selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session.Puller, _session.Responder,
+			_selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
 				new EnumerablePageReturner<ImportedMessage>(
 					_session.Context.Domain.MsgWallCtr.ImportedMessages, (x) => new Descriptor(x)));
 		}
 		private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
 		{
-			await _session.Responder.DoLaterReply();
+			await _session.DoLaterReply();
 			return new(Choose);
 		}
 		private async Task<NextNetworkInstruction> Choose(NetworkInstructionArgument arg)
