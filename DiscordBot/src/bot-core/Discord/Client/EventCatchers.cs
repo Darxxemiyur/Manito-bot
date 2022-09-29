@@ -13,29 +13,29 @@ using DisCatSharp.Interactivity.EventHandling;
 
 namespace Manito.Discord.Client
 {
-    public class SingleEventCatcher<TEvent> : Predictator<TEvent> where TEvent : DiscordEventArgs
-    {
-        private Func<TEvent, bool> _predictator;
-        private bool _runIfHandled;
-        public SingleEventCatcher(Func<TEvent, bool> predictator, bool runIfHandled = false)
-        {
-            _runIfHandled = runIfHandled;
-            _predictator = predictator;
-        }
-        public override Task<bool> IsFitting(DiscordClient client, TEvent args)
-        {
-            var res = _predictator(args);
+	public class SingleEventCatcher<TEvent> : Predictator<TEvent> where TEvent : DiscordEventArgs
+	{
+		private Func<TEvent, bool> _predictator;
+		private bool _runIfHandled;
+		private bool _hasRan;
+		public SingleEventCatcher(Func<TEvent, bool> predictator, bool runIfHandled = false)
+		{
+			_runIfHandled = runIfHandled;
+			_predictator = predictator;
+		}
+		public override Task<bool> IsFitting(DiscordClient client, TEvent args)
+		{
+			var res = _predictator(args);
 
-            _hasRan = _hasRan || res;
+			var bran = _hasRan;
+			_hasRan = _hasRan || res;
 
-            return Task.FromResult(res);
-        }
+			return Task.FromResult((!bran || _runIfHandled) && res);
+		}
+		public override bool RunIfHandled => _runIfHandled;
+		public override Task<bool> IsREOL() => Task.FromResult(_hasRan);
 
-        private bool _hasRan;
-
-        public override bool RunIfHandled => _runIfHandled;
-
-        public override Task<bool> IsREOL() => Task.FromResult(_hasRan);
-    }
+		protected override Task CancelPredictator() => Task.FromResult(_hasRan = true);
+	}
 
 }

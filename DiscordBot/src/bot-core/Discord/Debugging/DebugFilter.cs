@@ -26,7 +26,7 @@ namespace Manito.Discord.Economy
 			while (true)
 			{
 				var data = await _queue.GetData();
-				await FilterMessage(data.Item1, data.Item2);
+				await _service.ExecutionThread.AddNew(() => FilterMessage(data.Item1, data.Item2));
 			}
 		}
 		private DebugCommands _commands;
@@ -42,23 +42,15 @@ namespace Manito.Discord.Economy
 		}
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{
-			try
-			{
-				var res = _commands.Search(args.Interaction);
-				if (res == null)
-					return;
+			var res = _commands.Search(args.Interaction);
+			if (res == null)
+				return;
 
-				var guild = await _service.MyDiscordClient.ManitoGuild;
+			if (args.Interaction.User.Id != 860897395109789706)
+				return;
 
-				var user = await guild.GetMemberAsync(args.Interaction.User.Id);
-
-				if (user.Id != 860897395109789706)
-					return;
-
-				await res(args.Interaction);
-				args.Handled = true;
-			}
-			catch { }
+			await res(args.Interaction);
+			args.Handled = true;
 		}
 	}
 

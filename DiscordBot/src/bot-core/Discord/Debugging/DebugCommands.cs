@@ -78,37 +78,23 @@ namespace Manito.Discord.Economy
 		}
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
-			try
-			{
-				var at = _bot.MyDiscordClient.ActivityTools;
+			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
 
-				var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
+			await rs.DoLaterReply();
+			await rs.SendMessage(new UniversalMessageBuilder().SetContent("Goodi job!").AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!")));
 
-				await rs.DoLaterReply();
-				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Good job!"));
+			var intr = await rs.GetInteraction(InteractionTypes.Component | InteractionTypes.Message);
+			if (intr.Type == InteractionTypes.Component)
+				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Comp interaction!"));
 
-				await Task.WhenAll(Enumerable.Range(1, 8).Select(x => DoTheThing(args)));
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine($"{e}");
-			}
-		}
-		private async Task DoTheThing(DiscordInteraction args)
-		{
-			var btn = new DiscordButtonComponent(ButtonStyle.Primary, "gfff", "fggg");
-			var msg = new UniversalSession(new SessionFromMessage(_bot.MyDiscordClient,
-				await args.Channel.SendMessageAsync(
-				new UniversalMessageBuilder().SetContent("DDDD").AddComponents(btn)), args.User.Id));
+			if (intr.Type == InteractionTypes.Message)
+				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Msg interaction!"));
 
-			var intr = await msg.GetComponentInteraction();
-
-			await msg.DoLaterReply();
-			await msg.SendMessage(new UniversalMessageBuilder().SetContent("Good job!"));
+			await rs.DoLaterReply();
 		}
 		private async Task CheckMessage(DiscordInteraction args)
 		{
-			var (guild, msgs) = await _bot.Welcomer.GetMsg(args.User.Id);
+			var (guild, msgs) = await _bot.Filters.Welcomer.GetMsg(args.User.Id);
 			await args.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
 			foreach (var msg in msgs)

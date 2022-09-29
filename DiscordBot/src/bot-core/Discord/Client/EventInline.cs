@@ -31,14 +31,12 @@ namespace Manito.Discord.Client
 		public PerEventInline<ComponentInteractionCreateEventArgs> CompInteractBuffer {
 			get;
 		}
-
 		public PerEventInline<MessageReactionAddEventArgs> ReactAddBuffer {
 			get;
 		}
 		public PerEventInline<ContextMenuInteractionCreateEventArgs> ContInteractBuffer {
 			get;
 		}
-
 		private EventBuffer _sourceEventBuffer;
 		public EventInline(EventBuffer sourceEventBuffer)
 		{
@@ -96,7 +94,7 @@ namespace Manito.Discord.Client
 			var handled = false;
 			foreach (var chk in input)
 			{
-				if (!await chk.IsFitting(client, args) || handled && !chk.RunIfHandled)
+				if (handled && !chk.RunIfHandled || !await chk.IsFitting(client, args))
 					continue;
 				handled = true;
 				rrr = rrr.Append(chk);
@@ -145,6 +143,7 @@ namespace Manito.Discord.Client
 		protected Predictator() => _eventProxy = new();
 		public Task Handle(DiscordClient client, TEvent args) =>
 			_eventProxy.Handle(client, (this, args));
+		protected abstract Task CancelPredictator();
 		public virtual Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout, CancellationToken token)
 		{
 			return GetEvent(x => Task.Delay(timeout, token));
@@ -184,8 +183,10 @@ namespace Manito.Discord.Client
 			var either = await Task.WhenAny(cancelTask, gettingData);
 
 			if (either == cancelTask)
+			{
+				await CancelPredictator();
 				throw new TaskCanceledException($"Event awaiting has been cancelled!");
-
+			}
 
 			var result = await gettingData;
 

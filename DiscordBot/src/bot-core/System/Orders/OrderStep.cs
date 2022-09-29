@@ -11,5 +11,8 @@ namespace Manito.Discord.Orders
 		public string Description {
 			get; set;
 		}
+		public OrderStepType Type {
+			get;
+		}
 	}
 }

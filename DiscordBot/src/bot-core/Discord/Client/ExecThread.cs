@@ -53,7 +53,7 @@ namespace Manito.Discord.Client
 
 				//Forward all exceptions to the stderr-ish
 				if (completedTask?.Exception != null)
-					await Console.Error.WriteLineAsync($"{completedTask.Exception}");
+					await Console.Error.WriteLineAsync($"{completedTask.Exception.Flatten()}");
 				//await completedTask;
 
 				//Returns false if it tries to remove 'timeout' task, and true if succeeds

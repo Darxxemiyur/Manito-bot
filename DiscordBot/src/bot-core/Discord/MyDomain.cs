@@ -26,7 +26,6 @@ namespace Manito.Discord
 		private ExecThread _executionThread;
 		private ServerEconomy _economy;
 		private IInventorySystem _inventory;
-		private WelcomerFilter _welcomer;
 		private ShopService _shopService;
 		private RootConfig _rootConfig;
 		private MessageController _msgWallCtr;
@@ -35,7 +34,7 @@ namespace Manito.Discord
 		public ExecThread ExecutionThread => _executionThread;
 		public ServerEconomy Economy => _economy;
 		public IInventorySystem Inventory => _inventory;
-		public WelcomerFilter Welcomer => _welcomer;
+		public EventFilters Filters => _filters;
 		public ShopService ShopService => _shopService;
 		public MessageController MsgWallCtr => _msgWallCtr;
 		public static async Task<MyDomain> Create()
@@ -59,7 +58,6 @@ namespace Manito.Discord
 			_myDiscordClient = new MyDiscordClient(this, _rootConfig);
 			_msgWallCtr = new(this);
 			_shopService = new ShopService(this);
-			_welcomer = new WelcomerFilter(_myDiscordClient);
 			_appCommands = _myDiscordClient.AppCommands;
 			_executionThread = new ExecThread();
 			_filters = new EventFilters(this, _myDiscordClient.EventsBuffer);
@@ -81,7 +79,6 @@ namespace Manito.Discord
 			yield return _filters.RunModule();
 			yield return _economy.RunModule();
 			yield return _msgWallCtr.RunModule();
-			yield return _welcomer.RunModule();
 		}
 	}
 }
