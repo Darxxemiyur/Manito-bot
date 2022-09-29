@@ -22,7 +22,7 @@ namespace Manito.Discord.Orders
 	{
 		public NodeResultHandler StepResultHandler {
 			get;
-		}
+		} = Common.DefaultNodeResultHandler;
 		public readonly CancellationTokenSource Messanger;
 		public readonly UniversalSession Session;
 		public AdminOrderExec(UniversalSession session)
@@ -40,6 +40,7 @@ namespace Manito.Discord.Orders
 		}
 		public async Task StopExecuting()
 		{
+			await Task.Run(() => Messanger.Cancel());
 			return;
 			//throw new NotImplementedException();
 		}
@@ -47,11 +48,9 @@ namespace Manito.Discord.Orders
 		{
 			try
 			{
+				await Session.SendMessage(new UniversalMessageBuilder().AddContent("Meme"));
+
 				var newComponent = await Session.GetComponentInteraction(Messanger.Token);
-
-
-
-
 			}
 			catch (TaskCanceledException e)
 			{
@@ -61,7 +60,8 @@ namespace Manito.Discord.Orders
 		}
 		private async Task<NextNetworkInstruction> DoCancellation(NetworkInstructionArgument arg)
 		{
-			throw new NotImplementedException();
+			await Session.RemoveMessage();
+			return new();
 		}
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
@@ -75,7 +75,7 @@ namespace Manito.Discord.Orders
 		{
 			throw new NotImplementedException();
 		}
-		public NextNetworkInstruction GetStartingInstruction() => throw new NotImplementedException();
+		public NextNetworkInstruction GetStartingInstruction() => new(Decider);
 		public NextNetworkInstruction GetStartingInstruction(Object payload) => throw new NotImplementedException();
 	}
 }
