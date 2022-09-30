@@ -56,7 +56,7 @@ namespace Manito.Discord.Orders
 		}
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
-			var res = _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x)));
+			var res = await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x)));
 
 
 		}

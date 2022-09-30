@@ -1,13 +1,12 @@
-﻿using Manito.Discord.Chat.DialogueNet;
+﻿using DisCatSharp.Entities;
+
+using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
-using Name.Bayfaderix.Darxxemiyur.Common;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,10 +29,10 @@ namespace Manito.Discord.Orders
 			Messanger = new();
 			Session = session;
 		}
-
 		public Order ExOrder {
 			get; set;
 		}
+		private IEnumerator<OrderStep> _steps;
 		public async Task ChangeOrder()
 		{
 			throw new NotImplementedException();
@@ -46,17 +45,17 @@ namespace Manito.Discord.Orders
 		}
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument arg)
 		{
-			try
+			_steps.MoveNext();
+			var step = _steps.Current;
+			if (step != null)
 			{
-				await Session.SendMessage(new UniversalMessageBuilder().AddContent("Meme"));
+				if (step.Type == OrderStepType.DoConfirmation)
+					return new(DoConfirmation);
+				if (step.Type == OrderStepType.DoCommand)
+					return new(DoCommand);
+			}
 
-				var newComponent = await Session.GetComponentInteraction(Messanger.Token);
-			}
-			catch (TaskCanceledException e)
-			{
-				return new(DoCancellation);
-			}
-			throw new NotImplementedException();
+			return new(FetchNextStep);
 		}
 		private async Task<NextNetworkInstruction> DoCancellation(NetworkInstructionArgument arg)
 		{
@@ -65,11 +64,56 @@ namespace Manito.Discord.Orders
 		}
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var success = new DiscordButtonComponent();
+				var fail = new DiscordButtonComponent();
+
+				await Session.SendMessage(new UniversalMessageBuilder().AddContent("Meme"));
+				var intr = await Session.GetComponentInteraction(Messanger.Token);
+
+
+
+				if (intr.CompareButton(success))
+				{
+
+
+
+				}
+				if (intr.CompareButton(fail))
+				{
+
+
+
+				}
+				throw new NotImplementedException();
+
+			}
+			catch (TaskCanceledException e)
+			{
+				return new(DoCancellation);
+			}
 		}
 		private async Task<NextNetworkInstruction> DoCommand(NetworkInstructionArgument arg)
 		{
-			throw new NotImplementedException();
+			try
+			{
+
+				await Session.SendMessage(new UniversalMessageBuilder().AddContent("Meme"));
+				var intr = await Session.GetComponentInteraction(Messanger.Token);
+
+
+
+				if (intr.CompareButton())
+				{
+
+				}
+				throw new NotImplementedException();
+			}
+			catch (TaskCanceledException e)
+			{
+				return new(DoCancellation);
+			}
 		}
 		private async Task<NextNetworkInstruction> FetchNextStep(NetworkInstructionArgument arg)
 		{
