@@ -170,7 +170,7 @@ namespace Manito.Discord.ChatNew
 			InteractiveInteraction intr = await Client.ActivityTools
 				.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
-			await OnStatusChange(this, new SessionInnerMessage((intr.Interaction, _message), "ConvertMe"));
+			await OnStatusChange(this, new SessionInnerMessage((intr.Interaction, new DialogueCompInterIdentifier(intr), _message), "ConvertMe"));
 
 			return intr;
 		}
@@ -213,8 +213,8 @@ namespace Manito.Discord.ChatNew
 			if (msg.Message != "ConvertMe")
 				return;
 
-			var msgp = ((DiscordInteraction, DiscordMessage))msg.Generic;
-			_innerSession = new ComponentDialogueSession(Client, new InteractiveInteraction(msgp.Item1, msgp.Item2));
+			var msgp = ((DiscordInteraction, DialogueCompInterIdentifier, DiscordMessage))msg.Generic;
+			_innerSession = new ComponentDialogueSession(Client, msgp.Item2, new InteractiveInteraction(msgp.Item1, msgp.Item3));
 
 			session.OnStatusChange -= ConvertSession;
 		}
@@ -342,10 +342,14 @@ namespace Manito.Discord.ChatNew
 
 		public Task RemoveMessage() => Interactive.Interaction.DeleteOriginalResponseAsync();
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();
-		public ComponentDialogueSession(MyDiscordClient client, InteractiveInteraction interactive)
+		public ComponentDialogueSession(MyDiscordClient client, DialogueCompInterIdentifier id, InteractiveInteraction interactive)
 		{
-			Client = client;
-			Identifier = new DialogueCommandIdentifier(Interactive = interactive);
+			(Client, Interactive, Identifier) = (client, interactive, id);
+			NextType = InteractionResponseType.UpdateMessage;
+		}
+		public ComponentDialogueSession(MyDiscordClient client, DialogueCommandIdentifier id, InteractiveInteraction interactive)
+		{
+			(Client, Interactive, Identifier) = (client, interactive, id);
 			NextType = interactive.Message == null ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
 		}
 		public ComponentDialogueSession(MyDiscordClient client, DiscordInteraction interaction)

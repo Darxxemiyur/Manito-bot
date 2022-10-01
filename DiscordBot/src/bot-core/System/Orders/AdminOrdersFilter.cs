@@ -31,8 +31,11 @@ namespace Manito.Discord.Orders
 		private MyDomain _service;
 		private List<DiscordApplicationCommand> _commandList;
 		private DiscordEventProxy<DiscordInteraction> _queue;
+		private AdminOrderPool _pool;
+		public AdminOrderPool Pool => _pool;
 		public AdminOrdersFilter(MyDomain service, EventBuffer eventBuffer)
 		{
+			_pool = new();
 			_service = service;
 			_aoTab = new(service);
 			_commandList = GetCommands().ToList();
@@ -44,6 +47,8 @@ namespace Manito.Discord.Orders
 		{
 			yield return new DiscordApplicationCommand("admin",
 			 "Начать администрировать");
+			yield return new DiscordApplicationCommand("admin_add_test",
+			 "Добавить 5 заказов.");
 		}
 
 		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
@@ -56,8 +61,26 @@ namespace Manito.Discord.Orders
 		}
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
-			var res = await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x)));
+			if (args.Data.Name.Equals("admin"))
+				await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x, _pool)));
+			if (args.Data.Name.Equals("admin_add_test"))
+				for (int i = 0; i < 5; i++)
+				{
+					var order = new Order();
 
+					var oid = order.OrderId;
+
+					var id = Random.Shared.Next(999);
+					var step1 = new Order.ConfirmationStep((ulong)id, $"Подтверждение игрока {id}.", $"`/m {id} Вы подтверждаете исполнение заказа №{oid}?`");
+
+					id = Random.Shared.Next(999);
+					var step2 = new Order.ConfirmationStep((ulong)id, $"Подтверждение игрока {id}.", $"`/m {id} Вы подтверждаете исполнение заказа №{oid}?`");
+
+					id = Random.Shared.Next(999);
+					var step3 = new Order.ConfirmationStep((ulong)id, $"Подтверждение игрока {id}.", $"`/m {id} Вы подтверждаете исполнение заказа №{oid}?`");
+					order.SetSteps(step1, step2, step3);
+					await _pool.PlaceOrder(order);
+				}
 
 		}
 	}

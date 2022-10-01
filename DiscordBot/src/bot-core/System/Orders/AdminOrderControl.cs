@@ -22,8 +22,10 @@ namespace Manito.Discord.Orders
 		private DiscordButtonComponent _beginButton;
 		private DiscordButtonComponent _changeButton;
 		private DiscordButtonComponent _endButton;
-		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session)
+		private AdminOrderPool _pool;
+		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, AdminOrderPool pool)
 		{
+			_pool = pool;
 			_session = session;
 			_beginButton = new(ButtonStyle.Success, "beginworking", "Начать работу.");
 			_changeButton = new(ButtonStyle.Primary, "changeorder", "Сменить заказ.", true);
@@ -32,10 +34,11 @@ namespace Manito.Discord.Orders
 		private async Task<NextNetworkInstruction> BeginOrderExecution(NetworkInstructionArgument arg)
 		{
 			var (channel, id) = ((DiscordChannel, ulong))arg.Payload;
-			_execSession = new(new(new SessionFromMessage(_session.Client, channel, id)));
+			_execSession = new(_pool, new(new SessionFromMessage(_session.Client, channel, id)));
 			await Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(_execSession));
 
 			_beginButton.Disable();
+			_changeButton.Enable();
 			_endButton.Enable();
 			return new(Waiting);
 		}
@@ -43,7 +46,7 @@ namespace Manito.Discord.Orders
 		{
 			await _execSession.ChangeOrder();
 
-			_changeButton.Disable();
+			//_changeButton.Disable();
 			_endButton.Enable();
 			return new(Waiting);
 		}
