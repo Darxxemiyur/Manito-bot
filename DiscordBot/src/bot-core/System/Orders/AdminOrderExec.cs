@@ -18,14 +18,20 @@ namespace Manito.Discord.Orders
 		public NodeResultHandler StepResultHandler {
 			get;
 		} = Common.DefaultNodeResultHandler;
-		public readonly CancellationTokenSource Messanger;
+		public CancellationTokenSource Messanger {
+			get; private set;
+		}
 		public readonly UniversalSession Session;
 		private readonly AdminOrderPool _pool;
-		public AdminOrderExec(AdminOrderPool pool, UniversalSession session)
+		private readonly DiscordChannel _channel;
+		private readonly DiscordUser _user;
+		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
 		{
 			_pool = pool;
 			Messanger = new();
 			Session = session;
+			_channel = channel;
+			_user = user;
 		}
 		private Order _exOrder;
 		public Order ExOrder {
@@ -35,18 +41,20 @@ namespace Manito.Discord.Orders
 				_steps = value?.Steps?.GetEnumerator();
 			}
 		}
+		private bool _swap;
 		private IEnumerator<Order.Step> _steps;
 		public async Task ChangeOrder()
 		{
 			if (ExOrder != null)
 				await _pool.PlaceOrder(ExOrder);
 
+			_swap = true;
+			await StopExecuting();
 			ExOrder = null;
 		}
 		public async Task StopExecuting()
 		{
 			await Task.Run(() => Messanger.Cancel());
-
 		}
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument arg)
 		{
@@ -68,6 +76,14 @@ namespace Manito.Discord.Orders
 		}
 		private async Task<NextNetworkInstruction> DoCancellation(NetworkInstructionArgument arg)
 		{
+			if (_swap)
+			{
+				_swap = false;
+				Messanger = new();
+				return new(FetchNextStep);
+			}
+
+
 			await Session.RemoveMessage();
 			await ChangeOrder();
 
@@ -151,6 +167,11 @@ namespace Manito.Discord.Orders
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
 
 				ExOrder = await _pool.GetOrder(Messanger.Token);
+
+				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder()
+					.SetContent($"<@{_user.Id}>").AddMention(new UserMention(_user)));
+
+				await Session.Client.Domain.ExecutionThread.AddNew(() => msg.DeleteAsync());
 
 				return new(Decider);
 			}

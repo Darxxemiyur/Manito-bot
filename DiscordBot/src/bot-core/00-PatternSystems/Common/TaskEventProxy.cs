@@ -12,54 +12,35 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	{
 		public TaskEventProxy()
 		{
-			_sync = new SemaphoreSlim(1, 1);
+			_sync = new();
 			_chain = new();
 			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
 		}
 		private TaskCompletionSource<T> _generator;
 		private readonly Queue<Task<T>> _chain;
-		private readonly SemaphoreSlim _sync;
+		private readonly AsyncLocker _sync;
 		public Task<bool> HasAny() => Task.FromResult(_chain.Any(x => x.IsCompleted));
 		public async Task Handle(T stuff)
 		{
-			try
-			{
-				await _sync.WaitAsync();
+			using var _ = await _sync.BlockAsyncLock();
 
-				if (_generator.Task.IsCanceled)
-					throw _generator.Task.Exception;
+			if (_generator.Task.IsCanceled)
+				throw _generator.Task.Exception;
 
-				_generator.SetResult(stuff);
-				_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
-			}
-			finally
-			{
-				_sync.Release();
-			}
+			_generator.SetResult(stuff);
+			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
 		}
 		public async Task Cancel()
 		{
-			try
-			{
-				await _sync.WaitAsync();
-				_generator.SetCanceled();
-			}
-			finally
-			{
-				_sync.Release();
-			}
+			using var _ = await _sync.BlockAsyncLock();
+			_generator.SetCanceled();
 		}
 		public async Task<T> GetData()
 		{
 			Task<T> result = null;
-			try
 			{
-				await _sync.WaitAsync();
+				using var _ = await _sync.BlockAsyncLock();
 				result = _chain.Dequeue();
-			}
-			finally
-			{
-				_sync.Release();
 			}
 			return await (result ?? Task.FromResult<T>(default));
 		}

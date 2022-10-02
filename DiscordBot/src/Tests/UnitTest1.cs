@@ -11,6 +11,33 @@ namespace Tests
 		public void TestMethod1()
 		{
 		}
+		[TestMethod("SHITSHITSHIT")]
+		public async Task Method3()
+		{
+			var locker = new AsyncLocker();
+
+			{
+				using var f = await locker.BlockAsyncLock();
+
+			}
+
+			{
+				using var f = await locker.BlockAsyncLock();
+
+			}
+
+			{
+				using var f = await locker.BlockAsyncLock();
+
+			}
+
+			{
+				using var f = await locker.BlockAsyncLock();
+
+			}
+
+		}
+
 		[TestMethod("TaskTest5")]
 		public async Task TestMethod3()
 		{

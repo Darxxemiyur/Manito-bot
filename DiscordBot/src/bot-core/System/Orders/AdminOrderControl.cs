@@ -33,8 +33,8 @@ namespace Manito.Discord.Orders
 		}
 		private async Task<NextNetworkInstruction> BeginOrderExecution(NetworkInstructionArgument arg)
 		{
-			var (channel, id) = ((DiscordChannel, ulong))arg.Payload;
-			_execSession = new(_pool, new(new SessionFromMessage(_session.Client, channel, id)));
+			var (channel, id) = ((DiscordChannel, DiscordUser))arg.Payload;
+			_execSession = new(_pool, new(new SessionFromMessage(_session.Client, channel, id.Id)), channel, id);
 			await Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(_execSession));
 
 			_beginButton.Disable();
@@ -71,7 +71,7 @@ namespace Manito.Discord.Orders
 			var comp = await _session.GetComponentInteraction();
 
 			if (comp.CompareButton(_beginButton))
-				return new(BeginOrderExecution, (comp.Interaction.Channel, comp.Interaction.User.Id));
+				return new(BeginOrderExecution, (comp.Interaction.Channel, comp.Interaction.User));
 			if (comp.CompareButton(_changeButton))
 				return new(ChangeOrder);
 			if (comp.CompareButton(_endButton))

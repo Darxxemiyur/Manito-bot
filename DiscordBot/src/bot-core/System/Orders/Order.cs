@@ -22,15 +22,26 @@ namespace Manito.Discord.Orders
 		private readonly TaskCompletionSource<string> _handle = new();
 		private readonly CancellationTokenSource _cancel = new();
 		public Task<string> OrderFinishTask;
-		private readonly AsyncSafeVariable<bool> _safe = new();
+		private readonly AsyncLocker _lock = new();
+		private bool _isNotCancellable;
 		public void SetSteps(IEnumerable<Step> steps) => _steps = steps.ToList();
 		public void SetSteps(params Step[] steps) => _steps = steps.ToList();
 		public async Task CancelOrder()
 		{
-			if (await _safe.GetValue() is var f && f)
-				await Task.Run(_cancel.Cancel);
+			using var ff = await _lock.BlockAsyncLock();
+
+			if (_isNotCancellable)
+				return;
+
+			await Task.Run(_cancel.Cancel);
 		}
-		public Task MakeUncancellable() => _safe.SetValue(true);
+		public async Task MakeUncancellable()
+		{
+			using var ff = await _lock.BlockAsyncLock();
+
+			_isNotCancellable = true;
+		}
+
 		public Task FinishOrder(string message) => Task.FromResult(_handle.TrySetResult(message));
 
 
@@ -87,11 +98,18 @@ namespace Manito.Discord.Orders
 				get;
 			}
 		}
+		public class ChangeStateSteop : Step
+		{
+			public override StepType Type {
+				get;
+			}
+		}
 		public enum StepType
 		{
 			Confirmation,
 			Command,
 			ShowInfo,
+			ChangeState,
 		}
 	}
 }
