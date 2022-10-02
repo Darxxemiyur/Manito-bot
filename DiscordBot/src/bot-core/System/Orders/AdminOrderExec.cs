@@ -83,7 +83,6 @@ namespace Manito.Discord.Orders
 				return new(FetchNextStep);
 			}
 
-
 			await Session.RemoveMessage();
 			await ChangeOrder();
 
@@ -127,29 +126,18 @@ namespace Manito.Discord.Orders
 		{
 			try
 			{
-				var step = (Order.ConfirmationStep)arg.Payload;
+				var step = (Order.CommandStep)arg.Payload;
 
+				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "executed", "Выполнено.");
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
-				embed.WithDescription($"{step.Description}\nНе опрошено.\nНапишите в чат \"{step.Question}\" и нажмите \"Опрошено.\"");
-				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "asked", "Опрошено.");
-				var success = new DiscordButtonComponent(ButtonStyle.Success, "success", "Подтвердить.", true);
-				var fail = new DiscordButtonComponent(ButtonStyle.Danger, "fail", "Отклонить.", true);
+				embed.WithDescription($"{step.Description}\nНапишите в консоль \"{step.Command}\" и нажмите \"{asked.Label}\"");
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
-					.AddComponents(asked).AddComponents(fail, success));
-
-				await Session.GetComponentInteraction(Messanger.Token);
-
-				asked.Disable();
-				success.Enable();
-				fail.Enable();
-				embed.WithDescription($"{step.Description}\nОпрошено.\nДождитесь ответа игрока.\nВ случае `Нет`, жмите `Отклонить.`, в случае `Да`, жмите `Подтвердить.`");
-
-				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
-					.AddComponents(asked).AddComponents(fail, success));
+					.AddComponents(asked));
 
 				await Session.GetComponentInteraction(Messanger.Token);
 				await Session.DoLaterReply();
+
 				return new(Decider);
 			}
 			catch (TaskCanceledException)
