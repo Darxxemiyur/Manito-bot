@@ -35,14 +35,23 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			using var _ = await _sync.BlockAsyncLock();
 			_generator.SetCanceled();
 		}
-		public async Task<T> GetData()
+		public async Task<T> GetData(CancellationToken token = default)
 		{
 			Task<T> result = null;
 			{
 				using var _ = await _sync.BlockAsyncLock();
 				result = _chain.Dequeue();
 			}
-			return await (result ?? Task.FromResult<T>(default));
+			var canceller = Task.Run(() => result, token);
+			var first = await Task.WhenAny(result, canceller);
+
+			if (first == canceller && token.IsCancellationRequested)
+			{
+				_chain.Enqueue(result);
+				await canceller;
+			}
+
+			return await result;
 		}
 
 		private bool disposedValue;
@@ -92,7 +101,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		public Task<bool> HasAny() => _facade.HasAny();
 		public Task Handle() => _facade.Handle(true);
 		public Task Cancel() => _facade.Cancel();
-		public Task GetData() => _facade.GetData();
+		public Task GetData(CancellationToken token = default) => _facade.GetData(token);
 		private bool disposedValue;
 		protected virtual void Dispose(bool disposing)
 		{

@@ -17,7 +17,7 @@ namespace Manito.Discord
         public Task Handle(DiscordClient client, T stuff) => _facade.Handle((client, stuff));
         public Task<bool> HasAny() => _facade.HasAny();
         public async Task Cancel() => await _facade.Cancel();
-        public async Task<(DiscordClient, T)> GetData() => await _facade.GetData();
+        public async Task<(DiscordClient, T)> GetData(CancellationToken token = default) => await _facade.GetData(token);
 
         private bool disposedValue;
         protected virtual void Dispose(bool disposing)

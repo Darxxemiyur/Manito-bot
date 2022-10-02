@@ -56,7 +56,7 @@ namespace Manito.Discord.Economy
          _deposits.ContainsKey(id) ? _deposits[id] : _deposits[id] = new()
         {
             DiscordID = id,
-            Currency = 5000
+            Currency = 50000
         };
         public PlayerWallet GetPlayerWallet(ulong id) => new(this, id);
         public PlayerWallet GetPlayerWallet(DiscordUser user) => GetPlayerWallet(user.Id);

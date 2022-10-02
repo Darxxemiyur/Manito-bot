@@ -51,7 +51,7 @@ namespace Manito.Discord.Shop
 				}
 
 				await _session.SendMessage(_session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена.")));
-				await Task.Delay(10000);
+				await Task.Delay(5000);
 				await _session.RemoveMessage();
 
 				await StopSession();
