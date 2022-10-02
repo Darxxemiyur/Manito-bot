@@ -28,7 +28,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			if (_executors.Count > 0)
 			{
 				var rem = _executors.Dequeue();
-				if (!rem.Task.IsCanceled)
+				if (rem != null && !rem.Task.IsCanceled)
 					rem.TrySetResult(order);
 				else
 					await InnerPlaceOrder(order);
@@ -44,7 +44,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		private async Task<Task<Order>> InnerGetOrder(CancellationToken token = default)
 		{
 			if (_queue.Count > 0)
-				return _queue.Dequeue() is var g && !g.OrderCancelledTask.IsCompleted ? Task.FromResult(g) : await InnerGetOrder(token);
+				return _queue.Dequeue() is var g && g != null && !g.OrderCancelledTask.IsCompleted ? Task.FromResult(g) : await InnerGetOrder(token);
 
 			var relay = new TaskCompletionSource<Order>();
 			_executors.Enqueue(relay);

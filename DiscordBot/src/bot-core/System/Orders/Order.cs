@@ -130,7 +130,7 @@ namespace Manito.Discord.Orders
 				get;
 			}
 		}
-		public class ChangeStateSteop : Step
+		public class ChangeStateStep : Step
 		{
 			public override StepType Type => StepType.ChangeState;
 		}

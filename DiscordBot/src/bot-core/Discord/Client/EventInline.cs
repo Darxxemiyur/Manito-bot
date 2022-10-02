@@ -148,9 +148,11 @@ namespace Manito.Discord.Client
 		{
 			return GetEvent(x => Task.Delay(timeout, token));
 		}
-		public virtual Task<(DiscordClient, TEvent)> GetEvent(CancellationToken token)
+		public virtual async Task<(DiscordClient, TEvent)> GetEvent(CancellationToken token)
 		{
-			return GetEvent(x => Task.Delay(-1, token));
+			var result = await _eventProxy.GetData(token);
+
+			return (result.Item1, result.Item2.Item2);
 		}
 		/// <summary>
 		/// Get event in specific period of time
@@ -192,7 +194,6 @@ namespace Manito.Discord.Client
 
 			return (result.Item1, result.Item2.Item2);
 		}
-
 		public virtual async Task<(DiscordClient, TEvent)> GetEvent()
 		{
 			var result = await _eventProxy.GetData();

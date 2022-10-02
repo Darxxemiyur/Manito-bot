@@ -27,7 +27,6 @@ namespace Manito.Discord.Orders
 		private readonly PoolTaskEventProxy _pool;
 		private readonly DiscordChannel _channel;
 		private readonly DiscordUser _admin;
-		private bool _swap;
 		private IEnumerator<Order.Step> _steps;
 		private Order _exOrder;
 		public Order ExOrder {
@@ -58,6 +57,8 @@ namespace Manito.Discord.Orders
 					return new(DoConfirmation, step);
 				if (step.Type == Order.StepType.Command)
 					return new(DoCommand, step);
+				if (step.Type == Order.StepType.ChangeState)
+					return new(MakeNonCancallable);
 
 				throw new NotImplementedException();
 			}
@@ -95,7 +96,7 @@ namespace Manito.Discord.Orders
 			ExOrder = null;
 			return new(FetchNextStep);
 		}
-		public Task ChangeOrder() => Task.Run(_swapToken.Cancel);
+		public Task ChangeOrder() => ExOrder != null ? Task.Run(_swapToken.Cancel) : Task.CompletedTask;
 
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
@@ -124,12 +125,17 @@ namespace Manito.Discord.Orders
 
 				var answer = await Session.GetComponentInteraction(_localToken.Token);
 
-				if (answer.CompareButton(success))
-					return new(Decider);
-				return new();
+				if (answer.CompareButton(fail))
+				{
+					_cancelOrder.Cancel();
+					_cancelOrder.Token.ThrowIfCancellationRequested();
+				}
+
+				return new(Decider);
 			}
 			catch (TaskCanceledException)
 			{
+				Console.WriteLine("Shit");
 				return new(DoOrderCancellation);
 			}
 		}
@@ -148,6 +154,19 @@ namespace Manito.Discord.Orders
 
 				await Session.GetComponentInteraction(_localToken.Token);
 				await Session.DoLaterReply();
+
+				return new(Decider);
+			}
+			catch (TaskCanceledException)
+			{
+				return new(DoOrderCancellation);
+			}
+		}
+		private async Task<NextNetworkInstruction> MakeNonCancallable(NetworkInstructionArgument arg)
+		{
+			try
+			{
+				await ExOrder.MakeUncancellable();
 
 				return new(Decider);
 			}

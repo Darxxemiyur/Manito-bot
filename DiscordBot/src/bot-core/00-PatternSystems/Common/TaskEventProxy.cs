@@ -22,33 +22,38 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		public Task<bool> HasAny() => Task.FromResult(_chain.Any(x => x.IsCompleted));
 		public async Task Handle(T stuff)
 		{
-			using var _ = await _sync.BlockAsyncLock();
+			await using var _ = await _sync.BlockAsyncLock();
 
 			if (_generator.Task.IsCanceled)
-				throw _generator.Task.Exception;
+				throw new TaskCanceledException();
 
 			_generator.SetResult(stuff);
 			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
 		}
 		public async Task Cancel()
 		{
-			using var _ = await _sync.BlockAsyncLock();
+			await using var _ = await _sync.BlockAsyncLock();
 			_generator.SetCanceled();
 		}
 		public async Task<T> GetData(CancellationToken token = default)
 		{
 			Task<T> result = null;
 			{
-				using var _ = await _sync.BlockAsyncLock();
+				await using var _ = await _sync.BlockAsyncLock();
 				result = _chain.Dequeue();
 			}
-			var canceller = Task.Run(() => result, token);
-			var first = await Task.WhenAny(result, canceller);
 
-			if (first == canceller && token.IsCancellationRequested)
+			var revert = new TaskCompletionSource();
+			var fallback = token.Register(revert.SetCanceled);
+
+			var either = await Task.WhenAny(result, revert.Task);
+
+			if (either == revert.Task)
 			{
+				await using var _ = await _sync.BlockAsyncLock();
+				await Task.Run(fallback.Unregister);
 				_chain.Enqueue(result);
-				await canceller;
+				await revert.Task;
 			}
 
 			return await result;

@@ -36,7 +36,7 @@ namespace Manito.Discord.Orders
 		{
 			var (channel, id) = ((DiscordChannel, DiscordUser))arg.Payload;
 			_execSession = new(_pool, new(new SessionFromMessage(_session.Client, channel, id.Id)), channel, id);
-			await Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(_execSession));
+			await Domain.ExecutionThread.AddNew(() => NetworkCommon.RunNetwork(_execSession));
 
 			_beginButton.Disable();
 			_changeButton.Enable();

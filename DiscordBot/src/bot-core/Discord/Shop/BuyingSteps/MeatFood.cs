@@ -105,6 +105,7 @@ namespace Manito.Discord.Shop
 			var order = new Order(_session.Context.CustomerId);
 			var seq = new List<Order.Step>();
 			seq.Add(new Order.ConfirmationStep(id, $"Подтвердите получение каркаса на {_quantity} игроку {id}", $"`/m {id} Вы подтверждаете получение каркаса на {_quantity}? (Да/Нет)`"));
+			seq.Add(new Order.ChangeStateStep());
 			seq.Add(new Order.CommandStep(id, $"Телепортирование к {id}", $"`TeleportToP {id}`"));
 			var size = _quantity;
 			while (size > 0)
@@ -120,7 +121,11 @@ namespace Manito.Discord.Shop
 
 			var not1 = order.OrderCompleteTask;
 			var noRet = new CancellationTokenSource();
-			var not2 = order.OrderNonCancellableTask.ContinueWith((x) => Task.Run(noRet.Cancel));
+			var not2 = Task.Run(async () => {
+				await order.OrderNonCancellableTask;
+				await Task.Run(noRet.Cancel);
+			});
+
 			var not3 = order.OrderCancelledTask;
 
 			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
@@ -133,12 +138,11 @@ namespace Manito.Discord.Shop
 				var first = await Task.WhenAny(list);
 				list.Remove(first);
 
-				if (first == not2 && first == res)
+				if (first == not2 || first == res)
 				{
-					cancelBtn.Disable();
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
 				}
-				if (first == res && !both.Token.IsCancellationRequested)
+				if (first == res && !first.IsCanceled)
 				{
 					await order.TryCancelOrder();
 					await not3;
