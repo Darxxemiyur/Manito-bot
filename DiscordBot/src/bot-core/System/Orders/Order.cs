@@ -15,36 +15,68 @@ namespace Manito.Discord.Orders
 	{
 		private List<Step> _steps;
 		public IReadOnlyList<Step> Steps => _steps;
-		public Order(params Step[] steps) => _steps = steps?.ToList() ?? new();
-		public ulong Initiator;
-		public ulong OrderId = OrderIds++;
-		private static ulong OrderIds = 0;
-		private readonly TaskCompletionSource<string> _handle = new();
-		private readonly CancellationTokenSource _cancel = new();
-		public Task<string> OrderFinishTask;
+		public Order(ulong initiator, params Step[] steps) =>
+			(Initiator, _steps) = (initiator, steps?.ToList() ?? new());
+		public readonly ulong Initiator;
+		public readonly ulong OrderId = OrderIds++;
+		private static ulong OrderIds = 1;
+		private readonly TaskCompletionSource OrderCancelled = new();
+		private readonly TaskCompletionSource OrderNonCancellable = new();
+		private readonly TaskCompletionSource OrderComplete = new();
+		/// <summary>
+		/// On order cancelled. True if cancelled by admin, false if by customer.
+		/// </summary>
+		public Task OrderCancelledTask => OrderCancelled.Task;
+		private readonly CancellationTokenSource _playerOrderCancellation = new();
+		public CancellationToken PlayerOrderCancelToken => _playerOrderCancellation.Token;
+		private readonly CancellationTokenSource _adminOrderCancellation = new();
+		public CancellationToken AdminOrderCancelToken => _adminOrderCancellation.Token;
+		public Task OrderNonCancellableTask => OrderNonCancellable.Task;
+		public Task OrderCompleteTask => OrderComplete.Task;
 		private readonly AsyncLocker _lock = new();
 		private bool _isNotCancellable;
 		public void SetSteps(IEnumerable<Step> steps) => _steps = steps.ToList();
 		public void SetSteps(params Step[] steps) => _steps = steps.ToList();
+		/// <summary>
+		/// Order cancellation by admin.
+		/// </summary>
 		public async Task CancelOrder()
 		{
-			using var ff = await _lock.BlockAsyncLock();
+			await using var _ = await _lock.BlockAsyncLock();
+
+			await Task.Run(_adminOrderCancellation.Cancel);
+			await Task.Run(OrderCancelled.TrySetResult);
+			await Task.Run(OrderComplete.TrySetCanceled);
+		}
+		/// <summary>
+		/// Order cancellation by player
+		/// </summary>
+		/// <returns></returns>
+		public async Task TryCancelOrder()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
 
 			if (_isNotCancellable)
 				return;
 
-			await Task.Run(_cancel.Cancel);
+			await Task.Run(_playerOrderCancellation.Cancel);
+			await Task.Run(OrderCancelled.TrySetResult);
+			await Task.Run(OrderComplete.TrySetCanceled);
+		}
+		public async Task FinishOrder()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+
+			await Task.Run(OrderCancelled.TrySetCanceled);
+			await Task.Run(OrderComplete.TrySetResult);
 		}
 		public async Task MakeUncancellable()
 		{
-			using var ff = await _lock.BlockAsyncLock();
+			await using var _ = await _lock.BlockAsyncLock();
 
 			_isNotCancellable = true;
+			await Task.Run(OrderNonCancellable.SetResult);
 		}
-
-		public Task FinishOrder(string message) => Task.FromResult(_handle.TrySetResult(message));
-
-
 
 		public abstract class Step
 		{
@@ -100,9 +132,7 @@ namespace Manito.Discord.Orders
 		}
 		public class ChangeStateSteop : Step
 		{
-			public override StepType Type {
-				get;
-			}
+			public override StepType Type => StepType.ChangeState;
 		}
 		public enum StepType
 		{

@@ -18,21 +18,16 @@ namespace Manito.Discord.Orders
 		public NodeResultHandler StepResultHandler {
 			get;
 		} = Common.DefaultNodeResultHandler;
-		public CancellationTokenSource Messanger {
-			get; private set;
-		}
 		public readonly UniversalSession Session;
+		private CancellationTokenSource _quitToken;
+		private CancellationTokenSource _swapToken;
+		private CancellationTokenSource _cancelOrder;
+		private CancellationTokenSource _localToken;
 		private readonly AdminOrderPool _pool;
 		private readonly DiscordChannel _channel;
-		private readonly DiscordUser _user;
-		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
-		{
-			_pool = pool;
-			Messanger = new();
-			Session = session;
-			_channel = channel;
-			_user = user;
-		}
+		private readonly DiscordUser _admin;
+		private bool _swap;
+		private IEnumerator<Order.Step> _steps;
 		private Order _exOrder;
 		public Order ExOrder {
 			get => _exOrder;
@@ -41,21 +36,17 @@ namespace Manito.Discord.Orders
 				_steps = value?.Steps?.GetEnumerator();
 			}
 		}
-		private bool _swap;
-		private IEnumerator<Order.Step> _steps;
-		public async Task ChangeOrder()
+		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
 		{
-			if (ExOrder != null)
-				await _pool.PlaceOrder(ExOrder);
-
-			_swap = true;
-			await StopExecuting();
-			ExOrder = null;
+			_pool = pool;
+			_quitToken = new();
+			_swapToken = new();
+			_cancelOrder = new();
+			Session = session;
+			_channel = channel;
+			_admin = user;
 		}
-		public async Task StopExecuting()
-		{
-			await Task.Run(() => Messanger.Cancel());
-		}
+		public Task StopExecuting() => Task.Run(() => _quitToken.Cancel());
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument arg)
 		{
 			_steps.MoveNext();
@@ -70,24 +61,41 @@ namespace Manito.Discord.Orders
 				throw new NotImplementedException();
 			}
 
+			await ExOrder.FinishOrder();
 			ExOrder = null;
 
 			return new(FetchNextStep);
 		}
-		private async Task<NextNetworkInstruction> DoCancellation(NetworkInstructionArgument arg)
+		private async Task<NextNetworkInstruction> DoOrderCancellation(NetworkInstructionArgument arg)
 		{
-			if (_swap)
+			if (_swapToken.IsCancellationRequested)
 			{
-				_swap = false;
-				Messanger = new();
+				await _pool.PlaceOrder(ExOrder);
+				ExOrder = null;
+				_swapToken = new();
 				return new(FetchNextStep);
 			}
 
-			await Session.RemoveMessage();
-			await ChangeOrder();
+			if (_quitToken.IsCancellationRequested)
+			{
+				_quitToken = new();
+				await _pool.PlaceOrder(ExOrder);
+				ExOrder = null;
+				await Session.RemoveMessage();
+				return new();
+			}
 
-			return new();
+			if (_cancelOrder.Token.IsCancellationRequested)
+			{
+				_cancelOrder = new();
+				await ExOrder.CancelOrder();
+			}
+
+			ExOrder = null;
+			return new(FetchNextStep);
 		}
+		public Task ChangeOrder() => Task.Run(_swapToken.Cancel);
+
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
 			try
@@ -103,7 +111,7 @@ namespace Manito.Discord.Orders
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked).AddComponents(fail, success));
 
-				await Session.GetComponentInteraction(Messanger.Token);
+				await Session.GetComponentInteraction(_localToken.Token);
 
 				asked.Disable();
 				success.Enable();
@@ -113,13 +121,15 @@ namespace Manito.Discord.Orders
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked).AddComponents(fail, success));
 
-				await Session.GetComponentInteraction(Messanger.Token);
+				var answer = await Session.GetComponentInteraction(_localToken.Token);
 
-				return new(Decider);
+				if (answer.CompareButton(success))
+					return new(Decider);
+				return new();
 			}
 			catch (TaskCanceledException)
 			{
-				return new(DoCancellation);
+				return new(DoOrderCancellation);
 			}
 		}
 		private async Task<NextNetworkInstruction> DoCommand(NetworkInstructionArgument arg)
@@ -135,29 +145,33 @@ namespace Manito.Discord.Orders
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked));
 
-				await Session.GetComponentInteraction(Messanger.Token);
+				await Session.GetComponentInteraction(_localToken.Token);
 				await Session.DoLaterReply();
 
 				return new(Decider);
 			}
 			catch (TaskCanceledException)
 			{
-				return new(DoCancellation);
+				return new(DoOrderCancellation);
 			}
 		}
 		private async Task<NextNetworkInstruction> FetchNextStep(NetworkInstructionArgument arg)
 		{
 			try
 			{
+				_localToken = null;
+
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"Ожидание заказов...");
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
 
-				ExOrder = await _pool.GetOrder(Messanger.Token);
+				ExOrder = await _pool.GetOrder(_quitToken.Token);
+
+				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, ExOrder.PlayerOrderCancelToken, _cancelOrder.Token);
 
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder()
-					.SetContent($"<@{_user.Id}>").AddMention(new UserMention(_user)));
+					.SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 
 				await Session.Client.Domain.ExecutionThread.AddNew(() => msg.DeleteAsync());
 
@@ -165,7 +179,7 @@ namespace Manito.Discord.Orders
 			}
 			catch (TaskCanceledException)
 			{
-				return new(DoCancellation);
+				return new(DoOrderCancellation);
 			}
 		}
 		public NextNetworkInstruction GetStartingInstruction() => new(FetchNextStep);

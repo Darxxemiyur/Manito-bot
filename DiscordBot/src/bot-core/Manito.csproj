@@ -16,15 +16,23 @@
     <PackageReference Include="DisCatSharp.Lavalink" Version="10.1.4" />
     <PackageReference Include="DisCatSharp.VoiceNext" Version="10.1.4" />
     <PackageReference Include="emzi0767.common" Version="2.6.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
-    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.8" />
-    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
+    <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.9" />
+    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="microsoft.extensions.caching.abstractions" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.caching.memory" Version="6.0.1" />
     <PackageReference Include="microsoft.extensions.dependencyinjection" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.dependencyinjection.abstractions" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.logging" Version="6.0.0" />
-    <PackageReference Include="microsoft.extensions.logging.abstractions" Version="6.0.1" />
+    <PackageReference Include="microsoft.extensions.logging.abstractions" Version="6.0.2" />
     <PackageReference Include="microsoft.extensions.options" Version="6.0.0" />
     <PackageReference Include="microsoft.extensions.primitives" Version="6.0.0" />
     <PackageReference Include="microsoft.netcore.platforms" Version="6.0.5" />
@@ -42,7 +50,7 @@
     <PackageReference Include="nito.cancellation" Version="1.1.2" />
     <PackageReference Include="nito.collections.deque" Version="1.1.1" />
     <PackageReference Include="nito.disposables" Version="2.3.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
     <PackageReference Include="runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl" Version="4.3.3" />
     <PackageReference Include="runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl" Version="4.3.3" />
     <PackageReference Include="runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl" Version="4.3.3" />

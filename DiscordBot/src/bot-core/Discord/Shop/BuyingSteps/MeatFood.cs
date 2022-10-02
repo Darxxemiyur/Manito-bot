@@ -14,6 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Orders;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Manito.Discord.Shop
 {
@@ -56,23 +59,109 @@ namespace Manito.Discord.Shop
 		{
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
-			//var inventory = _session.Context.Inventory;
+
 			var price = _quantity * _food.Price;
 
 			if (!await wallet.CanAfford(price))
 				return new NextNetworkInstruction(ForceChange, NextNetworkActions.Continue);
 
 			await wallet.Withdraw(price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {price}");
-			//await inventory.AddItem(x => (x.ItemType, x.Owner, x.Quantity)
-			// = ($"{_food.Category}", _session.Customer.Id, _quantity));
 
-			return new NextNetworkInstruction(null, NextNetworkActions.Stop);
+
+			return new NextNetworkInstruction(GetId);
+		}
+		private async Task<NextNetworkInstruction> GetId(NetworkInstructionArgument args)
+		{
+			var id = 0;
+			while (true)
+			{
+				var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
+				_session, (x, y) => Task.FromResult(true),
+				async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
+				.WithDescription($"ID получающий ваш заказ - {x}")), id);
+
+				id = qua ?? id;
+
+				var cont = new DiscordButtonComponent(ButtonStyle.Primary, "continue", "Продолжить");
+				var back = new DiscordButtonComponent(ButtonStyle.Danger, "back", "Изменить");
+
+				await _session.SendMessage(new UniversalMessageBuilder().SetContent($"ID: {id}\nПродолжить?").AddComponents(back, cont));
+				var intr = await _session.GetComponentInteraction();
+
+				if (intr.CompareButton(cont))
+					break;
+
+			}
+			return new(WaitForOrder, id);
+		}
+		private async Task<NextNetworkInstruction> WaitForOrder(NetworkInstructionArgument args)
+		{
+			var id = (uint)(int)args.Payload;
+			var rmsg = new DiscordEmbedBuilder();
+			rmsg.WithDescription("Ожидание исполнения Вашего заказа.");
+
+			var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
+
+			var order = new Order(_session.Context.CustomerId);
+			var seq = new List<Order.Step>();
+			seq.Add(new Order.ConfirmationStep(id, $"Подтвердите получение каркаса на {_quantity} игроку {id}", $"`/m {id} Вы подтверждаете получение каркаса на {_quantity}? (Да/Нет)`"));
+			seq.Add(new Order.CommandStep(id, $"Телепортирование к {id}", $"`TeleportToP {id}`"));
+			var size = _quantity;
+			while (size > 0)
+			{
+				var single = Math.Min(size, 2000);
+				size -= single;
+				seq.Add(new Order.CommandStep(id, $"Выдача каркаса на {single} игроку {id}", $"`SpawnCarcass {single} {single}`"));
+			}
+
+			order.SetSteps(seq);
+
+			await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(order);
+
+			var not1 = order.OrderCompleteTask;
+			var noRet = new CancellationTokenSource();
+			var not2 = order.OrderNonCancellableTask.ContinueWith((x) => Task.Run(noRet.Cancel));
+			var not3 = order.OrderCancelledTask;
+
+			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
+			var both = CancellationTokenSource.CreateLinkedTokenSource(order.AdminOrderCancelToken, noRet.Token);
+			var res = _session.GetComponentInteraction(both.Token);
+			var list = new List<Task> { not1, not2, not3, res };
+
+			while (true)
+			{
+				var first = await Task.WhenAny(list);
+				list.Remove(first);
+
+				if (first == not2 && first == res)
+				{
+					cancelBtn.Disable();
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
+				}
+				if (first == res && !both.Token.IsCancellationRequested)
+				{
+					await order.TryCancelOrder();
+					await not3;
+					break;
+				}
+				if (first == not2)
+				{
+					await not1;
+					break;
+				}
+				if (first == not3)
+				{
+					break;
+				}
+			}
+
+			return new();
 		}
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
-			//var inventory = _session.Context.Inventory;
+
 			var price = _quantity * _food.Price;
 			var ms1 = $"Вы не можете позволить {_quantity} {_food.Name} за {price}.";
 			var ms2 = $"Пожалуйста измените выбранное количество {_food.Name} и попробуйте снова.";
@@ -89,7 +178,7 @@ namespace Manito.Discord.Shop
 			if (argv.CompareButton(chnamt))
 				return new(SelectQuantity, NextNetworkActions.Continue);
 
-			return new(null, NextNetworkActions.Stop);
+			return new(null);
 		}
 	}
 }

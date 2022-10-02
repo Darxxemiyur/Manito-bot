@@ -12,17 +12,18 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	{
 		private readonly SemaphoreSlim _lock;
 		public AsyncLocker() => _lock = new(1, 1);
-		public Task AsyncLock() => _lock.WaitAsync();
-		public void Lock() => _lock.Wait();
-		public Task<BlockAsyncLock> BlockAsyncLock() => AsyncLock()
-			.ContinueWith((x) => new BlockAsyncLock(this));
+		public Task AsyncLock(CancellationToken token = default) => _lock.WaitAsync(token);
+		public void Lock(CancellationToken token = default) => _lock.Wait(token);
+		public Task AsyncLock(TimeSpan time, CancellationToken token = default) => _lock.WaitAsync(time, token);
+		public void Lock(TimeSpan time, CancellationToken token = default) => _lock.Wait(time, token);
+		public Task<BlockAsyncLock> BlockAsyncLock(CancellationToken token = default) =>
+			AsyncLock(token).ContinueWith((x) => new BlockAsyncLock(this));
 		public BlockAsyncLock BlockLock()
 		{
 			Lock();
 			return new BlockAsyncLock(this);
 		}
 		public Task AsyncUnlock() => Task.Run(Unlock);
-		public ValueTask AsyncValueUnlock() => new(AsyncUnlock());
 		public void Unlock() => _lock.Release();
 		public void Dispose() => ((IDisposable)_lock).Dispose();
 	}
@@ -31,6 +32,6 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		private readonly AsyncLocker _lock;
 		public BlockAsyncLock(AsyncLocker tlock) => _lock = tlock;
 		public void Dispose() => _lock.Unlock();
-		public ValueTask DisposeAsync() => _lock.AsyncValueUnlock();
+		public ValueTask DisposeAsync() => new(_lock.AsyncUnlock());
 	}
 }
