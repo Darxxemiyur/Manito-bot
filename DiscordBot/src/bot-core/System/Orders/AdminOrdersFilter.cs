@@ -5,8 +5,10 @@ using DisCatSharp;
 using Manito.Discord.Client;
 using Manito.Discord.Shop;
 using Manito.Discord;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
+using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,8 +32,8 @@ namespace Manito.Discord.Orders
 		private DialogueNetSessionTab<AdminOrderContext> _aoTab;
 		private List<DiscordApplicationCommand> _commandList;
 		private DiscordEventProxy<DiscordInteraction> _queue;
-		private AdminOrderPool _pool;
-		public AdminOrderPool Pool => _pool;
+		private PoolTaskEventProxy _pool;
+		public PoolTaskEventProxy Pool => _pool;
 		public AdminOrdersFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_pool = new();

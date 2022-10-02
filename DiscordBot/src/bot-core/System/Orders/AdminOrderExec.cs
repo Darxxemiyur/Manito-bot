@@ -5,6 +5,7 @@ using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Manito.Discord.Orders
 		private CancellationTokenSource _swapToken;
 		private CancellationTokenSource _cancelOrder;
 		private CancellationTokenSource _localToken;
-		private readonly AdminOrderPool _pool;
+		private readonly PoolTaskEventProxy _pool;
 		private readonly DiscordChannel _channel;
 		private readonly DiscordUser _admin;
 		private bool _swap;
@@ -36,7 +37,7 @@ namespace Manito.Discord.Orders
 				_steps = value?.Steps?.GetEnumerator();
 			}
 		}
-		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
+		public AdminOrderExec(PoolTaskEventProxy pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
 		{
 			_pool = pool;
 			_quitToken = new();
