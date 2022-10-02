@@ -5,6 +5,7 @@ using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Threading.Tasks;
@@ -22,8 +23,8 @@ namespace Manito.Discord.Orders
 		private DiscordButtonComponent _beginButton;
 		private DiscordButtonComponent _changeButton;
 		private DiscordButtonComponent _endButton;
-		private AdminOrderPool _pool;
-		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, AdminOrderPool pool)
+		private PoolTaskEventProxy _pool;
+		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, PoolTaskEventProxy pool)
 		{
 			_pool = pool;
 			_session = session;

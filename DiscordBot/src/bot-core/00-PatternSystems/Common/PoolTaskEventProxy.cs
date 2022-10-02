@@ -1,7 +1,5 @@
 ﻿using Manito.Discord.Orders;
 
-using Name.Bayfaderix.Darxxemiyur.Common;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +7,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Manito.Discord.Orders
+namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	/// <summary>
 	/// Pool of placed orders
 	/// </summary>
-	public class AdminOrderPool
+	public class PoolTaskEventProxy
 	{
 		private readonly Queue<Order> _queue;
 		private readonly Queue<TaskCompletionSource<Order>> _executors;
 		private readonly AsyncLocker _lock;
-		public AdminOrderPool()
+		public PoolTaskEventProxy()
 		{
 			_lock = new();
 			_queue = new();
