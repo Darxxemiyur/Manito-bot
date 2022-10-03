@@ -17,6 +17,8 @@ using Manito.Discord.ChatNew;
 using Manito.Discord.Orders;
 using System.Diagnostics;
 using System.Threading;
+using Manito.Discord.Client;
+using Manito.Discord.Economy;
 
 namespace Manito.Discord.Shop
 {
@@ -60,19 +62,20 @@ namespace Manito.Discord.Shop
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
-			var price = _quantity * _food.Price;
+			var cart = new ShopItem.InCart(_food, _quantity);
 
-			if (!await wallet.CanAfford(price))
+			if (!await wallet.CanAfford(cart.Price))
 				return new NextNetworkInstruction(ForceChange, NextNetworkActions.Continue);
 
-			await wallet.Withdraw(price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {price}");
+			await wallet.Withdraw(cart.Price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {cart.Price}");
 
 
-			return new NextNetworkInstruction(GetId);
+			return new NextNetworkInstruction(GetId, cart);
 		}
 		private async Task<NextNetworkInstruction> GetId(NetworkInstructionArgument args)
 		{
 			var id = 0;
+			InteractiveInteraction intr = null;
 			while (true)
 			{
 				var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
@@ -86,24 +89,22 @@ namespace Manito.Discord.Shop
 				var back = new DiscordButtonComponent(ButtonStyle.Danger, "back", "Изменить");
 
 				await _session.SendMessage(new UniversalMessageBuilder().SetContent($"ID: {id}\nПродолжить?").AddComponents(back, cont));
-				var intr = await _session.GetComponentInteraction();
+				intr = await _session.GetComponentInteraction();
 
 				if (intr.CompareButton(cont))
 					break;
 
 			}
-			return new(WaitForOrder, id);
+			return new(WaitForOrder, (intr.Interaction.Channel, id, args.Payload));
 		}
 		private async Task<NextNetworkInstruction> WaitForOrder(NetworkInstructionArgument args)
 		{
-			var id = (uint)(int)args.Payload;
-			var rmsg = new DiscordEmbedBuilder();
-			rmsg.WithDescription("Ожидание исполнения Вашего заказа.");
-
-			var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
+			var (channel, idi, item) = ((DiscordChannel, int, ShopItem.InCart))args.Payload;
+			var id = (uint)idi;
 
 			var order = new Order(_session.Context.CustomerId);
 			var seq = new List<Order.Step>();
+			seq.Add(new Order.ShowInfoStep($"Выдача каркаса {_quantity} игроку {id}"));
 			seq.Add(new Order.ConfirmationStep(id, $"Подтвердите получение каркаса на {_quantity} игроку {id}", $"`/m {id} Вы подтверждаете получение каркаса на {_quantity}? (Да/Нет)`"));
 			seq.Add(new Order.ChangeStateStep());
 			seq.Add(new Order.CommandStep(id, $"Телепортирование к {id}", $"`TeleportToP {id}`"));
@@ -117,50 +118,82 @@ namespace Manito.Discord.Shop
 
 			order.SetSteps(seq);
 
-			await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(order);
+			var newS = new SessionFromMessage(_session.Client, channel, _session.Context.CustomerId);
+			var orderAwait = new OrderAwait(new(newS), order, item, _session.Context.Wallet);
 
-			var not1 = order.OrderCompleteTask;
-			var noRet = new CancellationTokenSource();
-			var not2 = Task.Run(async () => {
-				await order.OrderNonCancellableTask;
-				await Task.Run(noRet.Cancel);
-			});
-
-			var not3 = order.OrderCancelledTask;
-
-			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
-			var both = CancellationTokenSource.CreateLinkedTokenSource(order.AdminOrderCancelToken, noRet.Token);
-			var res = _session.GetComponentInteraction(both.Token);
-			var list = new List<Task> { not1, not2, not3, res };
-
-			while (true)
-			{
-				var first = await Task.WhenAny(list);
-				list.Remove(first);
-
-				if (first == not2 || first == res)
-				{
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
-				}
-				if (first == res && !first.IsCanceled)
-				{
-					await order.TryCancelOrder();
-					await not3;
-					break;
-				}
-				if (first == not2)
-				{
-					await not1;
-					break;
-				}
-				if (first == not3)
-				{
-					break;
-				}
-			}
+			await _session.Client.Domain.ExecutionThread.AddNew(() => NetworkCommon.RunNetwork(orderAwait));
 
 			return new();
 		}
+		private class OrderAwait : IDialogueNet
+		{
+			private readonly UniversalSession _session;
+			private readonly Order _order;
+			private readonly ShopItem.InCart _item;
+			private readonly PlayerWallet _wallet;
+			public OrderAwait(UniversalSession session, Order order, ShopItem.InCart item, PlayerWallet wallet) => (_session, _order, _item, _wallet) = (session, order, item, wallet);
+			private async Task<NextNetworkInstruction> ReleaseAwaiting(NetworkInstructionArgument args)
+			{
+				await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(_order);
+
+				var completed = _order.OrderCompleteTask;
+				var noRet = new CancellationTokenSource();
+				var nonCanc = Task.Run(async () => {
+					await _order.OrderNonCancellableTask;
+					await Task.Run(noRet.Cancel);
+				});
+				var cancelled = _order.OrderCancelledTask;
+
+				var rmsg = new DiscordEmbedBuilder().WithDescription($"Ожидание исполнения Вашего заказа №{_order.OrderId}.");
+
+				var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
+				await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
+				var both = CancellationTokenSource.CreateLinkedTokenSource(_order.AdminOrderCancelToken, noRet.Token);
+				var doCancel = _session.GetComponentInteraction(both.Token);
+				var list = new List<Task> { completed, nonCanc, cancelled, doCancel };
+
+				var timeout = TimeSpan.FromSeconds(20);
+
+				while (true)
+				{
+					var first = await Task.WhenAny(list);
+					list.Remove(first);
+
+					if (first == nonCanc)
+					{
+						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
+					}
+					if ((first == doCancel && !first.IsCanceled) || first == cancelled)
+					{
+						await _order.TryCancelOrder();
+						await cancelled;
+
+						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+
+						await _wallet.Deposit(_item.Price);
+
+						break;
+					}
+					if (first == nonCanc)
+					{
+						await completed;
+						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+						break;
+					}
+				}
+
+				await Task.Delay(timeout);
+
+				await _session.RemoveMessage();
+				await _session.EndSession();
+
+				return new();
+			}
+			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+			public NextNetworkInstruction GetStartingInstruction() => new(ReleaseAwaiting);
+			public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
+		}
+
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;

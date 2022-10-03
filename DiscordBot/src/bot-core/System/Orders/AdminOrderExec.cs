@@ -53,12 +53,14 @@ namespace Manito.Discord.Orders
 			var step = _steps.Current;
 			if (step != null)
 			{
+				if (step.Type == Order.StepType.ShowInfo)
+					return new(DoShowInfo, step);
 				if (step.Type == Order.StepType.Confirmation)
 					return new(DoConfirmation, step);
-				if (step.Type == Order.StepType.Command)
-					return new(DoCommand, step);
 				if (step.Type == Order.StepType.ChangeState)
 					return new(MakeNonCancallable);
+				if (step.Type == Order.StepType.Command)
+					return new(DoCommand, step);
 
 				throw new NotImplementedException();
 			}
@@ -135,7 +137,6 @@ namespace Manito.Discord.Orders
 			}
 			catch (TaskCanceledException)
 			{
-				Console.WriteLine("Shit");
 				return new(DoOrderCancellation);
 			}
 		}
@@ -167,6 +168,35 @@ namespace Manito.Discord.Orders
 			try
 			{
 				await ExOrder.MakeUncancellable();
+
+				return new(Decider);
+			}
+			catch (TaskCanceledException)
+			{
+				return new(DoOrderCancellation);
+			}
+		}
+		private async Task<NextNetworkInstruction> DoShowInfo(NetworkInstructionArgument arg)
+		{
+			try
+			{
+				var step = (Order.ShowInfoStep)arg.Payload;
+
+				var change = new DiscordButtonComponent(ButtonStyle.Primary, "change", "Выбрать другой заказ.");
+				var cont = new DiscordButtonComponent(ButtonStyle.Success, "continue", "Продолжить.");
+				var embed = new DiscordEmbedBuilder();
+				embed.WithColor(new DiscordColor(255, 255, 0));
+				embed.WithDescription($"{step.Description}");
+				await Session.SendMessage(new UniversalMessageBuilder()
+					.AddEmbed(embed).AddComponents(change, cont));
+
+				var res = await Session.GetComponentInteraction(_localToken.Token);
+
+				if (res.CompareButton(change))
+				{
+					await ChangeOrder();
+					await Task.FromCanceled(_swapToken.Token);
+				}
 
 				return new(Decider);
 			}
