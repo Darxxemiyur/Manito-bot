@@ -36,13 +36,11 @@ namespace Manito.Discord.ChatAbstract
 				{
 					await NetworkCommon.RunNetwork(await builder(session));
 				}
-				catch (Exception e)
+				finally
 				{
 					await session.SendMessage(new UniversalMessageBuilder()
 						.SetContent("Сессия завершена из-за ошибки!"));
 					await session.EndSession();
-
-					throw new AggregateException(e);
 				}
 			});
 

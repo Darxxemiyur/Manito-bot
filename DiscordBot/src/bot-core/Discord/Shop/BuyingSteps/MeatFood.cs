@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DisCatSharp.Enums;
@@ -14,11 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
-using Manito.Discord.Orders;
 using System.Diagnostics;
-using System.Threading;
-using Manito.Discord.Client;
-using Manito.Discord.Economy;
 
 namespace Manito.Discord.Shop
 {
@@ -30,7 +24,7 @@ namespace Manito.Discord.Shop
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
 
-		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity, NextNetworkActions.Continue);
+		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity);
 		public BuyingStepsForMeatFood(DialogueTabSession<ShopContext> session, ShopItem food)
 		{
 			_session = session;
@@ -39,23 +33,22 @@ namespace Manito.Discord.Shop
 
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
-			var btns = Common.Generate;
 			var ms1 = $"Выберите количество {_food.Name}";
 			var price = _food.Price;
 
 			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
 				_session,
-			 async (x, y) => y < 0 || await _session.Context.Wallet.CanAfford((x + y) * price),
+			 async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 0),
 			 async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
 			 .WithDescription($"{ms1}\nВыбранное количество {x} кг за {x * price}.")), _quantity);
 
 			if (!qua.HasValue)
-				return new NextNetworkInstruction(null, NextNetworkActions.Stop);
+				return new();
 
 			if ((_quantity = qua.Value) <= 0)
-				return new(SelectQuantity, NextNetworkActions.Continue);
+				return new(SelectQuantity);
 
-			return new(ExecuteTransaction, NextNetworkActions.Continue);
+			return new(ExecuteTransaction);
 		}
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
@@ -65,142 +58,22 @@ namespace Manito.Discord.Shop
 			var cart = new ShopItem.InCart(_food, _quantity);
 
 			if (!await wallet.CanAfford(cart.Price))
-				return new NextNetworkInstruction(ForceChange, NextNetworkActions.Continue);
+				return new NextNetworkInstruction(ForceChange);
 
 			await wallet.Withdraw(cart.Price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {cart.Price}");
 
 
-			return new NextNetworkInstruction(GetId, cart);
+			var res = (bool)await NetworkCommon.RunNetwork(new FoodOrderAwait(_session, cart));
+
+			return res ? new(SelectQuantity) : new();
 		}
-		private async Task<NextNetworkInstruction> GetId(NetworkInstructionArgument args)
-		{
-			var id = 0;
-			InteractiveInteraction intr = null;
-			while (true)
-			{
-				var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
-				_session, (x, y) => Task.FromResult(true),
-				async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
-				.WithDescription($"ID получающий ваш заказ - {x}")), id);
-
-				id = qua ?? id;
-
-				var cont = new DiscordButtonComponent(ButtonStyle.Primary, "continue", "Продолжить");
-				var back = new DiscordButtonComponent(ButtonStyle.Danger, "back", "Изменить");
-
-				await _session.SendMessage(new UniversalMessageBuilder().SetContent($"ID: {id}\nПродолжить?").AddComponents(back, cont));
-				intr = await _session.GetComponentInteraction();
-
-				if (intr.CompareButton(cont))
-					break;
-
-			}
-			return new(WaitForOrder, (intr.Interaction.Channel, id, args.Payload));
-		}
-		private async Task<NextNetworkInstruction> WaitForOrder(NetworkInstructionArgument args)
-		{
-			var (channel, idi, item) = ((DiscordChannel, int, ShopItem.InCart))args.Payload;
-			var id = (uint)idi;
-
-			var order = new Order(_session.Context.CustomerId);
-			var seq = new List<Order.Step>();
-			seq.Add(new Order.ShowInfoStep($"Выдача каркаса {_quantity} игроку {id}"));
-			seq.Add(new Order.ConfirmationStep(id, $"Подтвердите получение каркаса на {_quantity} игроку {id}", $"`/m {id} Вы подтверждаете получение каркаса на {_quantity}? (Да/Нет)`"));
-			seq.Add(new Order.ChangeStateStep());
-			seq.Add(new Order.CommandStep(id, $"Телепортирование к {id}", $"`TeleportToP {id}`"));
-			var size = _quantity;
-			while (size > 0)
-			{
-				var single = Math.Min(size, 2000);
-				size -= single;
-				seq.Add(new Order.CommandStep(id, $"Выдача каркаса на {single} игроку {id}", $"`SpawnCarcass {single} {single}`"));
-			}
-
-			order.SetSteps(seq);
-
-			var newS = new SessionFromMessage(_session.Client, channel, _session.Context.CustomerId);
-			var orderAwait = new OrderAwait(new(newS), order, item, _session.Context.Wallet);
-
-			await _session.Client.Domain.ExecutionThread.AddNew(() => NetworkCommon.RunNetwork(orderAwait));
-
-			return new();
-		}
-		private class OrderAwait : IDialogueNet
-		{
-			private readonly UniversalSession _session;
-			private readonly Order _order;
-			private readonly ShopItem.InCart _item;
-			private readonly PlayerWallet _wallet;
-			public OrderAwait(UniversalSession session, Order order, ShopItem.InCart item, PlayerWallet wallet) => (_session, _order, _item, _wallet) = (session, order, item, wallet);
-			private async Task<NextNetworkInstruction> ReleaseAwaiting(NetworkInstructionArgument args)
-			{
-				await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(_order);
-
-				var completed = _order.OrderCompleteTask;
-				var noRet = new CancellationTokenSource();
-				var nonCanc = Task.Run(async () => {
-					await _order.OrderNonCancellableTask;
-					await Task.Run(noRet.Cancel);
-				});
-				var cancelled = _order.OrderCancelledTask;
-
-				var rmsg = new DiscordEmbedBuilder().WithDescription($"Ожидание исполнения Вашего заказа №{_order.OrderId}.");
-
-				var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
-				await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
-				var both = CancellationTokenSource.CreateLinkedTokenSource(_order.AdminOrderCancelToken, noRet.Token);
-				var doCancel = _session.GetComponentInteraction(both.Token);
-				var list = new List<Task> { completed, nonCanc, cancelled, doCancel };
-
-				var timeout = TimeSpan.FromSeconds(20);
-
-				while (true)
-				{
-					var first = await Task.WhenAny(list);
-					list.Remove(first);
-
-					if (first == nonCanc)
-					{
-						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
-					}
-					if ((first == doCancel && !first.IsCanceled) || first == cancelled)
-					{
-						await _order.TryCancelOrder();
-						await cancelled;
-
-						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
-
-						await _wallet.Deposit(_item.Price);
-
-						break;
-					}
-					if (first == nonCanc)
-					{
-						await completed;
-						await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
-						break;
-					}
-				}
-
-				await Task.Delay(timeout);
-
-				await _session.RemoveMessage();
-				await _session.EndSession();
-
-				return new();
-			}
-			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-			public NextNetworkInstruction GetStartingInstruction() => new(ReleaseAwaiting);
-			public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
-		}
-
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
 			var price = _quantity * _food.Price;
-			var ms1 = $"Вы не можете позволить {_quantity} {_food.Name} за {price}.";
+			var ms1 = $"Вы не можете позволить {_quantity} ед. {_food.Name} за {price}.";
 			var ms2 = $"Пожалуйста измените выбранное количество {_food.Name} и попробуйте снова.";
 			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\n{ms2}"));
 
@@ -213,7 +86,7 @@ namespace Manito.Discord.Shop
 			var argv = await _session.GetComponentInteraction();
 
 			if (argv.CompareButton(chnamt))
-				return new(SelectQuantity, NextNetworkActions.Continue);
+				return new(SelectQuantity);
 
 			return new(null);
 		}

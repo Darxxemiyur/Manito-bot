@@ -1,0 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
+using DisCatSharp.Enums;
+using System.Threading.Tasks;
+using DisCatSharp.Entities;
+
+using Manito.Discord.Chat.DialogueNet;
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+using Manito.Discord.ChatNew;
+using Manito.Discord.Orders;
+using System.Threading;
+using Manito.Discord.Economy;
+
+namespace Manito.Discord.Shop
+{
+	public class OrderAwait : IDialogueNet
+	{
+		private readonly UniversalSession _session;
+		private readonly Order _order;
+		private readonly ShopItem.InCart _item;
+		private readonly PlayerWallet _wallet;
+		public OrderAwait(UniversalSession session, Order order, ShopItem.InCart item, PlayerWallet wallet) => (_session, _order, _item, _wallet) = (session, order, item, wallet);
+		private async Task<NextNetworkInstruction> ReleaseAwaiting(NetworkInstructionArgument args)
+		{
+			await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(_order);
+
+			var completed = _order.OrderCompleteTask;
+			var noRet = new CancellationTokenSource();
+			var nonCanc = Task.Run(async () => {
+				await _order.OrderNonCancellableTask;
+				await Task.Run(noRet.Cancel);
+			});
+			var cancelled = _order.OrderCancelledTask;
+
+			var rmsg = new DiscordEmbedBuilder().WithDescription($"Ожидание исполнения Вашего заказа №{_order.OrderId}.").WithColor(new DiscordColor(255, 255, 0));
+
+			var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
+			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
+			var both = CancellationTokenSource.CreateLinkedTokenSource(_order.AdminOrderCancelToken, noRet.Token);
+			var doCancel = _session.GetComponentInteraction(both.Token);
+			var list = new List<Task> { completed, nonCanc, cancelled, doCancel };
+
+			var timeout = TimeSpan.FromSeconds(20);
+
+			while (true)
+			{
+				var first = await Task.WhenAny(list);
+				list.Remove(first);
+
+				if (first == nonCanc)
+				{
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
+				}
+				if ((first == doCancel && !first.IsCanceled) || first == cancelled)
+				{
+					await _order.TryCancelOrder();
+
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+
+					await _wallet.Deposit(_item.Price);
+
+					break;
+				}
+				if (first == nonCanc)
+				{
+					await completed;
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+					break;
+				}
+			}
+
+			await Task.Delay(timeout);
+
+			await _session.RemoveMessage();
+			await _session.EndSession();
+
+			return new();
+		}
+		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+		public NextNetworkInstruction GetStartingInstruction() => new(ReleaseAwaiting);
+		public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
+	}
+}

@@ -147,6 +147,7 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+		public static implicit operator UniversalMessageBuilder(string msg) => new UniversalMessageBuilder().SetContent(msg);
 		public static implicit operator UniversalMessageBuilder(DiscordWebhookBuilder msg) => new(msg);
 		public static implicit operator UniversalMessageBuilder(DiscordMessageBuilder msg) => new(msg);
 		public static implicit operator UniversalMessageBuilder(DiscordInteractionResponseBuilder msg) => new(msg);

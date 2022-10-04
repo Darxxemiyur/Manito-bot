@@ -109,6 +109,8 @@ namespace Manito.Discord.Economy
 
 			await db.EnsureDeletedAsync();
 			await db.EnsureCreatedAsync();
+
+			await args.EditOriginalResponseAsync(new UniversalMessageBuilder().SetContent("Done"));
 		}
 
 		private async Task CopyStructure()

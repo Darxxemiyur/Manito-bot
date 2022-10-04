@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using static Manito.Discord.PermanentMessage.MsgWallPanelWallLineImport;
+
 namespace Manito.Discord.Orders
 {
 	public class Order
@@ -20,13 +22,13 @@ namespace Manito.Discord.Orders
 		public readonly ulong Initiator;
 		public readonly ulong OrderId = OrderIds++;
 		private static ulong OrderIds = 1;
-		private readonly TaskCompletionSource OrderCancelled = new();
+		private readonly TaskCompletionSource<string> OrderCancelled = new();
 		private readonly TaskCompletionSource OrderNonCancellable = new();
 		private readonly TaskCompletionSource OrderComplete = new();
 		/// <summary>
 		/// On order cancelled. True if cancelled by admin, false if by customer.
 		/// </summary>
-		public Task OrderCancelledTask => OrderCancelled.Task;
+		public Task<string> OrderCancelledTask => OrderCancelled.Task;
 		private readonly CancellationTokenSource _playerOrderCancellation = new();
 		public CancellationToken PlayerOrderCancelToken => _playerOrderCancellation.Token;
 		private readonly CancellationTokenSource _adminOrderCancellation = new();
@@ -40,12 +42,12 @@ namespace Manito.Discord.Orders
 		/// <summary>
 		/// Order cancellation by admin.
 		/// </summary>
-		public async Task CancelOrder()
+		public async Task CancelOrder(string reason)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 
 			await Task.Run(_adminOrderCancellation.Cancel);
-			await Task.Run(OrderCancelled.TrySetResult);
+			await Task.Run(() => OrderCancelled.TrySetResult(reason));
 			await Task.Run(OrderComplete.TrySetCanceled);
 		}
 		/// <summary>
@@ -60,7 +62,7 @@ namespace Manito.Discord.Orders
 				return;
 
 			await Task.Run(_playerOrderCancellation.Cancel);
-			await Task.Run(OrderCancelled.TrySetResult);
+			await Task.Run(() => OrderCancelled.TrySetResult("Отмена игроком."));
 			await Task.Run(OrderComplete.TrySetCanceled);
 		}
 		public async Task FinishOrder()
@@ -86,14 +88,15 @@ namespace Manito.Discord.Orders
 		}
 		public class ConfirmationStep : Step
 		{
-			public ConfirmationStep(ulong userId, string description, string question)
+			public ConfirmationStep(int userId, string description, string question, string failReason = "null")
 			{
 				UserId = userId;
 				Description = description;
 				Question = question;
+				FailReason = failReason;
 			}
 			public override StepType Type => StepType.Confirmation;
-			public ulong UserId {
+			public int UserId {
 				get;
 			}
 			public string Description {
@@ -102,17 +105,20 @@ namespace Manito.Discord.Orders
 			public string Question {
 				get;
 			}
+			public string FailReason {
+				get;
+			}
 		}
 		public class CommandStep : Step
 		{
-			public CommandStep(ulong userId, string description, string command)
+			public CommandStep(int userId, string description, string command)
 			{
 				UserId = userId;
 				Description = description;
 				Command = command;
 			}
 			public override StepType Type => StepType.Command;
-			public ulong UserId {
+			public int UserId {
 				get;
 			}
 			public string Description {
@@ -134,12 +140,27 @@ namespace Manito.Discord.Orders
 		{
 			public override StepType Type => StepType.ChangeState;
 		}
+		public class InformStep : Step
+		{
+			public InformStep(int id, string description, string info) => (UserId, Description, Info) = (id, description, info);
+			public int UserId {
+				get;
+			}
+			public string Description {
+				get;
+			}
+			public string Info {
+				get;
+			}
+			public override StepType Type => StepType.Inform;
+		}
 		public enum StepType
 		{
 			Confirmation,
 			Command,
 			ShowInfo,
 			ChangeState,
+			Inform,
 		}
 	}
 }

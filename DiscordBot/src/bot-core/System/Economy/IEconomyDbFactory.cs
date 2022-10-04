@@ -11,7 +11,6 @@ namespace Manito.Discord.Economy
 
     public interface IEconomyDbFactory : IMyDbFactory
     {
-
         IEconomyDb CreateEconomyDbContext();
         Task<IEconomyDb> CreateEconomyDbContextAsync();
     }

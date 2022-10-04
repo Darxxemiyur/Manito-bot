@@ -46,7 +46,7 @@ namespace Manito.Discord.Shop
 					if (argv.CompareButton(exbtn))
 						break;
 
-
+					await _session.DoLaterReply();
 					await ItemSelected(argv.GetOption(shopItems.ToDictionary(x => x.Name)));
 				}
 

@@ -72,11 +72,11 @@ namespace Manito.Discord.Orders
 
 					var id1 = Random.Shared.Next(999);
 					var id2 = Random.Shared.Next(999);
-					var step1 = new Order.ConfirmationStep((ulong)id1, $"Подтверждение игрока {id1}.", $"`/m {id1} Вы подтверждаете исполнение заказа №{oid}?`");
+					var step1 = new Order.ConfirmationStep(id1, $"Подтверждение игрока {id1}.", $"`/m {id1} Вы подтверждаете исполнение заказа №{oid}?`");
 
-					var step2 = new Order.ConfirmationStep((ulong)id2, $"Подтверждение игрока {id2}.", $"`/m {id2} Вы подтверждаете исполнение заказа №{oid}?`");
+					var step2 = new Order.ConfirmationStep(id2, $"Подтверждение игрока {id2}.", $"`/m {id2} Вы подтверждаете исполнение заказа №{oid}?`");
 
-					var step3 = new Order.CommandStep((ulong)id1, $"Телепортирование игрока {id1} к {id2}.", $"`TeleportPToP {id1} {id2}`");
+					var step3 = new Order.CommandStep(id1, $"Телепортирование игрока {id1} к {id2}.", $"`TeleportPToP {id1} {id2}`");
 
 					order.SetSteps(step1, step2, step3);
 					await _pool.PlaceOrder(order);

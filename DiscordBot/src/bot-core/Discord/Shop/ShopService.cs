@@ -44,7 +44,7 @@ namespace Manito.Discord.Shop
 
 			if (_shopTab.Sessions.All(x => x.Context.CustomerId != customer.Id))
 				session = await _shopTab.CreateSession(new(intr), new(customer.Id,
-				new Economy.PlayerWallet(_service.Economy, customer.Id), _cashRegister, this),
+				_service.Economy.GetPlayerWallet(customer.Id), _cashRegister, this),
 				(x) => Task.FromResult((IDialogueNet)new ShopDialogue(x)));
 
 			_lock.Release();

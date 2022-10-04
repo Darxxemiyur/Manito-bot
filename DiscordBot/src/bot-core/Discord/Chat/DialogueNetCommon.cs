@@ -61,14 +61,13 @@ namespace Manito.Discord.Chat.DialogueNet
 				quantity = Math.Clamp(quantity + change, 0, int.MaxValue);
 			}
 		}
-		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session,
-		 Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder,
-		 int starting = 0)
+		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session, Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder, int starting = 0)
 		{
 			var quantity = starting;
 			var btns = Generate(nums, muls);
-			var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Назад");
-			var sbmbtn = new DiscordButtonComponent(ButtonStyle.Success, "Submit", "Выбрать");
+			var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
+			var resbtn = new DiscordButtonComponent(ButtonStyle.Primary, "reset", "Сбросить");
+			var sbmbtn = new DiscordButtonComponent(ButtonStyle.Success, "submit", "Выбрать");
 			while (true)
 			{
 				var mg2 = await responder(quantity);
@@ -84,7 +83,7 @@ namespace Manito.Discord.Chat.DialogueNet
 				foreach (var btnrs in btns)
 					mg2.AddComponents(btnrs.Select(x => x.Item1));
 
-				mg2.AddComponents(exbtn, sbmbtn);
+				mg2.AddComponents(exbtn, resbtn, sbmbtn);
 
 				await session.SendMessage(mg2);
 
@@ -95,6 +94,12 @@ namespace Manito.Discord.Chat.DialogueNet
 
 				if (comp.CompareButton(sbmbtn))
 					return quantity;
+
+				if (comp.CompareButton(resbtn))
+				{
+					quantity = starting;
+					continue;
+				}
 
 				var pressed = comp.GetButton(btns.SelectMany(x => x)
 					.Select(x => x.Item1).ToDictionary(x => x.CustomId));

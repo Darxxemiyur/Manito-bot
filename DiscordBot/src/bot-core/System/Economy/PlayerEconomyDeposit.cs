@@ -9,10 +9,26 @@ using DisCatSharp.ApplicationCommands;
 namespace Manito.Discord.Economy
 {
 
-    public class PlayerEconomyDeposit
-    {
-
-        public ulong DiscordID;
-        public long Currency;
-    }
+	public class PlayerEconomyDeposit
+	{
+		public ulong DiscordID {
+			get; set;
+		}
+		public long ScalesCurr {
+			get; set;
+		}
+		public long ChupatCurr {
+			get; set;
+		}
+		public long DonatCurr {
+			get; set;
+		}
+		public PlayerEconomyDeposit(ulong discordID)
+		{
+			DiscordID = discordID;
+			ScalesCurr = 5000;
+			ChupatCurr = 0;
+			DonatCurr = 0;
+		}
+	}
 }

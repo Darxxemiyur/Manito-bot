@@ -12,6 +12,7 @@ using Manito.Discord.PermanentMessage;
 using Manito.Discord.Database;
 using Manito.Discord.Config;
 using Manito.Discord.Welcommer;
+using Manito.System.Logging;
 
 namespace Manito.Discord
 {
@@ -29,6 +30,7 @@ namespace Manito.Discord
 		private ShopService _shopService;
 		private RootConfig _rootConfig;
 		private MessageController _msgWallCtr;
+		private LoggingCenter _logging;
 		public IServiceCollection ServiceCollection => _serviceCollection;
 		public MyDiscordClient MyDiscordClient => _myDiscordClient;
 		public ExecThread ExecutionThread => _executionThread;
@@ -37,6 +39,7 @@ namespace Manito.Discord
 		public EventFilters Filters => _filters;
 		public ShopService ShopService => _shopService;
 		public MessageController MsgWallCtr => _msgWallCtr;
+		public LoggingCenter Logging => _logging;
 		public static async Task<MyDomain> Create()
 		{
 			var service = new MyDomain();
@@ -58,6 +61,7 @@ namespace Manito.Discord
 			_myDiscordClient = new MyDiscordClient(this, _rootConfig);
 			_msgWallCtr = new(this);
 			_shopService = new ShopService(this);
+			_logging = new(_myDiscordClient, _db);
 			_appCommands = _myDiscordClient.AppCommands;
 			_executionThread = new ExecThread();
 			_filters = new EventFilters(this, _myDiscordClient.EventsBuffer);

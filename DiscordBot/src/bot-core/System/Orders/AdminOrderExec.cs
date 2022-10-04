@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using static Manito.Discord.Orders.Order;
 
 namespace Manito.Discord.Orders
 {
@@ -27,7 +28,7 @@ namespace Manito.Discord.Orders
 		private readonly PoolTaskEventProxy _pool;
 		private readonly DiscordChannel _channel;
 		private readonly DiscordUser _admin;
-		private IEnumerator<Order.Step> _steps;
+		private IEnumerator<Step> _steps;
 		private Order _exOrder;
 		public Order ExOrder {
 			get => _exOrder;
@@ -61,6 +62,8 @@ namespace Manito.Discord.Orders
 					return new(MakeNonCancallable);
 				if (step.Type == Order.StepType.Command)
 					return new(DoCommand, step);
+				if (step.Type == Order.StepType.Inform)
+					return new(DoInform, step);
 
 				throw new NotImplementedException();
 			}
@@ -69,6 +72,29 @@ namespace Manito.Discord.Orders
 			ExOrder = null;
 
 			return new(FetchNextStep);
+		}
+		private async Task<NextNetworkInstruction> DoInform(NetworkInstructionArgument arg)
+		{
+			try
+			{
+				var step = (InformStep)arg.Payload;
+
+				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "executed", "Выполнено.");
+				var embed = new DiscordEmbedBuilder();
+				embed.WithColor(new DiscordColor(255, 255, 0));
+				embed.WithDescription($"{step.Description}\nНапишите игроку \"{step.Info}\" и нажмите \"{asked.Label}\"");
+				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
+					.AddComponents(asked));
+
+				await Session.GetComponentInteraction(_localToken.Token);
+				await Session.DoLaterReply();
+
+				return new(Decider);
+			}
+			catch (TaskCanceledException)
+			{
+				return new(DoOrderCancellation);
+			}
 		}
 		private async Task<NextNetworkInstruction> DoOrderCancellation(NetworkInstructionArgument arg)
 		{
@@ -92,19 +118,20 @@ namespace Manito.Discord.Orders
 			if (_cancelOrder.Token.IsCancellationRequested)
 			{
 				_cancelOrder = new();
-				await ExOrder.CancelOrder();
+				await ExOrder.CancelOrder(_cancelReason);
+				_cancelReason = null;
 			}
 
 			ExOrder = null;
 			return new(FetchNextStep);
 		}
+		private string _cancelReason;
 		public Task ChangeOrder() => ExOrder != null ? Task.Run(_swapToken.Cancel) : Task.CompletedTask;
-
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
 			try
 			{
-				var step = (Order.ConfirmationStep)arg.Payload;
+				var step = (ConfirmationStep)arg.Payload;
 
 				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "asked", "Опрошено");
 				var success = new DiscordButtonComponent(ButtonStyle.Success, "success", "Подтвердить", true);
@@ -130,7 +157,8 @@ namespace Manito.Discord.Orders
 				if (answer.CompareButton(fail))
 				{
 					_cancelOrder.Cancel();
-					_cancelOrder.Token.ThrowIfCancellationRequested();
+					_cancelReason = step.FailReason;
+					await Task.FromCanceled(_cancelOrder.Token);
 				}
 
 				return new(Decider);
@@ -144,7 +172,7 @@ namespace Manito.Discord.Orders
 		{
 			try
 			{
-				var step = (Order.CommandStep)arg.Payload;
+				var step = (CommandStep)arg.Payload;
 
 				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "executed", "Выполнено.");
 				var embed = new DiscordEmbedBuilder();
@@ -180,7 +208,7 @@ namespace Manito.Discord.Orders
 		{
 			try
 			{
-				var step = (Order.ShowInfoStep)arg.Payload;
+				var step = (ShowInfoStep)arg.Payload;
 
 				var change = new DiscordButtonComponent(ButtonStyle.Primary, "change", "Выбрать другой заказ.");
 				var cont = new DiscordButtonComponent(ButtonStyle.Success, "continue", "Продолжить.");
@@ -218,7 +246,7 @@ namespace Manito.Discord.Orders
 
 				ExOrder = await _pool.GetOrder(_quitToken.Token);
 
-				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, ExOrder.PlayerOrderCancelToken, _cancelOrder.Token);
+				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder()
 					.SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));

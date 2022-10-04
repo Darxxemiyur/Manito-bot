@@ -12,6 +12,8 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
+using Manito.Discord.ChatNew;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Manito.Discord.Economy
 {
@@ -20,7 +22,8 @@ namespace Manito.Discord.Economy
 	{
 		private const string Locale = "ru";
 		private readonly ServerEconomy _economy;
-		public EconomyCommands(ServerEconomy economy) => _economy = economy;
+		private readonly MyDiscordClient _client;
+		public EconomyCommands(ServerEconomy economy, MyDiscordClient client) => (_economy, _client) = (economy, client);
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -109,16 +112,18 @@ namespace Manito.Discord.Economy
 			if (oth != null)
 				target = (ulong)oth.Value;
 
-			var deposit = _economy.GetDeposit(target);
+			var session = new ComponentDialogueSession(_client, args);
+			await session.DoLaterReply();
+
+			var deposit = await _economy.GetPlayerWallet(target).GetScales();
 
 
-			var msg = new DiscordInteractionResponseBuilder(new DiscordMessageBuilder()
-			 .WithEmbed(new DiscordEmbedBuilder()
-			 .WithDescription(deposit.Currency + $" {_economy.CurrencyEmoji}")
-			 .WithTitle("Валюта").WithAuthor($"<@{target}>")));
+			var msg = new UniversalMessageBuilder()
+			 .AddEmbed(new DiscordEmbedBuilder()
+			 .WithDescription(deposit + $" {_economy.CurrencyEmoji}")
+			 .WithTitle("Валюта").WithAuthor($"<@{target}>"));
 
-			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
-
+			await session.SendMessage(msg);
 		}
 
 		private async Task TransferMoney(DiscordInteraction args)
@@ -127,6 +132,7 @@ namespace Manito.Discord.Economy
 
 			var tgt = argtools.AddReqArg("target");
 			var amot = argtools.AddReqArg("amount");
+			var session = new ComponentDialogueSession(_client, args);
 
 			var msg = new DiscordInteractionResponseBuilder();
 
@@ -134,13 +140,14 @@ namespace Manito.Discord.Economy
 			{
 				msg.WithContent(args.Locale == "ru"
 				 ? "Неправильно введены аргументы!" : "Wrong arguments!");
-				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+				await session.SendMessage(msg);
 				return;
 			}
+			await session.DoLaterReply();
 
 			var from = args.User.Id;
-			var to = (ulong)GetItem(argtools, tgt);
-			var amt = (long)GetItem(argtools, amot);
+			var to = argtools.GetArg<ulong>(tgt);
+			var amt = (long)argtools.GetArg<int>(amot);
 
 			amt = await _economy.TransferFunds(from, to, amt);
 
@@ -148,7 +155,7 @@ namespace Manito.Discord.Economy
 				 ? $"Успешно переведено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>"
 				 : $"Succesfuly transfered {amt} {_economy.CurrencyEmoji} to <@{to}>'s account");
 
-			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+			await session.SendMessage(msg);
 		}
 		private async Task Withdraw(DiscordInteraction args)
 		{
@@ -157,28 +164,28 @@ namespace Manito.Discord.Economy
 			var tgt = argtools.AddReqArg("target");
 			var amot = argtools.AddReqArg("amount");
 
+			var session = new ComponentDialogueSession(_client, args);
 			var msg = new DiscordInteractionResponseBuilder();
 
 			if (!argtools.DoHaveReqArgs())
 			{
 				msg.WithContent(args.Locale == "ru"
 				 ? "Неправильно введены аргументы!" : "Wrong arguments!");
-				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+				await session.SendMessage(msg);
 				return;
 			}
 
-			var to = (ulong)GetItem(argtools, tgt);
-			var amt = (long)GetItem(argtools, amot);
+			await session.DoLaterReply();
+
+			var to = argtools.GetArg<ulong>(tgt);
+			var amt = (long)argtools.GetArg<int>(amot);
 
 			amt = await _economy.Withdraw(to, amt);
 
 			msg.WithContent($"Успешно удалено {amt} {_economy.CurrencyEmoji} со счёта <@{to}>");
 
-			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+			await session.SendMessage(msg);
 		}
-		private Object GetItem(AppCommandArgsTools args, string value) =>
-			args.GetReq().FirstOrDefault(x => x.Key == value).Value;
-
 		private async Task Deposit(DiscordInteraction args)
 		{
 			var argtools = new AppCommandArgsTools(args);
@@ -187,22 +194,26 @@ namespace Manito.Discord.Economy
 			var amot = argtools.AddReqArg("amount");
 
 			var msg = new DiscordInteractionResponseBuilder();
+			var session = new ComponentDialogueSession(_client, args);
 
 			if (!argtools.DoHaveReqArgs())
 			{
 				msg.WithContent(args.Locale == "ru"
 				 ? "Неправильно введены аргументы!" : "Wrong arguments!");
-				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+				await session.SendMessage(msg);
 				return;
 			}
 
-			var to = (ulong)GetItem(argtools, tgt);
-			var amt = (long)GetItem(argtools, amot);
+			await session.DoLaterReply();
+
+			var to = argtools.GetArg<ulong>(tgt);
+			var amt = (long)argtools.GetArg<int>(amot);
 
 			amt = await _economy.Deposit(to, amt);
 			msg.WithContent($"Успешно добавлено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
 
-			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
+			await session.SendMessage(msg);
+
 		}
 	}
 
