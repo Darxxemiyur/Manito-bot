@@ -377,7 +377,7 @@ namespace Manito.Discord.PermanentMessage
 			var sent = _session.SendMessage(new DiscordWebhookBuilder()
 				.WithContent($"Работаем..."));
 
-			var list = new List<ulong>();
+			var list = new List<long>();
 
 			using (var db = _session.Context.Factory.CreateMyDbContext())
 			{

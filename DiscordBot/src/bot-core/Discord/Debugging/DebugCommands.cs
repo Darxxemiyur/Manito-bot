@@ -12,7 +12,9 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
-namespace Manito.Discord.Economy
+using Manito.Discord;
+
+namespace Manito.System.Economy
 {
 
 	public class DebugCommands

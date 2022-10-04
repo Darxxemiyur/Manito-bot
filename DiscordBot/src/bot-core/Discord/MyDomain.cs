@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.Economy;
+using Manito.System.Economy;
+using Manito.Discord;
 using Manito.Discord.Inventory;
 using Manito.Discord.Shop;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,7 +75,6 @@ namespace Manito.Discord
 			await _myDiscordClient.Start();
 			await _filters.PostInitialize();
 			await Task.WhenAll(GetTasks());
-
 		}
 		private IEnumerable<Task> GetTasks()
 		{
@@ -83,6 +83,7 @@ namespace Manito.Discord
 			yield return _filters.RunModule();
 			yield return _economy.RunModule();
 			yield return _msgWallCtr.RunModule();
+			yield return _logging.RunModule();
 		}
 	}
 }

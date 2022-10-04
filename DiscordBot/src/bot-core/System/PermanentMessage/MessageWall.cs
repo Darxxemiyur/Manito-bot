@@ -18,7 +18,7 @@ namespace Manito.Discord.PermanentMessage
     /// </summary>
     public class MessageWall
     {
-        public ulong ID { get; set; }
+        public long ID { get; set; }
         public string WallName { get; set; }
         public List<MessageWallLine> Msgs { get; set; }
         public MessageWall() => (Msgs, WallName) = (new(), "");

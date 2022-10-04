@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using Manito.Discord.Orders;
 using System.Threading.Channels;
 

@@ -15,7 +15,6 @@
     <PackageReference Include="DisCatSharp.Interactivity" Version="10.1.4" />
     <PackageReference Include="DisCatSharp.Lavalink" Version="10.1.4" />
     <PackageReference Include="DisCatSharp.VoiceNext" Version="10.1.4" />
-    <PackageReference Include="emzi0767.common" Version="2.6.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
     <PackageReference Include="microsoft.entityframeworkcore.abstractions" Version="6.0.9" />
     <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="6.0.9" />

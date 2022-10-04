@@ -1,5 +1,5 @@
 ﻿using Manito.Discord.Database;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 
 using System;
 using System.Collections.Generic;

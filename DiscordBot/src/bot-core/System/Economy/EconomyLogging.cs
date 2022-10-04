@@ -9,8 +9,9 @@ using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.EventArgs;
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
+using Manito.Discord;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
     public class EconomyLogging : IModule
     {

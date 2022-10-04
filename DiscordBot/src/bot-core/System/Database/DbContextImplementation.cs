@@ -3,11 +3,14 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 using Manito.Discord.Shop;
-using Manito.Discord.Economy;
+using Manito.System.Economy;
+using Manito.Discord;
 using Manito.Discord.PermanentMessage;
 using DisCatSharp.Common.Utilities;
 using System.Linq;
 using Manito.System.Logging;
+using Manito.System.Economy;
+using Manito.Discord;
 
 namespace Manito.Discord.Database
 {
@@ -34,45 +37,38 @@ namespace Manito.Discord.Database
 		public DbSet<LogLine> LogLines {
 			get; set;
 		}
+		public DbSet<PlayerEconomyWork> PlayerWorks {
+			get; set;
+		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<MessageWallTranslator>()
-				.HasKey(x => x.ID);
+			modelBuilder.Entity<MessageWallTranslator>().HasKey(x => x.ID);
+			modelBuilder.Entity<MessageWallTranslator>().Property(x => x.ID).UseIdentityByDefaultColumn();
 
-			modelBuilder.Entity<MessageWallTranslator>()
-				.Property(x => x.ID)
-				.ValueGeneratedOnAdd();
+			modelBuilder.Entity<MessageWallTranslator>().Ignore(x => x.Translation);
 
-			modelBuilder.Entity<MessageWallTranslator>()
-				.Ignore(x => x.Translation);
+			modelBuilder.Entity<MessageWall>().HasKey(x => x.ID);
+			modelBuilder.Entity<MessageWall>().Property(x => x.ID).UseIdentityByDefaultColumn();
 
-			modelBuilder.Entity<MessageWall>()
-				.HasKey(x => x.ID);
+			modelBuilder.Entity<MessageWallLine>().HasKey(x => x.ID);
+			modelBuilder.Entity<MessageWallLine>().Property(x => x.ID).UseIdentityByDefaultColumn();
 
-			modelBuilder.Entity<MessageWall>()
-				.Property(x => x.ID)
-				.ValueGeneratedOnAdd();
 
-			modelBuilder.Entity<MessageWallLine>()
-				.HasKey(x => x.ID);
+			modelBuilder.Entity<PlayerEconomyDeposit>().HasKey(x => x.DiscordID);
 
-			modelBuilder.Entity<MessageWallLine>()
-				.Property(x => x.ID)
-				.ValueGeneratedOnAdd();
+			modelBuilder.Entity<PlayerEconomyWork>(x => {
+				x.HasKey(x => x.DiscordID);
+				x.Property(x => x.LastWork);
+			});
 
-			modelBuilder.Entity<PlayerEconomyDeposit>()
-				.HasKey(x => x.DiscordID);
+			modelBuilder.Entity<ShopItem>().HasNoKey();
 
-			modelBuilder.Entity<ShopItem>()
-				.HasNoKey();
-
-			modelBuilder.Entity<LogLine>()
-				.Property(b => b.Id)
-				.ValueGeneratedOnAdd();
-			modelBuilder.Entity<LogLine>()
-				.Property(b => b.Data)
-				.HasColumnType("jsonb");
+			modelBuilder.Entity<LogLine>(x => {
+				x.HasKey(x => x.ID);
+				x.Property(x => x.ID).UseIdentityByDefaultColumn();
+				x.Property(b => b.Data).HasColumnType("jsonb");
+			});
 		}
 	}
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using Manito.Discord.Filters;
 using Manito.Discord.Inventory;
 using Manito.Discord.Shop;

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -11,9 +12,9 @@ namespace Manito.System.Logging
 {
 	public class LogLine : IDisposable
 	{
-		public ulong Id {
+		public long ID {
 			get; set;
-		}
+		} 
 		public string District {
 			get; set;
 		}
@@ -22,6 +23,12 @@ namespace Manito.System.Logging
 		}
 		public JsonDocument Data {
 			get; set;
+		}
+		public LogLine(string district, string category, JsonDocument data)
+		{
+			District = district;
+			Category = category;
+			Data = data;
 		}
 		public void Dispose() => Data?.Dispose();
 	}

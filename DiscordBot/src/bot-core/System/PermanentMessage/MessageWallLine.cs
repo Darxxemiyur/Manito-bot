@@ -15,7 +15,7 @@ namespace Manito.Discord.PermanentMessage
 
     public class MessageWallLine
     {
-        public ulong ID { get; set; }
+        public long ID { get; set; }
         public MessageWall MessageWall { get; set; }
         public string WallLine { get; private set; }
         public MessageWallLine() { }

@@ -14,8 +14,9 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.ChatNew;
 using static System.Collections.Specialized.BitVector32;
+using Microsoft.EntityFrameworkCore;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 
 	public class EconomyCommands
@@ -51,6 +52,14 @@ namespace Manito.Discord.Economy
 			 nameLocalizations: GetLoc("посмотреть"),
 			 descriptionLocalizations: GetLoc("Посмотреть средства")),
 			 GetAccountDeposit);
+
+			yield return (new DiscordApplicationCommandOption("work", "Do work",
+			 ApplicationCommandOptionType.SubCommand, false, null,// new[] {
+																  //new DiscordApplicationCommandOption("target", "Account", ApplicationCommandOptionType.User,  false, nameLocalizations: GetLoc( "счёт"), descriptionLocalizations: GetLoc( "Счёт"))
+																  //},
+			 nameLocalizations: GetLoc("заработать"),
+			 descriptionLocalizations: GetLoc("Заработать средства")),
+			 DoWork);
 
 			yield return (new DiscordApplicationCommandOption("transfer", "Transfer funds",
 			 ApplicationCommandOptionType.SubCommand, false, null, new[] {
@@ -120,11 +129,66 @@ namespace Manito.Discord.Economy
 
 			var msg = new UniversalMessageBuilder()
 			 .AddEmbed(new DiscordEmbedBuilder()
-			 .WithDescription(deposit + $" {_economy.CurrencyEmoji}")
-			 .WithTitle("Валюта").WithAuthor($"<@{target}>"));
+			 .WithDescription($"{deposit} {_economy.CurrencyEmoji} у <@{target}>")
+			 .WithTitle("Валюта"));
 
 			await session.SendMessage(msg);
 		}
+		/// <summary>
+		/// Get user's Account deposit.
+		/// </summary>
+		/// <returns></returns>
+		private async Task DoWork(DiscordInteraction args)
+		{
+			var target = args.User.Id;
+
+			//var oth = args.Data.Options.First().Options.FirstOrDefault(x => x.Name == "target");
+			//if (oth != null)
+			//	target = (ulong)oth.Value;
+			var session = new ComponentDialogueSession(_client, args);
+			var wallet = _economy.GetPlayerWallet(target);
+			await session.DoLaterReply();
+
+			{
+				await using var _ = await _lock.BlockAsyncLock();
+				await using var db = await _client.Domain.DbFactory.CreateMyDbContextAsync();
+
+
+				if (!await db.PlayerWorks.AnyAsync(x => x.DiscordID == target))
+				{
+					await db.PlayerWorks.AddAsync(new PlayerEconomyWork(target));
+					await db.SaveChangesAsync();
+				}
+
+				var work = await db.PlayerWorks.FirstAsync(x => x.DiscordID == target);
+
+				if (DateTimeOffset.UtcNow - work.LastWork < TimeSpan.FromHours(4))
+				{
+					await session.SendMessage(new DiscordEmbedBuilder().WithDescription("Вы уже работали"));
+					return;
+				}
+				else
+				{
+					work.LastWork = DateTimeOffset.UtcNow;
+					work.TimesWorked++;
+				}
+				await db.SaveChangesAsync();
+			}
+
+			for (int i = 0; i < 4; i++)
+			{
+				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Работаем...{string.Join("", Enumerable.Range(1, i).Select(x => "."))}").WithColor(new DiscordColor(100, 100, 20)));
+				await Task.Delay(4000);
+			}
+			var money = Random.Shared.Next(200, 400);
+			await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}"));
+
+			await wallet.Deposit(money, "Заработок");
+			var msg = await session.SessionMessage;
+			await Task.Delay(10000);
+			await msg.DeleteAsync();
+		}
+		private AsyncLocker _lock = new();
 
 		private async Task TransferMoney(DiscordInteraction args)
 		{

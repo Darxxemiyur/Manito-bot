@@ -14,7 +14,7 @@ using DisCatSharp.ApplicationCommands.Attributes;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using System.Threading;
 
 namespace Manito.Discord.Shop

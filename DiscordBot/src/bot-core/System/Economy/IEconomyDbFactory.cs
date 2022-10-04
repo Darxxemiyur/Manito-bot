@@ -6,7 +6,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.ApplicationCommands;
 using Manito.Discord.Database;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 
     public interface IEconomyDbFactory : IMyDbFactory

@@ -82,7 +82,7 @@ namespace Manito.Discord.PermanentMessage
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public async Task<Task<int?>> PostMessageUpdate(ulong id, MsgContext context)
+		public async Task<Task<int?>> PostMessageUpdate(long id, MsgContext context)
 		{
 			var callback = new TaskCompletionSource<int?>();
 
@@ -93,7 +93,7 @@ namespace Manito.Discord.PermanentMessage
 		/// <summary>
 		/// List of post update requests containing translator ID and a callback that resolves after update;
 		/// </summary>
-		private TaskEventProxy<(ulong, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
+		private readonly TaskEventProxy<(long, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
 		public async Task StartSession(DiscordInteraction args)
 		{
 			await _sessionTab.CreateSession(new InteractiveInteraction(args),

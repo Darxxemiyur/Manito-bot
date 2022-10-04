@@ -1,7 +1,7 @@
 ﻿using DisCatSharp.Entities;
 
 using Manito.Discord.Client;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using Manito.Discord.Inventory;
 
 namespace Manito.Discord.Shop

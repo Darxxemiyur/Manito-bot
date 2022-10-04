@@ -36,8 +36,7 @@ namespace Manito.Discord.Shop
 				{
 					var shopItems = _session.Context.CashRegister.GetShopItems();
 					var items = _session.Context.Format.GetSelector(shopItems);
-					var mg = _session.Context.Format.GetResponse(_session.Context.Format.GetShopItems(null, shopItems))
-						.AddComponents(items).AddComponents(exbtn).WithContent("");
+					var mg = _session.Context.Format.GetResponse(_session.Context.Format.GetShopItems(null, shopItems)).AddComponents(items).AddComponents(exbtn);
 					await _session.SendMessage(mg);
 
 

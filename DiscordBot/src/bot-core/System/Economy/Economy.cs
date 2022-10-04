@@ -13,8 +13,9 @@ using System.Linq;
 using System.Security.Principal;
 using System.Security.Cryptography;
 using static MongoDB.Driver.WriteConcern;
+using Manito.Discord;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 	public class PlayerWallet
 	{
@@ -54,7 +55,7 @@ namespace Manito.Discord.Economy
 		public async Task<long> GetScales(ulong whose)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			return await GetScales(whose);
+			return await GetScalesUnlocked(whose);
 		}
 		private async Task<bool> Ensure(ulong id)
 		{
@@ -87,7 +88,7 @@ namespace Manito.Discord.Economy
 		public async Task<long> Withdraw(ulong from, long amount, string msg = null)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			return await WithdrawUnlocked(from, amount);
+			return await WithdrawUnlocked(from, amount, msg);
 		}
 		public async Task<long> Deposit(ulong to, long amount, string msg = null)
 		{

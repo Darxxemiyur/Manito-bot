@@ -1,6 +1,7 @@
 ﻿using DisCatSharp.Entities;
 
-using Manito.Discord.Economy;
+using Manito.Discord.ChatNew;
+using Manito.System.Economy; using Manito.Discord;
 
 using System;
 using System.Collections.Generic;
@@ -21,13 +22,13 @@ namespace Manito.Discord.Shop
 		}
 		public DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
 			_cashRegister.Default(bld);
-		public DiscordMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
+		public UniversalMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
 		{
-			return new DiscordMessageBuilder().WithEmbed(builder ?? BaseContent());
+			return new UniversalMessageBuilder().AddEmbed(builder ?? BaseContent());
 		}
-		public DiscordInteractionResponseBuilder GetResponse(DiscordEmbedBuilder builder = null)
+		public UniversalMessageBuilder GetResponse(DiscordEmbedBuilder builder = null)
 		{
-			return new DiscordInteractionResponseBuilder(GetDResponse(builder));
+			return new(GetDResponse(builder));
 		}
 		public DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null,
 		 IEnumerable<ShopItem> list = null)

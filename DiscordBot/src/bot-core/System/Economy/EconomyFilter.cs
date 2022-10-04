@@ -13,9 +13,9 @@ using DisCatSharp.ApplicationCommands.Attributes;
 
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 
 	public class EconomyFilter : IModule
@@ -32,10 +32,11 @@ namespace Manito.Discord.Economy
 		}
 		private EconomyCommands _commands;
 		private DiscordEventProxy<InteractionCreateEventArgs> _queue;
+		private MyDomain _domain;
 		public EconomyFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_commands = new EconomyCommands(service.Economy, service.MyDiscordClient);
-			service.MyDiscordClient.AppCommands.Add("Economy", _commands.GetCommands());
+			(_domain = service).MyDiscordClient.AppCommands.Add("Economy", _commands.GetCommands());
 			_queue = new();
 			eventBuffer.Interact.OnMessage += _queue.Handle;
 		}
@@ -45,7 +46,7 @@ namespace Manito.Discord.Economy
 			if (res == null)
 				return;
 
-			await res(args.Interaction);
+			await _domain.ExecutionThread.AddNew(() => res(args.Interaction));
 			args.Handled = true;
 		}
 	}

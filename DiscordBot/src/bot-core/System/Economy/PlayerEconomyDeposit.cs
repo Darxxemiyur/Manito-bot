@@ -6,7 +6,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.ApplicationCommands;
 
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 
 	public class PlayerEconomyDeposit

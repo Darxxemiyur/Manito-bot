@@ -12,9 +12,10 @@ using DisCatSharp.ApplicationCommands.EventArgs;
 using DisCatSharp.ApplicationCommands.Attributes;
 
 using Manito.Discord.Client;
-using Manito.Discord.Economy;
+using Manito.System.Economy;
+using Manito.Discord;
 
-namespace Manito.Discord.Economy
+namespace Manito.System.Economy
 {
 
 	public class DebugFilter : IModule

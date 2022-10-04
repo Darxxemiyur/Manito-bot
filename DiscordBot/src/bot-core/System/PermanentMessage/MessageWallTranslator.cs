@@ -20,7 +20,7 @@ namespace Manito.Discord.PermanentMessage
 
 	public class MessageWallTranslator
 	{
-		public ulong ID {
+		public long ID {
 			get; set;
 		}
 		public MessageWall MessageWall {

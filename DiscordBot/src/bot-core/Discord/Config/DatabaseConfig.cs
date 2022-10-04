@@ -29,7 +29,7 @@ namespace Manito.Discord.Config
 			Address = "localhost";
 			Port = "5432";
 #if DEBUG
-			Login = "postgres";
+			Login = "postgres;Include Error Detail=true";
 			Password = "postgres";
 #else
 			Login = "ManitoStuff";
@@ -41,7 +41,7 @@ namespace Manito.Discord.Config
 		private string ConnectS => $"Host={Address};Port={Port}";
 
 		private string LoginString => $"{LoginS};{ConnectS};Database={Database}";
-		private string OptionsString => "Minimum Pool Size=2";
+		private string OptionsString => "Minimum Pool Size=10";
 		public string ConnectionString => $"{LoginString};{OptionsString}";
 	}
 }

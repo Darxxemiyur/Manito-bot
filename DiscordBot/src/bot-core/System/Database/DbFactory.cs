@@ -3,7 +3,8 @@ using System.Data.Common;
 using System.Threading.Tasks;
 
 using Manito.Discord.Config;
-using Manito.Discord.Economy;
+using Manito.System.Economy;
+using Manito.Discord;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Logging;
@@ -26,9 +27,11 @@ namespace Manito.Discord.Database
 			public DbContextImplementation CreateDbContext(string[] args)
 			{
 				var optionsBuilder = new DbContextOptionsBuilder<DbContextImplementation>();
-				//optionsBuilder.UseSqlite(String.Format("Data Source={0}", Configuration.Config.DBPath));
 
 				optionsBuilder.UseNpgsql(_dbConfig.ConnectionString);
+
+				optionsBuilder.EnableDetailedErrors();
+				optionsBuilder.EnableSensitiveDataLogging();
 
 				return new(optionsBuilder.Options);
 			}

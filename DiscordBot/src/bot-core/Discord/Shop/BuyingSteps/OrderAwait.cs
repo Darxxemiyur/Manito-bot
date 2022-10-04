@@ -9,7 +9,7 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Orders;
 using System.Threading;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 
 namespace Manito.Discord.Shop
 {
@@ -55,7 +55,7 @@ namespace Manito.Discord.Shop
 				{
 					await _order.TryCancelOrder();
 
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(255, 50, 50))));
 
 					await _wallet.Deposit(_item.Price);
 
@@ -64,7 +64,7 @@ namespace Manito.Discord.Shop
 				if (first == nonCanc)
 				{
 					await completed;
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.")));
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(50, 255, 50))));
 					break;
 				}
 			}

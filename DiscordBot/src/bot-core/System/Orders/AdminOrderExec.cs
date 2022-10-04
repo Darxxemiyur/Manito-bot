@@ -54,15 +54,15 @@ namespace Manito.Discord.Orders
 			var step = _steps.Current;
 			if (step != null)
 			{
-				if (step.Type == Order.StepType.ShowInfo)
+				if (step.Type == StepType.ShowInfo)
 					return new(DoShowInfo, step);
-				if (step.Type == Order.StepType.Confirmation)
+				if (step.Type == StepType.Confirmation)
 					return new(DoConfirmation, step);
-				if (step.Type == Order.StepType.ChangeState)
+				if (step.Type == StepType.ChangeState)
 					return new(MakeNonCancallable);
-				if (step.Type == Order.StepType.Command)
+				if (step.Type == StepType.Command)
 					return new(DoCommand, step);
-				if (step.Type == Order.StepType.Inform)
+				if (step.Type == StepType.Inform)
 					return new(DoInform, step);
 
 				throw new NotImplementedException();

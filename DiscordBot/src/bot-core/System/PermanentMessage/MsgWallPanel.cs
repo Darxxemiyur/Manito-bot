@@ -5,7 +5,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using DisCatSharp.EventArgs;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.Inventory;

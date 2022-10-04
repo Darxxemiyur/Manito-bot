@@ -8,7 +8,6 @@ using Manito.Discord;
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
-using Name.Bayfaderix.Darxxemiyur.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

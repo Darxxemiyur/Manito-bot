@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 using Manito.Discord.Shop;
 using System.Threading;
-using Manito.Discord.Economy;
+using Manito.System.Economy; using Manito.Discord;
 using Manito.Discord.PermanentMessage;
 using Manito.System.Logging;
+using Manito.System.Economy; using Manito.Discord;
 
 namespace Manito.Discord.Database
 {
@@ -24,6 +25,8 @@ namespace Manito.Discord.Database
 			get; private set;
 		}
 		public DbSet<LogLine> LogLines => ImplementedContext.LogLines;
+
+		public DbSet<PlayerEconomyWork> PlayerWorks => ImplementedContext.PlayerWorks;
 
 		public int SaveChanges() => ImplementedContext.SaveChanges();
 		public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
