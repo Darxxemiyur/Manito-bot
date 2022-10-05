@@ -31,7 +31,6 @@ namespace Manito.Discord.Shop
 			CustomerId = customerId;
 			CashRegister = cashRegister;
 			Wallet = wallet;
-			//_inventory = inventory;
 			Format = new(CashRegister, Wallet);
 			ShopService = shopService;
 		}
