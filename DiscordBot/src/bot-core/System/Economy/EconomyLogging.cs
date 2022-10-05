@@ -1,42 +1,39 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.ApplicationCommands.Attributes;
-using DisCatSharp.ApplicationCommands.EventArgs;
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord;
+using Manito.Discord.Client;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
+
+using System.Threading.Tasks;
 
 namespace Manito.System.Economy
 {
-    public class EconomyLogging : IModule
-    {
+	public class EconomyLogging : IModule
+	{
+		#region ToRework
 
-        #region ToRework
-        private ulong logid = 973271532681982022;
-        private TaskEventProxy<string> _logQueue = new();
-        private MyDomain _service;
-        public EconomyLogging(MyDomain service)
-        {
-            _service = service;
-        }
-        public Task ReportTransaction(string str) => _logQueue.Handle(str);
+		private ulong logid = 973271532681982022;
+		private TaskEventProxy<string> _logQueue = new();
+		private MyDomain _service;
 
-        public Task RunModule() => LogTransactions();
+		public EconomyLogging(MyDomain service)
+		{
+			_service = service;
+		}
 
-        private async Task LogTransactions()
-        {
-            while (true)
-            {
-                var str = await _logQueue.GetData();
-                var ch = await _service.MyDiscordClient.Client.GetChannelAsync(logid);
-                await ch.SendMessageAsync(str);
-            }
-        }
-        #endregion
-    }
+		public Task ReportTransaction(string str) => _logQueue.Handle(str);
+
+		public Task RunModule() => LogTransactions();
+
+		private async Task LogTransactions()
+		{
+			while (true)
+			{
+				var str = await _logQueue.GetData();
+				var ch = await _service.MyDiscordClient.Client.GetChannelAsync(logid);
+				await ch.SendMessageAsync(str);
+			}
+		}
+
+		#endregion ToRework
+	}
 }

@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using DisCatSharp.Enums;
-using System.Threading.Tasks;
-using DisCatSharp.Entities;
-
-using Manito.Discord.Chat.DialogueNet;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
+﻿using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Orders;
-using Manito.Discord.Client;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
@@ -20,8 +18,11 @@ namespace Manito.Discord.Shop
 		public FoodOrderAwait(DialogueTabSession<ShopContext> session, ShopItem.InCart item) => (_session, _item) = (session, item);
 
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction() => new(GetId);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
+
 		private async Task<NextNetworkInstruction> GetId(NetworkInstructionArgument args)
 		{
 			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
@@ -33,6 +34,7 @@ namespace Manito.Discord.Shop
 
 			return new();
 		}
+
 		private async Task<NextNetworkInstruction> WaitForOrder(NetworkInstructionArgument args)
 		{
 			var id = (int)args.Payload;

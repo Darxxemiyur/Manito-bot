@@ -1,17 +1,12 @@
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+
+using Manito.Discord.Client;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.Enums;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.ApplicationCommands.Attributes;
-using DisCatSharp.ApplicationCommands.EventArgs;
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-
 
 namespace Manito.Discord.Inventory
 {
@@ -20,8 +15,10 @@ namespace Manito.Discord.Inventory
 		private const string Locale = "ru";
 		private IInventorySystem _inventory;
 		private InventoryController _controller;
+
 		public InventoryCommands(InventoryController controller, IInventorySystem inventory) =>
 		 (_controller, _inventory) = (controller, inventory);
+
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -37,7 +34,9 @@ namespace Manito.Discord.Inventory
 			}
 			return null;
 		}
+
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
+
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
 		{
 			yield return (new DiscordApplicationCommandOption("open", "Open inventory",
@@ -49,14 +48,15 @@ namespace Manito.Discord.Inventory
 			 descriptionLocalizations: GetLoc("Открыть инвентарь")),
 			 ShowInventory);
 		}
+
 		public IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
 			yield return new DiscordApplicationCommand("inventory", "Inventory",
 			 GetSubCommands().Select(x => x.Item1),
 			 ApplicationCommandType.ChatInput,
 			 GetLoc("инвентарь"), GetLoc("Инвентарь"));
-
 		}
+
 		/// <summary>
 		/// Show user's inventory
 		/// </summary>
@@ -69,7 +69,5 @@ namespace Manito.Discord.Inventory
 
 			await _controller.StartSession(args, (x) => new ListItems(x, page - 1));
 		}
-
 	}
-
 }

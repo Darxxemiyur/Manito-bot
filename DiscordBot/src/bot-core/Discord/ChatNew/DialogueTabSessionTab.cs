@@ -1,19 +1,13 @@
 ﻿using Manito.Discord.Client;
 
-using Microsoft.EntityFrameworkCore;
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
 {
 	/// <summary>
-	/// Dialogue Session tab
-	/// Controls creation of new sessions and keeps the created ones.
+	/// Dialogue Session tab Controls creation of new sessions and keeps the created ones.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class DialogueTabSessionTab<T>
@@ -21,17 +15,22 @@ namespace Manito.Discord.ChatNew
 		public MyDiscordClient Client {
 			get; private set;
 		}
+
 		// Keeps list of created sessions.
 		private List<DialogueTabSession<T>> _sessions;
+
 		public IReadOnlyList<DialogueTabSession<T>> Sessions => _sessions;
+
 		// Used to sync creation and deletion of sessions
 		private SemaphoreSlim _sync;
+
 		public DialogueTabSessionTab(MyDiscordClient client)
 		{
 			_sync = new(1, 1);
 			_sessions = new();
 			Client = client;
 		}
+
 		public async Task<DialogueTabSession<T>> CreateSync(InteractiveInteraction interactive, T context)
 		{
 			await _sync.WaitAsync();
@@ -44,6 +43,7 @@ namespace Manito.Discord.ChatNew
 
 			return session;
 		}
+
 		public async Task<bool> RemoveSession(IDialogueSession session)
 		{
 			await _sync.WaitAsync();

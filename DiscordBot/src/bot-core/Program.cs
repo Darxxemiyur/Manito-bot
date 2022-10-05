@@ -1,21 +1,16 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Manito.Discord;
 
-using Manito.Discord;
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
+using System.Threading.Tasks;
 
 namespace Manito
 {
-    class Program
-    {
-        async static Task Main(string[] args)
-        {
-            var service = await MyDomain.Create();
+	internal class Program
+	{
+		private static async Task Main(string[] args)
+		{
+			var service = await MyDomain.Create();
 
-            await service.StartBot();
-        }
-
-    }
+			await service.StartBot();
+		}
+	}
 }

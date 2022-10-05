@@ -1,26 +1,17 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Enums;
 
-using Manito.Discord.Database;
-using System.Linq;
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using System.Threading;
 using Manito.Discord.Chat.DialogueNet;
-using Manito.Discord.ChatNew;
 using Manito.Discord.ChatAbstract;
+using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
+
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
-
 	public class ShopService
 	{
 		private MyDomain _service;
@@ -28,6 +19,7 @@ namespace Manito.Discord.Shop
 		private ShopCashRegister _cashRegister;
 		private DialogueNetSessionTab<ShopContext> _shopTab;
 		private SemaphoreSlim _lock;
+
 		public ShopService(MyDomain service)
 		{
 			_lock = new SemaphoreSlim(1, 1);
@@ -36,6 +28,7 @@ namespace Manito.Discord.Shop
 			_shopTab = new(service);
 			_cashRegister = new(null);
 		}
+
 		public async Task<DialogueTabSession<ShopContext>> StartSession(DiscordUser customer, DiscordInteraction intr)
 		{
 			await _lock.WaitAsync();
@@ -51,6 +44,7 @@ namespace Manito.Discord.Shop
 
 			return session;
 		}
+
 		public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
 			_cashRegister.Default(bld);
 
@@ -60,5 +54,4 @@ namespace Manito.Discord.Shop
 				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "Start", "Шоппинг!"));
 		}
 	}
-
 }

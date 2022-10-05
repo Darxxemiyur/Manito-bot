@@ -1,22 +1,16 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.EventArgs;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.Common.Utilities;
-using DisCatSharp.Interactivity.EventHandling;
+
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
 	public class ActivitiesTools
 	{
 		private EventInline _evInline;
+
 		public ActivitiesTools(EventInline evInline)
 		{
 			_evInline = evInline;
@@ -24,6 +18,7 @@ namespace Manito.Discord.Client
 
 		public Task<MessageReactionAddEventArgs> WaitForReaction(DiscordMessage message)
 			=> WaitForReaction((MessageReactionAddEventArgs x) => x.Message.Id == message.Id);
+
 		public async Task<MessageCreateEventArgs> WaitForMessage(
 			Func<MessageCreateEventArgs, bool> pred)
 		{
@@ -33,8 +28,10 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			DiscordMessage message) => WaitForComponentInteraction((x) => x.Message.Id == message.Id);
+
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker)
 		{
@@ -44,6 +41,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, TimeSpan timeout, CancellationToken token)
 		{
@@ -53,6 +51,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, TimeSpan timeout)
 		{
@@ -62,6 +61,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, CancellationToken token)
 		{
@@ -71,6 +71,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<MessageReactionAddEventArgs> WaitForReaction(
 			Func<MessageReactionAddEventArgs, bool> pred)
 		{
@@ -80,6 +81,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<MessageReactionAddEventArgs> WaitForReaction(
 			Func<MessageReactionAddEventArgs, bool> pred, TimeSpan timeout)
 		{
@@ -89,6 +91,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<MessageCreateEventArgs> WaitForMessage(
 			Func<MessageCreateEventArgs, bool> pred, TimeSpan timeout)
 		{
@@ -98,6 +101,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<MessageCreateEventArgs> WaitForMessage(
 			Func<MessageCreateEventArgs, bool> pred, TimeSpan timeout, CancellationToken token = default)
 		{
@@ -107,6 +111,7 @@ namespace Manito.Discord.Client
 
 			return evnv.Item2;
 		}
+
 		public async Task<MessageCreateEventArgs> WaitForMessage(
 			Func<MessageCreateEventArgs, bool> pred, CancellationToken token = default)
 		{

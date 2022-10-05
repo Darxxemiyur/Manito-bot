@@ -1,20 +1,15 @@
-﻿using DisCatSharp;
-using DisCatSharp.Entities;
-
-using Manito.Discord.PatternSystems.Common;
-using Manito.Discord.Chat.DialogueNet;
-using Manito.Discord.Client;
+﻿using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 
-using Microsoft.EntityFrameworkCore;
+using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
+using Manito.Discord.PatternSystems.Common;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Manito.Discord.ChatNew;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -26,11 +21,13 @@ namespace Manito.Discord.PermanentMessage
 			private ImportedMessage _line;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
 			}
+
 			private async Task<NextNetworkInstruction> ShowOptions(NetworkInstructionArgument args)
 			{
 				var remBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "Удалить");
@@ -53,6 +50,7 @@ namespace Manito.Discord.PermanentMessage
 
 				return response.CompareButton(remBtn) ? new(RemoveLine) : _ret;
 			}
+
 			private async Task<NextNetworkInstruction> RemoveLine(NetworkInstructionArgument args)
 			{
 				var returnBtn = new DiscordButtonComponent(ButtonStyle.Success, "return", "Назад");
@@ -80,10 +78,12 @@ namespace Manito.Discord.PermanentMessage
 
 				return new(_ret);
 			}
+
 			public NextNetworkInstruction GetStartingInstruction()
 			{
 				throw new NotImplementedException();
 			}
+
 			public NextNetworkInstruction GetStartingInstruction(object payload)
 			{
 				_line = (ImportedMessage)payload;
@@ -91,26 +91,39 @@ namespace Manito.Discord.PermanentMessage
 				return new(ShowOptions);
 			}
 		}
+
 		public class Descriptor : IItemDescriptor<ImportedMessage>
 		{
 			private readonly ImportedMessage _wallLine;
+
 			public Descriptor(ImportedMessage wallLine) => _wallLine = wallLine;
+
 			private int _lid;
 			private int _gid;
+
 			public string GetButtonId() => $"Importer{_lid}_{_wallLine.MessageId}";
+
 			public string GetButtonName()
 			{
 				var wallName = $"{_wallLine.Message ?? ""}".Trim();
 
 				return wallName.DoAtMax(80).Trim();
 			}
+
 			public ImportedMessage GetCarriedItem() => _wallLine;
+
 			public string GetFieldBody() => throw new NotImplementedException();
+
 			public string GetFieldName() => throw new NotImplementedException();
+
 			public int GetGlobalDisplayOrder() => _gid;
+
 			public int GetLocalDisplayOrder() => _lid;
+
 			public bool HasButton() => true;
+
 			public bool HasField() => false;
+
 			public IItemDescriptor<ImportedMessage> SetGlobalDisplayedOrder(int i)
 			{
 				_gid = i;
@@ -123,10 +136,12 @@ namespace Manito.Discord.PermanentMessage
 				return this;
 			}
 		}
+
 		private InteractiveSelectMenu<ImportedMessage> _selectMenu;
 
 		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
+
 		public MsgWallPanelWallLineImport(DialogueTabSession<MsgContext> session)
 		{
 			_editor = new(session, new(Choose));
@@ -135,17 +150,20 @@ namespace Manito.Discord.PermanentMessage
 				new EnumerablePageReturner<ImportedMessage>(
 					_session.Context.Domain.MsgWallCtr.ImportedMessages, (x) => new Descriptor(x)));
 		}
+
 		private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
 		{
 			await _session.DoLaterReply();
 			return new(Choose);
 		}
+
 		private async Task<NextNetworkInstruction> Choose(NetworkInstructionArgument arg)
 		{
 			var line = (await _selectMenu.EvaluateItem())?.GetCarriedItem();
 
 			return new(Decider, line);
 		}
+
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument args)
 		{
 			var itm = (ImportedMessage)args.Payload;
@@ -155,8 +173,11 @@ namespace Manito.Discord.PermanentMessage
 
 			return _editor.GetStartingInstruction(itm);
 		}
+
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction() => new(EnterMenu);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload)
 		 => GetStartingInstruction();
 	}

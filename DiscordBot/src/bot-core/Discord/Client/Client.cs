@@ -1,23 +1,13 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.Interactivity;
-using DisCatSharp.Interactivity.Enums;
-using DisCatSharp.Interactivity.Extensions;
-using DisCatSharp.ApplicationCommands;
 
 using Manito.Discord.Config;
 
-using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
-
 	public class MyDiscordClient
 	{
 		private MyDomain _collection;
@@ -37,6 +27,7 @@ namespace Manito.Discord.Client
 #endif
 		private ActivitiesTools _activitiesTools;
 		public ActivitiesTools ActivityTools => _activitiesTools;
+
 		public MyDiscordClient(MyDomain collection, RootConfig rconfig)
 		{
 			var config = new DiscordConfiguration {
@@ -52,7 +43,6 @@ namespace Manito.Discord.Client
 			_activitiesTools = new ActivitiesTools(_eventInliner);
 
 			_eventBuffer = new EventBuffer(_eventInliner);
-
 		}
 
 		public async Task Start()
@@ -60,11 +50,13 @@ namespace Manito.Discord.Client
 			await _client.ConnectAsync();
 			await _client.InitializeAsync();
 		}
+
 		private IEnumerable<Task> GetRunners()
 		{
 			yield return _eventInliner.Run();
 			yield return _eventBuffer.EventLoops();
 		}
+
 		public Task StartLongTerm() => Task.WhenAll(GetRunners());
 	}
 }

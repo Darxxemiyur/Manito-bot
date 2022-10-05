@@ -1,18 +1,12 @@
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using DisCatSharp.Enums;
-using System.Reflection;
-using System.Threading.Tasks;
-using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using Microsoft.EntityFrameworkCore;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
-using System.Diagnostics;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
@@ -22,14 +16,17 @@ namespace Manito.Discord.Shop
 		private DialogueTabSession<ShopContext> _session;
 		private int _quantity;
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
 
 		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity);
+
 		public BuyingStepsForMeatFood(DialogueTabSession<ShopContext> session, ShopItem food)
 		{
 			_session = session;
 			_food = food;
 		}
+
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
 			var ms1 = $"Выберите количество {_food.Name}";
@@ -43,6 +40,7 @@ namespace Manito.Discord.Shop
 
 			return new(ExecuteTransaction);
 		}
+
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
@@ -55,11 +53,11 @@ namespace Manito.Discord.Shop
 
 			await wallet.Withdraw(cart.Price, $"Покупка {_food.Name} за {_food.Price} в кол-ве {_quantity} за {cart.Price}");
 
-
 			var res = (bool)await NetworkCommon.RunNetwork(new FoodOrderAwait(_session, cart));
 
 			return res ? new(SelectQuantity) : new();
 		}
+
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;

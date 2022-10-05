@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 
@@ -15,14 +9,18 @@ using Microsoft.EntityFrameworkCore;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace Manito.Discord.PermanentMessage
 {
 	/// <summary>
-	/// MessageWall wall submenu 
+	/// MessageWall wall submenu
 	/// </summary>
 	public class MsgWallPanelWall : INodeNetwork
 	{
-
 		/// <summary>
 		/// MessageWall Wall Editor dialogue
 		/// </summary>
@@ -34,11 +32,13 @@ namespace Manito.Discord.PermanentMessage
 			private MsgWallPanelWallLine.Editor _lineEditor;
 			private NextNetworkInstruction _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 			public Editor(DialogueTabSession<MsgContext> session, NextNetworkInstruction ret)
 			{
 				_session = session;
 				_ret = ret;
 			}
+
 			private async Task<NextNetworkInstruction> ActionsChoose(NetworkInstructionArgument args)
 			{
 				var renameBtn = new DiscordButtonComponent(ButtonStyle.Secondary, "rename", "Назвать");
@@ -72,6 +72,7 @@ namespace Manito.Discord.PermanentMessage
 
 				return new(_ret);
 			}
+
 			private async Task<NextNetworkInstruction> SelectWallChildren(NetworkInstructionArgument args)
 			{
 				var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
@@ -94,9 +95,9 @@ namespace Manito.Discord.PermanentMessage
 					.AddComponents(sel.MkNewButton.Disable(),
 					 sel.EditButton.Disable(), exitBtn.Disable()));
 
-
 				return sel.GetStartingInstruction(response);
 			}
+
 			private async Task<NextNetworkInstruction> OnChildSelected(NetworkInstructionArgument arg)
 			{
 				var itm = (MessageWallLine)arg.Payload;
@@ -109,6 +110,7 @@ namespace Manito.Discord.PermanentMessage
 
 				return _lineEditor.GetStartingInstruction(itm);
 			}
+
 			private async Task<NextNetworkInstruction> RenameWall(NetworkInstructionArgument args)
 			{
 				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
@@ -133,9 +135,9 @@ namespace Manito.Discord.PermanentMessage
 
 				return new(ActionsChoose);
 			}
+
 			private async Task<NextNetworkInstruction> RemoveWall(NetworkInstructionArgument args)
 			{
-
 				var returnBtn = new DiscordButtonComponent(ButtonStyle.Success, "return", "Назад");
 				var removeBtn = new DiscordButtonComponent(ButtonStyle.Danger, "remove", "***Удалить***");
 
@@ -180,6 +182,7 @@ namespace Manito.Discord.PermanentMessage
 
 				return new(_ret);
 			}
+
 			public NextNetworkInstruction GetStartingInstruction()
 			{
 				throw new NotImplementedException();
@@ -193,6 +196,7 @@ namespace Manito.Discord.PermanentMessage
 				return new(ActionsChoose);
 			}
 		}
+
 		public class Selector : INodeNetwork
 		{
 			/// <summary>
@@ -201,20 +205,33 @@ namespace Manito.Discord.PermanentMessage
 			private class Descriptor : IItemDescriptor<MessageWall>
 			{
 				private readonly MessageWall _wall;
+
 				public Descriptor(MessageWall wall) => _wall = wall;
+
 				private int _lid;
 				private int _gid;
+
 				public string GetButtonId() => $"MessageWall{_lid}_{_wall.ID}";
+
 				private string GetMyThing(string str) => $"Стена {str} ID:{_wall.ID}";
+
 				public string GetButtonName() => GetMyThing(_wall.WallName
 					[..Math.Min(_wall.WallName.Length, 80 - GetMyThing("").Length)]);
+
 				public MessageWall GetCarriedItem() => _wall;
+
 				public string GetFieldBody() => throw new NotImplementedException();
+
 				public string GetFieldName() => throw new NotImplementedException();
+
 				public int GetGlobalDisplayOrder() => _gid;
+
 				public int GetLocalDisplayOrder() => _lid;
+
 				public bool HasButton() => true;
+
 				public bool HasField() => false;
+
 				public IItemDescriptor<MessageWall> SetGlobalDisplayedOrder(int i)
 				{
 					_gid = i;
@@ -234,32 +251,39 @@ namespace Manito.Discord.PermanentMessage
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 			public DiscordButtonComponent CreateButton;
 			public DiscordButtonComponent SelectButton;
+
 			private class MyQuerrier : IQuerrier<MessageWall>
 			{
 				private IPermMessageDbFactory _factory;
+
 				public MyQuerrier(IPermMessageDbFactory factory)
 				{
 					_factory = factory;
 				}
+
 				public IItemDescriptor<MessageWall> Convert(MessageWall item) => new Descriptor(item);
+
 				public Int32 GetPages(Int32 perPage)
 				{
 					using var db = _factory.CreateMyDbContext();
 
 					return (int)Math.Ceiling((double)GetTotalCount() / perPage);
 				}
+
 				public IEnumerable<MessageWall> GetSection(Int32 skip, Int32 take)
 				{
 					using var db = _factory.CreateMyDbContext();
 
 					return db.MessageWalls.OrderBy(x => x.ID).Skip(skip).Take(take).ToArray();
 				}
+
 				public Int32 GetTotalCount()
 				{
 					using var db = _factory.CreateMyDbContext();
 					return db.MessageWalls.OrderBy(x => x.ID).Count();
 				}
 			}
+
 			public Selector(DialogueTabSession<MsgContext> session, Node ret)
 			{
 				CreateButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
@@ -268,16 +292,19 @@ namespace Manito.Discord.PermanentMessage
 				_selectMenu = new InteractiveSelectMenu<MessageWall>(_session,
 					new QueryablePageReturner<MessageWall>(new MyQuerrier(_session.Context.Factory)));
 			}
+
 			public IQueryable<MessageWall> Querryer()
 			{
 				using var db = _session.Context.Factory.CreateMyDbContext();
 
 				return db.MessageWalls.OrderBy(x => x.ID);
 			}
+
 			public IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
 			{
 				return input.Include(x => x.Msgs);
 			}
+
 			private async Task<NextNetworkInstruction> CreateWall(NetworkInstructionArgument args)
 			{
 				using var db = await _session.Context.Factory.CreateMyDbContextAsync();
@@ -297,10 +324,12 @@ namespace Manito.Discord.PermanentMessage
 
 				return new(_ret, wall);
 			}
+
 			public NextNetworkInstruction GetStartingInstruction()
 			{
 				throw new NotImplementedException();
 			}
+
 			public NextNetworkInstruction GetStartingInstruction(object payload)
 			{
 				var resp = payload as InteractiveInteraction;
@@ -314,15 +343,18 @@ namespace Manito.Discord.PermanentMessage
 				throw new NotImplementedException();
 			}
 		}
+
 		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
 		private Selector _selector;
+
 		public MsgWallPanelWall(DialogueTabSession<MsgContext> session)
 		{
 			_session = session;
 			_selector = new(session, Decider);
 			_editor = new(session, new(_selector.SelectWall));
 		}
+
 		private async Task<NextNetworkInstruction> EnterMenu(NetworkInstructionArgument args)
 		{
 			var exitBtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Выйти");
@@ -342,6 +374,7 @@ namespace Manito.Discord.PermanentMessage
 
 			return _selector.GetStartingInstruction(response);
 		}
+
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument args)
 		{
 			var itm = (MessageWall)args.Payload;
@@ -351,8 +384,11 @@ namespace Manito.Discord.PermanentMessage
 
 			return _editor.GetStartingInstruction(itm);
 		}
+
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction() => new(EnterMenu);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
 	}
 }

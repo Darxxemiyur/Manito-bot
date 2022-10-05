@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manito.System.Economy
 {
@@ -14,15 +10,19 @@ namespace Manito.System.Economy
 		public ulong DiscordID {
 			get; set;
 		}
+
 		public DateTimeOffset LastWork {
 			get; set;
 		}
+
 		public int TimesWorked {
 			get; set;
 		}
+
 		public PlayerEconomyWork()
 		{
 		}
+
 		public PlayerEconomyWork(ulong discordId)
 		{
 			DiscordID = discordId;

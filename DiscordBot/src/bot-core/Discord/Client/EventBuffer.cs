@@ -1,18 +1,13 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-
 using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.EventArgs;
-using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Common.Utilities;
+using DisCatSharp.EventArgs;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
-
 	public class EventBuffer
 	{
 		public SingleEventBuffer<MessageCreateEventArgs> Message;
@@ -33,8 +28,8 @@ namespace Manito.Discord.Client
 			 x => client.MessageReactionAdded -= x);
 			ContInteract = new(x => client.ContextMenuInteractionCreated += x,
 			 x => client.ContextMenuInteractionCreated -= x);
-			
 		}
+
 		public EventBuffer(EventInline client)
 		{
 			Message = new(client.MessageBuffer);
@@ -42,8 +37,8 @@ namespace Manito.Discord.Client
 			CompInteract = new(client.CompInteractBuffer);
 			MsgAddReact = new(client.ReactAddBuffer);
 			ContInteract = new(client.ContInteractBuffer);
-
 		}
+
 		private IEnumerable<Task> GetLoops()
 		{
 			yield return Message.Loop();
@@ -52,6 +47,7 @@ namespace Manito.Discord.Client
 			yield return MsgAddReact.Loop();
 			yield return ContInteract.Loop();
 		}
+
 		public Task EventLoops() => Task.WhenAll(GetLoops());
 	}
 
@@ -59,11 +55,14 @@ namespace Manito.Discord.Client
 	{
 		private DiscordEventProxy<TEvent> _eventBuffer;
 		private Action<AsyncEventHandler<DiscordClient, TEvent>> _unlinker;
+
 		public event Func<DiscordClient, TEvent, Task> OnMessage;
+
 		private void CreateEventBuffer()
 		{
 			_eventBuffer = new();
 		}
+
 		public SingleEventBuffer(Action<AsyncEventHandler<DiscordClient, TEvent>> linker,
 		 Action<AsyncEventHandler<DiscordClient, TEvent>> unlinker)
 		{
@@ -71,15 +70,18 @@ namespace Manito.Discord.Client
 			linker(_eventBuffer.Handle);
 			_unlinker = unlinker;
 		}
+
 		public SingleEventBuffer(PerEventInline<TEvent> linker)
 		{
 			CreateEventBuffer();
 			linker.OnFail += _eventBuffer.Handle;
 		}
+
 		~SingleEventBuffer()
 		{
 			_unlinker(_eventBuffer.Handle);
 		}
+
 		public async Task Loop()
 		{
 			while (true)
@@ -90,5 +92,4 @@ namespace Manito.Discord.Client
 			}
 		}
 	}
-
 }

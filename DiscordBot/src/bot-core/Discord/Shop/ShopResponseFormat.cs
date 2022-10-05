@@ -1,13 +1,10 @@
 ﻿using DisCatSharp.Entities;
 
 using Manito.Discord.ChatNew;
-using Manito.System.Economy; using Manito.Discord;
+using Manito.System.Economy;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
@@ -15,21 +12,26 @@ namespace Manito.Discord.Shop
 	{
 		private ShopCashRegister _cashRegister;
 		private PlayerWallet _wallet;
+
 		public ShopResponseFormat(ShopCashRegister cashRegister, PlayerWallet wallet)
 		{
 			_cashRegister = cashRegister;
 			_wallet = wallet;
 		}
+
 		public DiscordEmbedBuilder BaseContent(DiscordEmbedBuilder bld = null) =>
 			_cashRegister.Default(bld);
+
 		public UniversalMessageBuilder GetDResponse(DiscordEmbedBuilder builder = null)
 		{
 			return new UniversalMessageBuilder().AddEmbed(builder ?? BaseContent());
 		}
+
 		public UniversalMessageBuilder GetResponse(DiscordEmbedBuilder builder = null)
 		{
 			return new(GetDResponse(builder));
 		}
+
 		public DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null,
 		 IEnumerable<ShopItem> list = null)
 		{
@@ -39,8 +41,8 @@ namespace Manito.Discord.Shop
 				return x.AddField($"**{y.Name}**", $"**Цена за 1 ед:** {price}", true);
 			});
 			return emb;
-
 		}
+
 		public DiscordSelectComponent GetSelector(IEnumerable<ShopItem> list = null)
 		{
 			var items = (list ?? _cashRegister.GetShopItems())

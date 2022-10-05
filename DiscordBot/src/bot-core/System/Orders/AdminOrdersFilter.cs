@@ -1,25 +1,23 @@
-﻿using DisCatSharp.Entities;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
-using DisCatSharp;
+
+using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.ChatAbstract;
 using Manito.Discord.Client;
-using Manito.Discord.Shop;
-using Manito.Discord;
-using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Manito.Discord.ChatAbstract;
-using Manito.Discord.Chat.DialogueNet;
 
 namespace Manito.Discord.Orders
 {
 	public class AdminOrdersFilter : IModule
 	{
 		public Task RunModule() => HandleLoop();
+
 		private async Task HandleLoop()
 		{
 			while (true)
@@ -28,12 +26,14 @@ namespace Manito.Discord.Orders
 				await HandleAsCommand(data);
 			}
 		}
+
 		private readonly DialogueNetSessionTab<AdminOrderContext> _aoTab;
 		private readonly List<DiscordApplicationCommand> _commandList;
 		private readonly DiscordEventProxy<DiscordInteraction> _queue;
 		private readonly AdminOrderPool _pool;
 		private readonly MyDomain _domain;
 		public AdminOrderPool Pool => _pool;
+
 		public AdminOrdersFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_pool = new();
@@ -43,6 +43,7 @@ namespace Manito.Discord.Orders
 			service.MyDiscordClient.AppCommands.Add("AdmOrdFlt", _commandList);
 			eventBuffer.Interact.OnMessage += FilterMessage;
 		}
+
 		private IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
 			yield return new DiscordApplicationCommand("admin",
@@ -61,7 +62,9 @@ namespace Manito.Discord.Orders
 			await _queue.Handle(client, args.Interaction);
 			args.Handled = true;
 		}
+
 		private Task<bool> IsWorthy(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
+
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
 			if (!await IsWorthy(args.User))
@@ -91,7 +94,6 @@ namespace Manito.Discord.Orders
 					order.SetSteps(step1, step2, step3);
 					await _pool.PlaceOrder(order);
 				}
-
 		}
 	}
 }

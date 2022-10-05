@@ -1,29 +1,24 @@
-using System;
-using System.Data.Common;
-using System.Threading.Tasks;
-
 using Manito.Discord.Config;
-using Manito.System.Economy;
-using Manito.Discord;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
+using Manito.System.Economy;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Internal;
 
-using Npgsql;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
-
 	public class MyDbFactory : IShopDbFactory, IEconomyDbFactory, IPermMessageDbFactory, ILoggingDBFactory, IMyDbFactory
 	{
 		private class DTDCF : IDesignTimeDbContextFactory<DbContextImplementation>
 		{
 			private DatabaseConfig _dbConfig;
+
 			public DTDCF(DatabaseConfig dbConfig) => _dbConfig = dbConfig;
+
 			public DbContextImplementation CreateDbContext(string[] args)
 			{
 				var optionsBuilder = new DbContextOptionsBuilder<DbContextImplementation>();
@@ -36,16 +31,20 @@ namespace Manito.Discord.Database
 				return new(optionsBuilder.Options);
 			}
 		}
+
 		public IDesignTimeDbContextFactory<DbContextImplementation> OriginalFactory {
 			get; private set;
 		}
+
 		public MyDbFactory(MyDomain domain, DatabaseConfig dbConfig)
 		{
 			OriginalFactory = new DTDCF(dbConfig);
 		}
+
 		public void SetUpFactory()
 		{
 		}
+
 		public Task SetUpFactoryAsync() => Task.CompletedTask;
 
 		public MyDatabase CreateMyDbContext()
@@ -61,14 +60,17 @@ namespace Manito.Discord.Database
 			await db.SetUpDatabaseAsync(this);
 			return db;
 		}
+
 		IShopDb IShopDbFactory.CreateMyDbContext()
 		{
 			return CreateMyDbContext();
 		}
+
 		async Task<IShopDb> IShopDbFactory.CreateMyDbContextAsync()
 		{
 			return await CreateMyDbContextAsync();
 		}
+
 		IMyDatabase IMyDbFactory.CreateMyDbContext()
 		{
 			return CreateMyDbContext();

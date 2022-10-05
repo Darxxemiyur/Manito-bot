@@ -1,30 +1,28 @@
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+
+using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
+
+using Microsoft.EntityFrameworkCore;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.ApplicationCommands.Attributes;
-using DisCatSharp.ApplicationCommands.EventArgs;
-using DisCatSharp.Enums;
-
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.ChatNew;
-using Microsoft.EntityFrameworkCore;
-using Manito.Discord;
-
 namespace Manito.System.Economy
 {
-
 	public class EconomyCommands
 	{
 		private const string Locale = "ru";
 		private readonly ServerEconomy _economy;
 		private readonly MyDiscordClient _client;
+
 		public EconomyCommands(ServerEconomy economy, MyDiscordClient client) => (_economy, _client) = (economy, client);
+
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -40,8 +38,11 @@ namespace Manito.System.Economy
 			}
 			return null;
 		}
+
 		private Task<bool> IsWorthy(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
+
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
+
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
 		{
 			yield return (new DiscordApplicationCommandOption("account", "Show currency",
@@ -101,6 +102,7 @@ namespace Manito.System.Economy
 			 descriptionLocalizations: GetLoc("Удалить средства")),
 			 Withdraw);
 		}
+
 		public IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
 			yield return new DiscordApplicationCommand("bank", "Bank",
@@ -108,8 +110,8 @@ namespace Manito.System.Economy
 			 ApplicationCommandType.ChatInput,
 			 GetLoc("банк"),
 			 GetLoc("Банк"));
-
 		}
+
 		/// <summary>
 		/// Get user's Account deposit.
 		/// </summary>
@@ -127,7 +129,6 @@ namespace Manito.System.Economy
 
 			var deposit = await _economy.GetPlayerWallet(target).GetScales();
 
-
 			var msg = new UniversalMessageBuilder()
 			 .AddEmbed(new DiscordEmbedBuilder()
 			 .WithDescription($"{deposit} {_economy.CurrencyEmoji} у <@{target}>")
@@ -135,6 +136,7 @@ namespace Manito.System.Economy
 
 			await session.SendMessage(msg);
 		}
+
 		/// <summary>
 		/// Get user's Account deposit.
 		/// </summary>
@@ -193,6 +195,7 @@ namespace Manito.System.Economy
 				await session.RemoveMessage();
 			});
 		}
+
 		private AsyncLocker _lock = new();
 
 		private async Task TransferMoney(DiscordInteraction args)
@@ -226,6 +229,7 @@ namespace Manito.System.Economy
 
 			await session.SendMessage(msg);
 		}
+
 		private async Task Withdraw(DiscordInteraction args)
 		{
 			if (!await IsWorthy(args.User))
@@ -262,6 +266,7 @@ namespace Manito.System.Economy
 
 			await session.SendMessage(msg);
 		}
+
 		private async Task Deposit(DiscordInteraction args)
 		{
 			if (!await IsWorthy(args.User))
@@ -296,8 +301,6 @@ namespace Manito.System.Economy
 			msg.WithContent($"Успешно добавлено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
 
 			await session.SendMessage(msg);
-
 		}
 	}
-
 }

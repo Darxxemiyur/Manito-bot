@@ -2,14 +2,10 @@
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
 
-using Microsoft.EntityFrameworkCore;
-
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatAbstract

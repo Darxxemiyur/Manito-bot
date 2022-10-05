@@ -1,6 +1,4 @@
-
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Manito.System.UserAssociaton
 {
@@ -9,9 +7,11 @@ namespace Manito.System.UserAssociaton
 		public ulong ID {
 			get; set;
 		}
+
 		public ulong DiscordID {
 			get; set;
 		}
+
 		public List<ulong> SteamIDs {
 			get; set;
 		}

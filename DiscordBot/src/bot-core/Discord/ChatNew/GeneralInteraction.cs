@@ -2,12 +2,6 @@
 
 using Manito.Discord.Client;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Manito.Discord.ChatNew
 {
 	/// <summary>
@@ -18,12 +12,15 @@ namespace Manito.Discord.ChatNew
 		public InteractionTypes Type {
 			get; private set;
 		}
+
 		public InteractiveInteraction InteractiveInteraction {
 			get; private set;
 		}
+
 		public DiscordMessage Message {
 			get; private set;
 		}
+
 		public GeneralInteraction(InteractionTypes type,
 			InteractiveInteraction interactiveInteraction = null, DiscordMessage message = null)
 			=> (Type, InteractiveInteraction, Message) = (type, interactiveInteraction, message);

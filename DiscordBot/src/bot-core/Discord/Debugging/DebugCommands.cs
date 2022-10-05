@@ -1,27 +1,24 @@
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+
+using Manito.Discord;
+using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.ApplicationCommands.Attributes;
-using DisCatSharp.ApplicationCommands.EventArgs;
-using DisCatSharp.Enums;
-
-using Manito.Discord.ChatNew;
-using Manito.Discord.Client;
-using Manito.Discord;
-
 namespace Manito.System.Economy
 {
-
 	public class DebugCommands
 	{
 		private const string Locale = "ru";
 		private MyDomain _bot;
+
 		public DebugCommands(MyDomain dom) => (_bot) = (dom);
+
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
 			foreach (var item in GetCommands())
@@ -37,6 +34,7 @@ namespace Manito.System.Economy
 			}
 			return null;
 		}
+
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new DiscordApplicationCommandLocalization(new Dictionary<string, string>() { { Locale, trans } });
 
 		public IEnumerable<DiscordApplicationCommand> GetCommands()
@@ -46,8 +44,8 @@ namespace Manito.System.Economy
 			 ApplicationCommandType.ChatInput,
 			 GetLoc("дебаг"),
 			 GetLoc("Дебаг"));
-
 		}
+
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
 		{
 			yield return (new DiscordApplicationCommandOption("test_time", "Test time",
@@ -78,6 +76,7 @@ namespace Manito.System.Economy
 			 descriptionLocalizations: GetLoc("Проверить диалоговую систему")),
 			 CheckDialogue);
 		}
+
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
 			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
@@ -94,6 +93,7 @@ namespace Manito.System.Economy
 
 			await rs.DoLaterReply();
 		}
+
 		private async Task CheckMessage(DiscordInteraction args)
 		{
 			var (guild, msgs) = await _bot.Filters.Welcomer.GetMsg(args.User.Id);
@@ -102,6 +102,7 @@ namespace Manito.System.Economy
 			foreach (var msg in msgs)
 				await args.Channel.SendMessageAsync(msg);
 		}
+
 		private async Task ResetDatabase(DiscordInteraction args)
 		{
 			await args.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -117,7 +118,6 @@ namespace Manito.System.Economy
 
 		private async Task CopyStructure()
 		{
-
 		}
 
 		/// <summary>
@@ -142,8 +142,6 @@ namespace Manito.System.Economy
 			  + $"<t:{time.ToUnixTimeSeconds()}>\n{time}\n{tools.GetStringArg(msgString, false)}")));
 
 			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msg);
-
 		}
 	}
-
 }

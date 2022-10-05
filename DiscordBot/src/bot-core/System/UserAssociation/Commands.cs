@@ -1,35 +1,33 @@
+using DisCatSharp.Entities;
 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DisCatSharp.Entities;
 
 namespace Manito.System.UserAssociaton
 {
-    public class UserAssociatonCommands
-    {
-        public UserAssociatonCommands()
-        {
+	public class UserAssociatonCommands
+	{
+		public UserAssociatonCommands()
+		{
+		}
 
-        }
+		public List<DiscordApplicationCommand> GetCommands()
+		{
+			throw new NotImplementedException();
+		}
 
-        public List<DiscordApplicationCommand> GetCommands()
-        {
-            throw new NotImplementedException();
-        }
+		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
+		{
+			throw new NotImplementedException();
+		}
 
-        public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
-        {
-            throw new NotImplementedException();
-        }
+		public async Task EnterMenu()
+		{
+		}
 
-        public async Task EnterMenu()
-        {
-
-        }
-        public async Task LinkAccount()
-        {
-
-        }
-    }
+		public async Task LinkAccount()
+		{
+		}
+	}
 }

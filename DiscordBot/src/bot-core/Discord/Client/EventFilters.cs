@@ -1,18 +1,13 @@
-using System;
+using Manito.Discord.Inventory;
+using Manito.Discord.Orders;
+using Manito.Discord.PermanentMessage;
+using Manito.Discord.Shop;
+using Manito.Discord.Welcommer;
+using Manito.System.Economy;
+using Manito.System.UserAssociaton;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.System.Economy;
-using Manito.Discord;
-using Manito.Discord.Filters;
-using Manito.Discord.Inventory;
-using Manito.Discord.Shop;
-using Manito.Discord.PermanentMessage;
-using Manito.Discord.Welcommer;
-using Manito.Discord.Orders;
-using Manito.System.UserAssociaton;
 
 namespace Manito.Discord.Client
 {
@@ -41,11 +36,13 @@ namespace Manito.Discord.Client
 		public EconomyFilter Economy => _economyFilter;
 		public DebugFilter Debug => _debugFilter;
 		public UserAssociationFilter AssociationFilter => _associationFilter;
+
 		public EventFilters(MyDomain service, EventBuffer eventBuffer)
 		{
 			_service = service;
 			_eventBuffer = eventBuffer;
 		}
+
 		public async Task Initialize()
 		{
 			_msgWallFilter = new MsgWallFilter(_service, _eventBuffer);
@@ -61,8 +58,8 @@ namespace Manito.Discord.Client
 
 		public async Task PostInitialize()
 		{
-
 		}
+
 		private IEnumerable<Task> GetRuns()
 		{
 			yield return _inventoryFilter.RunModule();
@@ -74,6 +71,7 @@ namespace Manito.Discord.Client
 			yield return _adminOrder.RunModule();
 			yield return _associationFilter.RunModule();
 		}
+
 		public Task RunModule() => Task.WhenAll(GetRuns());
 	}
 }

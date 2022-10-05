@@ -1,19 +1,16 @@
-using System;
+using Manito.Discord.Client;
+using Manito.Discord.Config;
+using Manito.Discord.Database;
+using Manito.Discord.Inventory;
+using Manito.Discord.PermanentMessage;
+using Manito.Discord.Shop;
+using Manito.System.Economy;
+using Manito.System.Logging;
+
+using Microsoft.Extensions.DependencyInjection;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.System.Economy;
-using Manito.Discord;
-using Manito.Discord.Inventory;
-using Manito.Discord.Shop;
-using Microsoft.Extensions.DependencyInjection;
-using Manito.Discord.PermanentMessage;
-using Manito.Discord.Database;
-using Manito.Discord.Config;
-using Manito.Discord.Welcommer;
-using Manito.System.Logging;
 
 namespace Manito.Discord
 {
@@ -41,6 +38,7 @@ namespace Manito.Discord
 		public ShopService ShopService => _shopService;
 		public MessageController MsgWallCtr => _msgWallCtr;
 		public LoggingCenter Logging => _logging;
+
 		public static async Task<MyDomain> Create()
 		{
 			var service = new MyDomain();
@@ -49,9 +47,11 @@ namespace Manito.Discord
 
 			return service;
 		}
+
 		private MyDomain()
 		{
 		}
+
 		private async Task Initialize()
 		{
 			_rootConfig = RootConfig.GetConfig();
@@ -76,6 +76,7 @@ namespace Manito.Discord
 			await _filters.PostInitialize();
 			await Task.WhenAll(GetTasks());
 		}
+
 		private IEnumerable<Task> GetTasks()
 		{
 			yield return _executionThread.Run();

@@ -2,17 +2,11 @@
 
 using Manito.Discord.Client;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Manito.Discord.ChatNew
 {
 	/// <summary>
-	/// Contract that sets interface with dialogue identifiers that
-	/// identify dialogue where by user/channel/message ids, or component ids.
+	/// Contract that sets interface with dialogue identifiers that identify dialogue where by
+	/// user/channel/message ids, or component ids.
 	/// </summary>
 	public interface IDialogueIdentifier
 	{
@@ -22,12 +16,14 @@ namespace Manito.Discord.ChatNew
 		/// <param name="interaction">The interaction being checked</param>
 		/// <returns>true if it does, false if it doesn't</returns>
 		bool DoesBelongToUs(InteractiveInteraction interaction);
+
 		/// <summary>
 		/// Describes how much it wants the interaction;
 		/// </summary>
 		/// <param name="interaction">The interaction to be checked</param>
 		/// <returns>Want value</returns>
 		int HowBadWants(InteractiveInteraction interaction);
+
 		int HowBadIfWants(InteractiveInteraction interaction) => DoesBelongToUs(interaction) ? HowBadWants(interaction) : -1;
 
 		/// <summary>
@@ -36,12 +32,14 @@ namespace Manito.Discord.ChatNew
 		/// <param name="interaction">The interaction being checked</param>
 		/// <returns>true if it does, false if it doesn't</returns>
 		bool DoesBelongToUs(DiscordMessage interaction);
+
 		/// <summary>
 		/// Describes how much it wants the interaction;
 		/// </summary>
 		/// <param name="interaction">The interaction to be checked</param>
 		/// <returns>Want value</returns>
 		int HowBadWants(DiscordMessage interaction);
+
 		int HowBadIfWants(DiscordMessage interaction) => DoesBelongToUs(interaction) ? HowBadWants(interaction) : -1;
 	}
 }

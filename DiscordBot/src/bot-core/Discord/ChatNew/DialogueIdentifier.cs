@@ -1,15 +1,9 @@
-﻿using DisCatSharp;
-using DisCatSharp.Entities;
+﻿using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
 {
@@ -24,9 +18,11 @@ namespace Manito.Discord.ChatNew
 			_chId = message.ChannelId;
 			_msId = message.Id;
 		}
+
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
 			var mid = interaction.Message.Id;
@@ -35,7 +31,9 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && mid == _msId && uid == _usId;
 		}
+
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 10;
+
 		public bool DoesBelongToUs(DiscordMessage interaction)
 		{
 			var cid = interaction.ChannelId;
@@ -43,8 +41,10 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && uid == _usId;
 		}
+
 		public Int32 HowBadWants(DiscordMessage interaction) => 10;
 	}
+
 	public class DialogueMessageIdentifier : IDialogueIdentifier
 	{
 		public DialogueMessageIdentifier(InteractiveInteraction interaction)
@@ -53,9 +53,11 @@ namespace Manito.Discord.ChatNew
 			_chId = interaction.Interaction.ChannelId;
 			_msId = interaction.Message.Id;
 		}
+
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
 			var mid = interaction.Message.Id;
@@ -64,7 +66,9 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && mid == _msId && uid == _usId;
 		}
+
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 10;
+
 		public bool DoesBelongToUs(DiscordMessage interaction)
 		{
 			var cid = interaction.ChannelId;
@@ -72,8 +76,10 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && uid == _usId;
 		}
+
 		public Int32 HowBadWants(DiscordMessage interaction) => 10;
 	}
+
 	public class DialogueCompInterIdentifier : IDialogueIdentifier
 	{
 		public DialogueCompInterIdentifier(InteractiveInteraction interaction)
@@ -82,9 +88,11 @@ namespace Manito.Discord.ChatNew
 			_chId = interaction.Interaction.ChannelId;
 			_msId = interaction.Message.Id;
 		}
+
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
 			var mid = interaction.Message.Id;
@@ -93,7 +101,9 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && mid == _msId && uid == _usId && interaction.Interaction.Type == InteractionType.Component;
 		}
+
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 100;
+
 		public bool DoesBelongToUs(DiscordMessage interaction)
 		{
 			var cid = interaction.ChannelId;
@@ -101,16 +111,22 @@ namespace Manito.Discord.ChatNew
 
 			return _chId == cid && uid == _usId;
 		}
+
 		public Int32 HowBadWants(DiscordMessage interaction) => 100;
 	}
+
 	public class DialogueCommandIdentifier : IDialogueIdentifier
 	{
 		public DialogueCommandIdentifier(InteractiveInteraction interaction)
 		{
 		}
+
 		public bool DoesBelongToUs(InteractiveInteraction interaction) => false;
+
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 100;
+
 		public bool DoesBelongToUs(DiscordMessage interaction) => false;
+
 		public Int32 HowBadWants(DiscordMessage interaction) => 100;
 	}
 }

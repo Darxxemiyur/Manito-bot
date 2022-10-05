@@ -1,10 +1,6 @@
-using System;
-using Microsoft.EntityFrameworkCore;
-
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
 using Manito.Discord.Database;
-using Manito.System.Economy; using Manito.Discord;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Manito.System.Economy
 {
@@ -13,9 +9,9 @@ namespace Manito.System.Economy
 		DbSet<PlayerEconomyDeposit> PlayerEconomies {
 			get;
 		}
+
 		DbSet<PlayerEconomyWork> PlayerWorks {
 			get;
 		}
 	}
-
 }

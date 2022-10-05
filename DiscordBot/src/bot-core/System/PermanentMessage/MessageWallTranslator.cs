@@ -1,36 +1,35 @@
-using System;
-using Microsoft.EntityFrameworkCore;
+using Cyriller;
 
+using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
+using DisCatSharp.Exceptions;
 
-using Manito.Discord.Database;
-using System.Threading.Tasks;
+using Manito.Discord.PatternSystems.Common;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Manito.Discord.Client;
-using DisCatSharp;
-using DisCatSharp.Exceptions;
-using Cyriller;
-using System.Collections.Immutable;
-using Manito.Discord.PatternSystems.Common;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.PermanentMessage
 {
-
 	public class MessageWallTranslator
 	{
 		public long ID {
 			get; set;
 		}
+
 		public MessageWall MessageWall {
 			get; set;
 		}
+
 		public ulong ChannelId {
 			get; set;
 		}
+
 		public const int MaxCharsPerLine = 2000;
 		private static string Rp => ":YYvYYgYYvYY:";
+
 		public string CTranslation {
 			get => string.Join(Rp, Translation ?? new List<ulong>());
 			set => Translation = value.Split(Rp).Where(y => ulong.TryParse(y, out var v))
@@ -44,15 +43,18 @@ namespace Manito.Discord.PermanentMessage
 		public List<ulong> Translation {
 			get; set;
 		}
+
 		public MessageWallTranslator()
 		{
 		}
+
 		public MessageWallTranslator(MessageWall messageWall, ulong channelId)
 		{
 			Translation = new();
 			ChannelId = channelId;
 			MessageWall = messageWall;
 		}
+
 		public async Task<int?> SubmitUpdate(DiscordClient client)
 		{
 			var oldDict = Translation;

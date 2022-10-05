@@ -1,12 +1,8 @@
 ﻿using DisCatSharp.Entities;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
 {
@@ -25,6 +21,7 @@ namespace Manito.Discord.ChatNew
 		public IReadOnlyList<IMention> Mentions => _mentions;
 		private string _content;
 		public string Content => _content;
+
 		public UniversalMessageBuilder(DiscordMessage msg)
 		{
 			_components = msg.Components?.Select(x => x.Components.ToList())?.ToList();
@@ -32,6 +29,7 @@ namespace Manito.Discord.ChatNew
 			_mentions = null;
 			_content = msg.Content;
 		}
+
 		public UniversalMessageBuilder(params UniversalMessageBuilder[] um)
 		{
 			_embeds = um?.Where(x => x._embeds != null).SelectMany(x => x._embeds)?.ToList();
@@ -40,6 +38,7 @@ namespace Manito.Discord.ChatNew
 			_mentions = um?.Where(x => x._mentions != null).SelectMany(x => x._mentions)?.ToList();
 			_content = string.Concat(um?.Select(x => x._content)?.Where(x => x != null));
 		}
+
 		public UniversalMessageBuilder(DiscordWebhookBuilder builder)
 		{
 			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
@@ -48,6 +47,7 @@ namespace Manito.Discord.ChatNew
 			_mentions = builder?.Mentions?.ToList();
 			_content = builder?.Content;
 		}
+
 		public UniversalMessageBuilder(DiscordMessageBuilder builder)
 		{
 			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
@@ -56,6 +56,7 @@ namespace Manito.Discord.ChatNew
 			_mentions = builder?.Mentions?.ToList();
 			_content = builder?.Content;
 		}
+
 		public UniversalMessageBuilder(DiscordInteractionResponseBuilder builder)
 		{
 			_components = builder?.Components?.Where(x => x.Components != null)?.Select(x => x.Components.ToList())?.ToList();
@@ -64,18 +65,23 @@ namespace Manito.Discord.ChatNew
 			_mentions = builder?.Mentions?.ToList();
 			_content = builder?.Content;
 		}
+
 		public UniversalMessageBuilder() => ResetBuilder();
+
 		public UniversalMessageBuilder SetContent(string content)
 		{
 			_content = content;
 			return this;
 		}
+
 		public UniversalMessageBuilder AddContent(string content) => SetContent(_content + content);
+
 		public UniversalMessageBuilder AddComponents(params DiscordComponent[] components)
 		{
 			_components.Add(components.ToList());
 			return this;
 		}
+
 		public UniversalMessageBuilder AddComponents(params DiscordComponent[][] components)
 		{
 			foreach (var row in components)
@@ -83,16 +89,19 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+
 		public UniversalMessageBuilder SetComponents(params DiscordComponent[][] components)
 		{
 			_components = components.Select(x => x.ToList()).ToList();
 			return this;
 		}
+
 		public UniversalMessageBuilder AddEmbed(DiscordEmbedBuilder embed)
 		{
 			_embeds.Add(embed);
 			return this;
 		}
+
 		public UniversalMessageBuilder AddEmbeds(params DiscordEmbedBuilder[] components)
 		{
 			foreach (var row in components)
@@ -100,24 +109,28 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+
 		public UniversalMessageBuilder SetEmbeds(params DiscordEmbedBuilder[] components)
 		{
 			_embeds = components.ToList();
 
 			return this;
 		}
+
 		public UniversalMessageBuilder SetFile(string name, Stream file)
 		{
 			_files[name] = file;
 
 			return this;
 		}
+
 		public UniversalMessageBuilder OverrideFiles(Dictionary<string, Stream> files)
 		{
 			_files = files;
 
 			return this;
 		}
+
 		public UniversalMessageBuilder SetFiles(Dictionary<string, Stream> files)
 		{
 			foreach (var file in files)
@@ -125,18 +138,21 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+
 		public UniversalMessageBuilder AddMention(IMention mention)
 		{
 			_mentions.Add(mention);
 
 			return this;
 		}
+
 		public UniversalMessageBuilder AddMentions(IEnumerable<IMention> mentions)
 		{
 			_mentions.AddRange(mentions);
 
 			return this;
 		}
+
 		public UniversalMessageBuilder ResetBuilder()
 		{
 			_components = new();
@@ -147,12 +163,19 @@ namespace Manito.Discord.ChatNew
 
 			return this;
 		}
+
 		public static implicit operator UniversalMessageBuilder(string msg) => new UniversalMessageBuilder().SetContent(msg);
+
 		public static implicit operator UniversalMessageBuilder(DiscordEmbedBuilder msg) => new UniversalMessageBuilder().AddEmbed(msg);
+
 		public static implicit operator UniversalMessageBuilder(DiscordEmbedBuilder[] msg) => new UniversalMessageBuilder().AddEmbeds(msg);
+
 		public static implicit operator UniversalMessageBuilder(DiscordWebhookBuilder msg) => new(msg);
+
 		public static implicit operator UniversalMessageBuilder(DiscordMessageBuilder msg) => new(msg);
+
 		public static implicit operator UniversalMessageBuilder(DiscordInteractionResponseBuilder msg) => new(msg);
+
 		public static implicit operator DiscordWebhookBuilder(UniversalMessageBuilder msg)
 		{
 			var wbh = new DiscordWebhookBuilder();
@@ -160,7 +183,6 @@ namespace Manito.Discord.ChatNew
 			if (msg._components != null)
 				foreach (var row in msg._components)
 					wbh.AddComponents(row);
-
 
 			if (msg._embeds != null)
 				wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
@@ -176,6 +198,7 @@ namespace Manito.Discord.ChatNew
 
 			return wbh;
 		}
+
 		public static implicit operator DiscordMessageBuilder(UniversalMessageBuilder msg)
 		{
 			var wbh = new DiscordMessageBuilder();
@@ -183,7 +206,6 @@ namespace Manito.Discord.ChatNew
 			if (msg._components != null)
 				foreach (var row in msg._components)
 					wbh.AddComponents(row);
-
 
 			if (msg._embeds != null)
 				wbh.AddEmbeds(msg._embeds.Select(x => x.Build()));
@@ -199,6 +221,7 @@ namespace Manito.Discord.ChatNew
 
 			return wbh;
 		}
+
 		public static implicit operator DiscordInteractionResponseBuilder(UniversalMessageBuilder msg)
 		{
 			var dirb = new DiscordInteractionResponseBuilder();
@@ -206,7 +229,6 @@ namespace Manito.Discord.ChatNew
 			if (msg._components != null)
 				foreach (var row in msg._components)
 					dirb.AddComponents(row);
-
 
 			if (msg._embeds != null)
 				dirb.AddEmbeds(msg._embeds.Select(x => x.Build()));

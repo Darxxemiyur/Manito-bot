@@ -5,12 +5,12 @@ using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using static Manito.Discord.Orders.Order;
 
 namespace Manito.Discord.Orders
@@ -20,6 +20,7 @@ namespace Manito.Discord.Orders
 		public NodeResultHandler StepResultHandler {
 			get;
 		} = Common.DefaultNodeResultHandler;
+
 		public readonly UniversalSession Session;
 		private CancellationTokenSource _quitToken;
 		private CancellationTokenSource _swapToken;
@@ -30,6 +31,7 @@ namespace Manito.Discord.Orders
 		private readonly DiscordUser _admin;
 		private IEnumerator<Step> _steps;
 		private Order _exOrder;
+
 		public Order ExOrder {
 			get => _exOrder;
 			set {
@@ -37,6 +39,7 @@ namespace Manito.Discord.Orders
 				_steps = value?.Steps?.GetEnumerator();
 			}
 		}
+
 		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
 		{
 			_pool = pool;
@@ -47,7 +50,9 @@ namespace Manito.Discord.Orders
 			_channel = channel;
 			_admin = user;
 		}
+
 		public Task StopExecuting() => Task.Run(() => _quitToken.Cancel());
+
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument arg)
 		{
 			_steps.MoveNext();
@@ -73,6 +78,7 @@ namespace Manito.Discord.Orders
 
 			return new(FetchNextStep);
 		}
+
 		private async Task<NextNetworkInstruction> DoInform(NetworkInstructionArgument arg)
 		{
 			try
@@ -96,6 +102,7 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> DoOrderCancellation(NetworkInstructionArgument arg)
 		{
 			if (_swapToken.IsCancellationRequested)
@@ -126,8 +133,11 @@ namespace Manito.Discord.Orders
 			ExOrder = null;
 			return new(FetchNextStep);
 		}
+
 		private string _cancelReason;
+
 		public Task ChangeOrder() => ExOrder != null ? Task.Run(_swapToken.Cancel) : Task.CompletedTask;
+
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
 			try
@@ -169,6 +179,7 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> DoCommand(NetworkInstructionArgument arg)
 		{
 			try
@@ -192,6 +203,7 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> MakeNonCancallable(NetworkInstructionArgument arg)
 		{
 			try
@@ -205,6 +217,7 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> DoShowInfo(NetworkInstructionArgument arg)
 		{
 			try
@@ -234,6 +247,7 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> FetchNextStep(NetworkInstructionArgument arg)
 		{
 			try
@@ -261,12 +275,15 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
+
 		private async Task<NextNetworkInstruction> SetupStep(NetworkInstructionArgument arg)
 		{
 			await _pool.StartAdministrating();
 			return new(FetchNextStep);
 		}
+
 		public NextNetworkInstruction GetStartingInstruction() => new(SetupStep);
+
 		public NextNetworkInstruction GetStartingInstruction(Object payload) => throw new NotImplementedException();
 	}
 }

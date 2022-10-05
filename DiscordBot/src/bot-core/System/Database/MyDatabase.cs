@@ -1,17 +1,16 @@
-using System;
-using System.Threading.Tasks;
+using Manito.Discord.PermanentMessage;
+using Manito.Discord.Shop;
+using Manito.System.Economy;
+using Manito.System.Logging;
+
 using Microsoft.EntityFrameworkCore;
 
-using Manito.Discord.Shop;
+using System;
 using System.Threading;
-using Manito.System.Economy; using Manito.Discord;
-using Manito.Discord.PermanentMessage;
-using Manito.System.Logging;
-using Manito.System.Economy; using Manito.Discord;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
-
 	public class MyDatabase : IShopDb, ILoggingDB, IPermMessageDb, IEconomyDb, IMyDatabase
 	{
 		private bool disposedValue;
@@ -21,14 +20,17 @@ namespace Manito.Discord.Database
 		public DbSet<MessageWallTranslator> MessageWallTranslators => ImplementedContext.MessageWallTranslators;
 		public DbSet<MessageWall> MessageWalls => ImplementedContext.MessageWalls;
 		public DbSet<MessageWallLine> MessageWallLines => ImplementedContext.MessageWallLines;
+
 		public DbContextImplementation ImplementedContext {
 			get; private set;
 		}
+
 		public DbSet<LogLine> LogLines => ImplementedContext.LogLines;
 
 		public DbSet<PlayerEconomyWork> PlayerWorks => ImplementedContext.PlayerWorks;
 
 		public int SaveChanges() => ImplementedContext.SaveChanges();
+
 		public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 		 => ImplementedContext.SaveChangesAsync(cancellationToken);
 
@@ -36,6 +38,7 @@ namespace Manito.Discord.Database
 		{
 			ImplementedContext = factory.OriginalFactory.CreateDbContext(null);
 		}
+
 		public Task SetUpDatabaseAsync(IMyDbFactory factory) =>
 		 Task.Run(() => SetUpDatabase(factory));
 
@@ -55,12 +58,9 @@ namespace Manito.Discord.Database
 			}
 		}
 
-		// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-		// ~MyDatabase()
-		// {
-		//     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-		//     Dispose(disposing: false);
-		// }
+		// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged
+		// resources ~MyDatabase() { // Do not change this code. Put cleanup code in 'Dispose(bool
+		// disposing)' method Dispose(disposing: false); }
 
 		public void Dispose()
 		{
@@ -75,5 +75,4 @@ namespace Manito.Discord.Database
 			return ImplementedContext.DisposeAsync();
 		}
 	}
-
 }

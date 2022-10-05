@@ -1,19 +1,12 @@
-using System;
-using System.Threading.Tasks;
-using System.Linq;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
+using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
+
+using System;
 using System.Collections.Generic;
-using Manito.System.Economy; using Manito.Discord;
-using DisCatSharp.EventArgs;
-using Manito.Discord.Chat.DialogueNet;
-using Manito.Discord.Inventory;
 using System.Threading;
-using DisCatSharp.Enums;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Chat.DialogueNet
 {
@@ -33,9 +26,11 @@ namespace Manito.Discord.Chat.DialogueNet
 		public ulong? GdId => _gdId;
 		public ulong? ChId => _chId;
 		public ulong? MsId => _msId;
+
 		public bool IsEphemeral {
 			get;
 		}
+
 		/// <summary>
 		/// Create Dialogue network Session from Interactive args, bot client and sessioned user.
 		/// </summary>
@@ -55,6 +50,7 @@ namespace Manito.Discord.Chat.DialogueNet
 			_cancellation = new();
 			IsEphemeral = isEphemeral;
 		}
+
 		private InteractionResponseType IRT => !_irtt && (_irtt = true)
 			? InteractionResponseType.ChannelMessageWithSource
 			: InteractionResponseType.UpdateMessage;
@@ -70,7 +66,8 @@ namespace Manito.Discord.Chat.DialogueNet
 		}
 
 		/// <summary>
-		/// Fires Respond and then fires GetInteraction against components placed in the fired message body.
+		/// Fires Respond and then fires GetInteraction against components placed in the fired
+		/// message body.
 		/// </summary>
 		/// <param name="bld"></param>
 		/// <returns></returns>
@@ -80,7 +77,8 @@ namespace Manito.Discord.Chat.DialogueNet
 		}
 
 		/// <summary>
-		/// Fires Respond and then fires GetInteraction against components placed in the fired message body.
+		/// Fires Respond and then fires GetInteraction against components placed in the fired
+		/// message body.
 		/// </summary>
 		/// <param name="bld"></param>
 		/// <returns></returns>
@@ -90,6 +88,7 @@ namespace Manito.Discord.Chat.DialogueNet
 			await Respond(rsptp, bld);
 			return await GetInteraction(bld.Components);
 		}
+
 		/// <summary>
 		/// Responds to an interaction with given response type and optional response body.
 		/// </summary>
@@ -111,8 +110,11 @@ namespace Manito.Discord.Chat.DialogueNet
 			return (await _client.ActivityTools.WaitForMessage((x) => x.Author.Id == Args.User.Id
 				&& x.Message.ChannelId == _chId)).Message;
 		}
+
 		private Func<DialogueNetSession, Task> _controller;
+
 		public void ConnectManager(Func<DialogueNetSession, Task> manager) => _controller = manager;
+
 		/// <summary>
 		/// Handles the exception thrown within the session;
 		/// </summary>
@@ -131,17 +133,21 @@ namespace Manito.Discord.Chat.DialogueNet
 			}
 			throw new AggregateException(e).Flatten();
 		}
+
 		protected async Task SendExceptionMessage(Exception e)
 		{
 			await (await GetSessionBotMessage()).ModifyAsync(x => x
 				.WithContent("Сессия завершена из-за ошибки."));
 		}
+
 		private CancellationTokenSource _cancellation;
+
 		private async Task<DiscordMessage> GetSessionBotMessage()
 		{
 			var chnl = await _client.Client.GetChannelAsync(_chId.Value);
 			return await chnl.GetMessageAsync(_msId.Value);
 		}
+
 		public virtual async Task QuitSession()
 		{
 			if (_chId != null && _msId != null && !IsEphemeral)
@@ -150,12 +156,15 @@ namespace Manito.Discord.Chat.DialogueNet
 			await _controller(this);
 			_irtt = false;
 		}
+
 		public Task<InteractiveInteraction> GetInteraction(
 		 IEnumerable<DiscordActionRowComponent> components) =>
 		 GetInteraction(x => x.AnyComponents(components));
+
 		public Task<InteractiveInteraction> GetInteraction(
 		 params DiscordComponent[] components) =>
 		 GetInteraction(x => x.AnyComponents(components));
+
 		public async Task<InteractiveInteraction> GetInteraction(
 		 Func<InteractiveInteraction, bool> checker)
 		{
@@ -165,6 +174,7 @@ namespace Manito.Discord.Chat.DialogueNet
 
 			return _iargs = new(theEvent);
 		}
+
 		public Task<InteractiveInteraction> GetInteraction() => GetInteraction(_ => true);
 	}
 }

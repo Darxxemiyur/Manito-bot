@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using System.Threading.Tasks;
-using DisCatSharp.Entities;
 
 using Manito.Discord.Chat.DialogueNet;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Orders;
+using Manito.System.Economy;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
+using System;
+using System.Collections.Generic;
 using System.Threading;
-using Manito.System.Economy; using Manito.Discord;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
@@ -19,7 +21,9 @@ namespace Manito.Discord.Shop
 		private readonly Order _order;
 		private readonly ShopItem.InCart _item;
 		private readonly PlayerWallet _wallet;
+
 		public OrderAwait(UniversalSession session, Order order, ShopItem.InCart item, PlayerWallet wallet) => (_session, _order, _item, _wallet) = (session, order, item, wallet);
+
 		private async Task<NextNetworkInstruction> ReleaseAwaiting(NetworkInstructionArgument args)
 		{
 			var completed = _order.OrderCompleteTask;
@@ -75,8 +79,11 @@ namespace Manito.Discord.Shop
 
 			return new();
 		}
+
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction() => new(ReleaseAwaiting);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
 	}
 }

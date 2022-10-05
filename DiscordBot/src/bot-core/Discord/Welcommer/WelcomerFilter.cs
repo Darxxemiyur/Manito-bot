@@ -2,24 +2,16 @@
 using DisCatSharp.Entities;
 using DisCatSharp.EventArgs;
 
-using Manito.Discord;
 using Manito.Discord.Client;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
-using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
 namespace Manito.Discord.Welcommer
 {
 	public class WelcomerFilter : IModule
 	{
-
 		public const ulong NimfaRole = 915918629172822036;
 		public const ulong WayChannel = 1006205301206306847;
 		public const ulong NewsChannel = 915691089082581032;
@@ -55,6 +47,7 @@ namespace Manito.Discord.Welcommer
 		public static string WelcomeMessage => "<@{0}>\nДобро пожаловать на наш {1} проект!\n" + MCh;
 		private MyDiscordClient _client;
 		private TaskEventProxy<DiscordMember> _toAddQueue;
+
 		public WelcomerFilter(MyDiscordClient client)
 		{
 			_client = client;
@@ -62,7 +55,6 @@ namespace Manito.Discord.Welcommer
 #if !DEBUG
 			client.Client.GuildMemberAdded += OnNewNymfJoin;
 #endif
-
 		}
 
 		private async Task OnNewNymfJoin(DiscordClient sender, GuildMemberAddEventArgs e)
@@ -118,7 +110,6 @@ namespace Manito.Discord.Welcommer
 					var (guild, msgs) = await GetMsg(member.Id);
 					try
 					{
-
 						foreach (var msg in msgs)
 							await member.SendMessageAsync(msg);
 					}

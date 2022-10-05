@@ -1,10 +1,7 @@
-using System;
-
 namespace Manito.Discord.Inventory.Items
 {
-    public class CarcassItem
-    {
-        private ItemBuilder _itemBuilder;
-        
-    }
+	public class CarcassItem
+	{
+		private ItemBuilder _itemBuilder;
+	}
 }

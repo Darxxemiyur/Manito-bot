@@ -1,9 +1,5 @@
 using System;
 
-using Newtonsoft.Json;
-
-
-
 namespace Manito.Discord.Config
 {
 	[Serializable]
@@ -12,18 +8,23 @@ namespace Manito.Discord.Config
 		public string Address {
 			get;
 		}
+
 		public string Port {
 			get;
 		}
+
 		public string Login {
 			get;
 		}
+
 		public string Password {
 			get;
 		}
+
 		public string Database {
 			get;
 		}
+
 		public DatabaseConfig()
 		{
 			Address = "localhost";
@@ -37,6 +38,7 @@ namespace Manito.Discord.Config
 #endif
 			Database = "Manito";
 		}
+
 		private string LoginS => $"Username={Login};Password={Password}";
 		private string ConnectS => $"Host={Address};Port={Port}";
 

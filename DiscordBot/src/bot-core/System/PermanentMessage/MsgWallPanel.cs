@@ -1,18 +1,12 @@
-using System.Threading.Tasks;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using System.Collections.Generic;
-using Manito.System.Economy; using Manito.Discord;
-using DisCatSharp.EventArgs;
+
 using Manito.Discord.Chat.DialogueNet;
-using Manito.Discord.Inventory;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using System.Diagnostics;
-using System;
 using Manito.Discord.ChatNew;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
+using System.Threading.Tasks;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -22,6 +16,7 @@ namespace Manito.Discord.PermanentMessage
 	public class MsgWallPanel : IDialogueNet
 	{
 		private DialogueTabSession<MsgContext> _session;
+
 		public MsgWallPanel(DialogueTabSession<MsgContext> session)
 		{
 			_session = session;
@@ -30,7 +25,9 @@ namespace Manito.Discord.PermanentMessage
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 
 		public NextNetworkInstruction GetStartingInstruction() => new(SelectWhatToDo);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
+
 		private async Task<NextNetworkInstruction> SelectWhatToDo(NetworkInstructionArgument arg)
 		{
 			var wallLine = new DiscordButtonComponent(ButtonStyle.Primary, "wallLine", "Строки-сироты");

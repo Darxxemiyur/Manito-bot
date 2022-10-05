@@ -1,17 +1,9 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.EventArgs;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.Common.Utilities;
-using System.Linq;
-using System.Threading;
 using Name.Bayfaderix.Darxxemiyur.Common;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
@@ -21,6 +13,7 @@ namespace Manito.Discord.Client
 		private readonly List<Func<Task>> _toExecuteTasks;
 		private readonly AsyncLocker _sync;
 		private TaskCompletionSource _onNew;
+
 		public ExecThread()
 		{
 			_sync = new();
@@ -28,12 +21,14 @@ namespace Manito.Discord.Client
 			_toExecuteTasks = new();
 			_onNew = new();
 		}
+
 		public async Task AddNew(Func<Task> runner)
 		{
 			using var g = await _sync.BlockAsyncLock();
 			_toExecuteTasks.Add(runner);
 			_onNew.TrySetResult();
 		}
+
 		public async Task Run()
 		{
 			while (true)

@@ -3,15 +3,11 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Client;
 
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.VisualBasic;
-
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,12 +17,15 @@ namespace Manito.Discord.ChatNew
 	{
 		public readonly object Generic;
 		public readonly string Message;
+
 		public SessionInnerMessage(object generic, string message) => (Generic, Message) = (generic, message);
 	}
+
 	public static class IDialogueExtender
 	{
 		public static Task<GeneralInteraction> GetInteraction(this IDialogueSession session, InteractionTypes types, CancellationToken token = default) => session.GetInteraction(types, token);
 	}
+
 	public interface IDialogueSession
 	{
 		/// <summary>
@@ -35,63 +34,74 @@ namespace Manito.Discord.ChatNew
 		MyDiscordClient Client {
 			get;
 		}
+
 		/// <summary>
 		/// Identifier of message to pull events for.
 		/// </summary>
 		IDialogueIdentifier Identifier {
 			get;
 		}
+
 		/// <summary>
 		/// Send/update session message.
 		/// </summary>
 		/// <param name="msg">The new message.</param>
 		/// <returns></returns>
 		Task SendMessage(UniversalMessageBuilder msg);
+
 		/// <summary>
 		/// Respond to an interaction to reply later.
 		/// </summary>
 		/// <returns></returns>
 		Task DoLaterReply();
+
 		/// <summary>
 		/// Delete message.
 		/// </summary>
 		/// <returns></returns>
 		Task RemoveMessage();
+
 		/// <summary>
 		/// Ends session.
 		/// </summary>
 		/// <returns></returns>
 		Task EndSession();
+
 		/// <summary>
 		/// Gets message of the session.
 		/// </summary>
 		Task<DiscordMessage> SessionMessage {
 			get;
 		}
+
 		/// <summary>
 		/// Gets message of the session.
 		/// </summary>
 		Task<DiscordChannel> SessionChannel {
 			get;
 		}
+
 		/// <summary>
 		/// Gets message from user that is acceptable to SessionIdentifier.
 		/// </summary>
 		/// <param name="token"></param>
 		/// <returns></returns>
 		Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default);
+
 		/// <summary>
 		/// Gets reply message from user that is acceptable to SessionIdentifier.
 		/// </summary>
 		/// <param name="token"></param>
 		/// <returns></returns>
 		Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default);
+
 		/// <summary>
 		/// Get component interaction to a message that is acceptable to SessionIdentifier.
 		/// </summary>
 		/// <param name="token"></param>
 		/// <returns></returns>
 		Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default);
+
 		/// <summary>
 		/// Get interaction to a message that is acceptable to SessionIdentifier.
 		/// </summary>
@@ -123,35 +133,41 @@ namespace Manito.Discord.ChatNew
 
 			var couple = tasks.First(x => x.Item2 == first);
 
-
 			return new GeneralInteraction(couple.Item1,
 				couple.Item2 is Task<InteractiveInteraction> i ? await i : null,
 				couple.Item2 is Task<DiscordMessage> m ? await m : null);
 		}
+
 		/// <summary>
 		/// Used to inform subscribers about session status change.
 		/// </summary>
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
+
 		/// <summary>
 		/// Used to inform subscribers about session end.
 		/// </summary>
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
+
 		/// <summary>
 		/// Used to inform subscribers about session removal.
 		/// </summary>
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 	}
+
 	public class UniversalSession : IDialogueSession
 	{
 		private IDialogueSession _innerSession;
 		public MyDiscordClient Client => _innerSession.Client;
 		public IDialogueIdentifier Identifier => _innerSession.Identifier;
+
 		public UniversalSession(SessionFromMessage session)
 		{
 			_innerSession = session;
 			((IDialogueSession)session).OnStatusChange += ConvertSession;
 		}
+
 		public UniversalSession(ComponentDialogueSession session) => _innerSession = session;
+
 		private async Task ConvertSession(IDialogueSession session, SessionInnerMessage msg)
 		{
 			if (msg.Message != "ConvertMe")
@@ -162,48 +178,69 @@ namespace Manito.Discord.ChatNew
 
 			session.OnStatusChange -= ConvertSession;
 		}
+
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
+
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
+
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
+
 		public Task DoLaterReply() => _innerSession.DoLaterReply();
+
 		public Task EndSession() => _innerSession.EndSession();
+
 		public Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default) => _innerSession.GetComponentInteraction(token);
+
 		public Task<GeneralInteraction> GetInteraction(InteractionTypes types, CancellationToken token = default) => _innerSession.GetInteraction(types);
+
 		public Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default) => _innerSession.GetMessageInteraction(token);
+
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) =>
 			_innerSession.GetReplyInteraction(token);
+
 		public Task RemoveMessage() => _innerSession.RemoveMessage();
+
 		public Task SendMessage(UniversalMessageBuilder msg) => _innerSession.SendMessage(msg);
+
 		public Task<DiscordMessage> SessionMessage => _innerSession.SessionMessage;
 
 		public Task<DiscordChannel> SessionChannel => _innerSession.SessionChannel;
 	}
+
 	public class SessionFromMessage : IDialogueSession
 	{
 		private DiscordMessage _message;
 		private DiscordChannel _channel;
 		private ulong _userId;
+
 		public SessionFromMessage(MyDiscordClient client, DiscordMessage message, ulong userId)
 		{
 			Client = client;
 			Identifier = new DialogueMsgIdentifier(_message = message, _userId = userId);
 			_channel = message.Channel;
 		}
+
 		public SessionFromMessage(MyDiscordClient client, DiscordChannel channel, ulong userId)
 		{
 			Client = client;
 			_channel = channel;
 			_userId = userId;
 		}
+
 		public MyDiscordClient Client {
 			get;
 		}
+
 		public IDialogueIdentifier Identifier {
 			get; private set;
 		}
+
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
+
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
+
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
+
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
 			if (Identifier == null)
@@ -213,6 +250,7 @@ namespace Manito.Discord.ChatNew
 
 			return msg.Message;
 		}
+
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{
 			if (Identifier == null)
@@ -223,9 +261,9 @@ namespace Manito.Discord.ChatNew
 
 			return intr;
 		}
+
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default)
 		{
-
 			throw new NotImplementedException();
 		}
 
@@ -242,7 +280,9 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public Task DoLaterReply() => Task.CompletedTask;
+
 		public Task RemoveMessage() => _message.DeleteAsync();
+
 		public async Task EndSession()
 		{
 			if (OnSessionEnd != null)
@@ -250,32 +290,43 @@ namespace Manito.Discord.ChatNew
 			if (OnRemove != null)
 				await OnRemove(this);
 		}
+
 		public Task<DiscordMessage> SessionMessage => Task.FromResult(_message);
 
 		public Task<DiscordChannel> SessionChannel => Task.FromResult(_channel);
 	}
+
 	public class ComponentDialogueSession : IDialogueSession
 	{
 		private InteractiveInteraction Interactive {
 			get; set;
 		}
+
 		private UniversalMessageBuilder _innerMsgBuilder;
+
 		public MyDiscordClient Client {
 			get;
 		}
+
 		public IDialogueIdentifier Identifier {
 			get; private set;
 		}
+
 		public InteractionResponseType NextType {
 			get; private set;
 		}
+
 		private readonly AsyncLocker _lock = new();
+
 		/// <summary>
 		/// Used to inform subscribers about session status change.
 		/// </summary>
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
+
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
+
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
+
 		public async Task EndSession()
 		{
 			if (OnSessionEnd != null)
@@ -283,11 +334,13 @@ namespace Manito.Discord.ChatNew
 			if (OnRemove != null)
 				await OnRemove(this);
 		}
+
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			await SendMessageLocal(message);
 		}
+
 		private async Task SendMessageLocal(UniversalMessageBuilder message)
 		{
 			switch (NextType)
@@ -297,10 +350,12 @@ namespace Manito.Discord.ChatNew
 					NextType = InteractionResponseType.Pong;
 					await MarkTheMessage();
 					break;
+
 				case InteractionResponseType.UpdateMessage:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, message);
 					NextType = InteractionResponseType.Pong;
 					break;
+
 				case InteractionResponseType.Pong:
 					await MarkTheMessage(await Interactive.Interaction.EditOriginalResponseAsync(message));
 					break;
@@ -328,6 +383,7 @@ namespace Manito.Discord.ChatNew
 			await SendMessageLocal(builder.SetComponents(components));
 			NextType = InteractionResponseType.Pong;
 		}
+
 		private async Task RespondToAnInteraction()
 		{
 			switch (NextType)
@@ -338,12 +394,14 @@ namespace Manito.Discord.ChatNew
 					NextType = InteractionResponseType.Pong;
 					await MarkTheMessage();
 					break;
+
 				case InteractionResponseType.UpdateMessage:
 					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 					NextType = InteractionResponseType.Pong;
 					break;
 			}
 		}
+
 		public async Task DoLaterReply()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
@@ -360,6 +418,7 @@ namespace Manito.Discord.ChatNew
 
 			return msg.Message;
 		}
+
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{
 			InteractiveInteraction intr = await Client.ActivityTools
@@ -379,19 +438,23 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();
+
 		public Task<DiscordMessage> SessionMessage => Interactive.Interaction.GetOriginalResponseAsync();
 
 		public Task<DiscordChannel> SessionChannel => Task.Run(async () => await Client.Client.GetChannelAsync((await SessionMessage).ChannelId));
+
 		public ComponentDialogueSession(MyDiscordClient client, DialogueCompInterIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
 			NextType = interactive.Message == null ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
 		}
+
 		public ComponentDialogueSession(MyDiscordClient client, DialogueCommandIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
 			NextType = interactive.Message == null ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
 		}
+
 		public ComponentDialogueSession(MyDiscordClient client, DiscordInteraction interaction)
 		{
 			Client = client;

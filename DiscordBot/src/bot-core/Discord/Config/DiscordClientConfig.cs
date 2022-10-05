@@ -1,9 +1,5 @@
 using System;
 
-using Newtonsoft.Json;
-
-
-
 namespace Manito.Discord.Config
 {
 	[Serializable]
@@ -12,6 +8,7 @@ namespace Manito.Discord.Config
 		public string ClientKey {
 			get;
 		}
+
 		public DiscordClientConfig()
 		{
 #if DEBUG

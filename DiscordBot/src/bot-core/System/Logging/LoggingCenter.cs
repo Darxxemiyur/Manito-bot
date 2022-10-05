@@ -1,16 +1,11 @@
 ﻿using DisCatSharp;
 using DisCatSharp.EventArgs;
 
-using Manito.Discord;
 using Manito.Discord.Client;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -22,6 +17,7 @@ namespace Manito.System.Logging
 		private readonly MyDiscordClient _client;
 		private readonly ILoggingDBFactory _factory;
 		private readonly TaskEventProxy<(string, string)> _relay;
+
 		public LoggingCenter(MyDiscordClient client, ILoggingDBFactory factory)
 		{
 			(_client, _factory) = (client, factory);
@@ -34,6 +30,7 @@ namespace Manito.System.Logging
 		{
 			await _client.Domain.ExecutionThread.AddNew(() => _relay.Handle(("DiscordBotLog", e.Json)));
 		}
+
 		public async Task WriteLog(string district, string log)
 		{
 			await using var _ = await _locker.BlockAsyncLock();

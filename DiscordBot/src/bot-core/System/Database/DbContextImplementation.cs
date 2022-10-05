@@ -1,42 +1,42 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-
+using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
-using Manito.Discord;
-using Manito.Discord.PermanentMessage;
-using DisCatSharp.Common.Utilities;
-using System.Linq;
 using Manito.System.Logging;
-using Manito.System.Economy;
-using Manito.Discord;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Manito.Discord.Database
 {
-
 	public class DbContextImplementation : DbContext
 	{
-		public DbContextImplementation(DbContextOptions options) : base(options) { }
+		public DbContextImplementation(DbContextOptions options) : base(options)
+		{
+		}
 
 		public DbSet<ShopItem> ShopItems {
 			get; set;
 		}
+
 		public DbSet<PlayerEconomyDeposit> PlayerEconomyDeposits {
 			get; set;
 		}
+
 		public DbSet<MessageWallTranslator> MessageWallTranslators {
 			get; set;
 		}
+
 		public DbSet<MessageWall> MessageWalls {
 			get; set;
 		}
+
 		public DbSet<MessageWallLine> MessageWallLines {
 			get; set;
 		}
+
 		public DbSet<LogLine> LogLines {
 			get; set;
 		}
+
 		public DbSet<PlayerEconomyWork> PlayerWorks {
 			get; set;
 		}
@@ -54,7 +54,6 @@ namespace Manito.Discord.Database
 			modelBuilder.Entity<MessageWallLine>().HasKey(x => x.ID);
 			modelBuilder.Entity<MessageWallLine>().Property(x => x.ID).UseIdentityByDefaultColumn();
 
-
 			modelBuilder.Entity<PlayerEconomyDeposit>().HasKey(x => x.DiscordID);
 
 			modelBuilder.Entity<PlayerEconomyWork>(x => {
@@ -71,5 +70,4 @@ namespace Manito.Discord.Database
 			});
 		}
 	}
-
 }

@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using DisCatSharp.ApplicationCommands.Attributes;
-using DisCatSharp.ApplicationCommands.EventArgs;
-using Manito.Discord.Client;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using System.Linq;
-using System.Security.Principal;
-using System.Security.Cryptography;
-using static MongoDB.Driver.WriteConcern;
+
 using Manito.Discord;
+using Manito.Discord.Client;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Manito.System.Economy
 {
@@ -24,18 +18,25 @@ namespace Manito.System.Economy
 		public ulong UserId => _userId;
 		public ulong CurrencyEmojiId => _economy.CurrencyEmojiId;
 		public string CurrencyEmoji => _economy.CurrencyEmoji;
+
 		public PlayerWallet(ServerEconomy economy, ulong userId)
 		{
 			_economy = economy;
 			_userId = userId;
 		}
+
 		public Task<long> GetScales() => _economy.GetScales(_userId);
+
 		public Task<long> TransferFunds(ulong to, long amount, string msg = null) =>
 		 _economy.TransferFunds(_userId, to, amount, msg);
+
 		public Task<long> Withdraw(long amount, string msg = null) => _economy.Withdraw(_userId, amount, msg);
+
 		public Task<bool> CanAfford(long amount) => _economy.CanAfford(_userId, amount);
+
 		public Task<long> Deposit(long amount, string msg = null) => _economy.Deposit(_userId, amount, msg);
 	}
+
 	public class ServerEconomy : IModule
 	{
 		private ulong _emojiId => 997272231384207470;
@@ -45,23 +46,28 @@ namespace Manito.System.Economy
 		private IEconomyDbFactory _dbFactory;
 		private EconomyLogging _logger;
 		private AsyncLocker _lock;
+
 		public Task RunModule() => _logger.RunModule();
+
 		public ServerEconomy(MyDomain service, IEconomyDbFactory factory)
 		{
 			_dbFactory = factory;
 			_lock = new();
 			_logger = new(service);
 		}
+
 		public async Task<long> GetScales(ulong whose)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return await GetScalesUnlocked(whose);
 		}
+
 		private async Task<bool> Ensure(ulong id)
 		{
 			await using var db = await _dbFactory.CreateEconomyDbContextAsync();
 			return await Ensure(db, id);
 		}
+
 		private async Task<bool> Ensure(IEconomyDb db, ulong id)
 		{
 			if (db.PlayerEconomies.Any(x => x.DiscordID == id))
@@ -72,29 +78,37 @@ namespace Manito.System.Economy
 
 			return await Ensure(id);
 		}
+
 		public PlayerWallet GetPlayerWallet(ulong id) => new(this, id);
+
 		public PlayerWallet GetPlayerWallet(DiscordUser user) => GetPlayerWallet(user.Id);
+
 		private Task ReportTransaction(string msg) => _logger.ReportTransaction($"Транзакция: {msg}");
+
 		public async Task<bool> CanAfford(ulong who, long amount)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return await CanAffordUnlocked(who, amount);
 		}
+
 		public async Task<long> TransferFunds(ulong fromId, ulong toId, long amount, string msg = null)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return await TransferFundsUnlocked(fromId, toId, amount, msg);
 		}
+
 		public async Task<long> Withdraw(ulong from, long amount, string msg = null)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return await WithdrawUnlocked(from, amount, msg);
 		}
+
 		public async Task<long> Deposit(ulong to, long amount, string msg = null)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return await DepositUnlocked(to, amount, msg);
 		}
+
 		public async Task<long> TransferFundsUnlocked(ulong fromId, ulong toId, long amount, string msg = null)
 		{
 			await using var db = await _dbFactory.CreateEconomyDbContextAsync();
@@ -115,6 +129,7 @@ namespace Manito.System.Economy
 			await ReportTransaction($"Перевод игроку <@{toId}> от <@{fromId}> на сумму {depamount} {_emoji}\n{msg}");
 			return amount;
 		}
+
 		/// <summary>
 		/// Must be used only in lockable conditions!
 		/// </summary>
@@ -131,6 +146,7 @@ namespace Manito.System.Economy
 			await ReportTransaction($"Снятие {amount} {_emoji} у <@{from}>\n{msg}");
 			return amount;
 		}
+
 		/// <summary>
 		/// Must be used only in lockable conditions!
 		/// </summary>
@@ -142,6 +158,7 @@ namespace Manito.System.Economy
 
 			return dep.ScalesCurr >= amount;
 		}
+
 		/// <summary>
 		/// Must be used only in lockable conditions!
 		/// </summary>
@@ -157,6 +174,7 @@ namespace Manito.System.Economy
 			await ReportTransaction($"Зачисление {amount} {_emoji} у <@{toId}>\n{msg}");
 			return amount;
 		}
+
 		/// <summary>
 		/// Must be used only in lockable conditions!
 		/// </summary>
@@ -168,12 +186,14 @@ namespace Manito.System.Economy
 
 			return dep.ScalesCurr;
 		}
+
 		private long DoDeposit(PlayerEconomyDeposit to, long amount)
 		{
 			amount = Math.Clamp(amount, 0, long.MaxValue - to.ScalesCurr);
 			to.ScalesCurr += amount;
 			return amount;
 		}
+
 		private long DoWithdraw(PlayerEconomyDeposit from, long amount)
 		{
 			amount = Math.Clamp(amount, 0, from.ScalesCurr);

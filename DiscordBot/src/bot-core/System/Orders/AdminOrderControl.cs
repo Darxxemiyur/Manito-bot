@@ -5,7 +5,6 @@ using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Threading.Tasks;
@@ -17,6 +16,7 @@ namespace Manito.Discord.Orders
 		public NodeResultHandler StepResultHandler {
 			get;
 		} = Common.DefaultNodeResultHandler;
+
 		private DialogueTabSession<AdminOrderContext> _session;
 		private MyDomain Domain => _session.Client.Domain;
 		private AdminOrderExec _execSession;
@@ -25,6 +25,7 @@ namespace Manito.Discord.Orders
 		private DiscordButtonComponent _endButton;
 		private AdminOrderPool _pool;
 		public AdminOrderPool Pool => _pool;
+
 		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, AdminOrderPool pool)
 		{
 			_pool = pool;
@@ -33,6 +34,7 @@ namespace Manito.Discord.Orders
 			_changeButton = new(ButtonStyle.Primary, "changeorder", "Сменить заказ.", true);
 			_endButton = new(ButtonStyle.Danger, "endworking", "Закончить работу.", true);
 		}
+
 		private async Task<NextNetworkInstruction> BeginOrderExecution(NetworkInstructionArgument arg)
 		{
 			var (channel, id) = ((DiscordChannel, DiscordUser))arg.Payload;
@@ -44,6 +46,7 @@ namespace Manito.Discord.Orders
 			_endButton.Enable();
 			return new(Waiting);
 		}
+
 		private async Task<NextNetworkInstruction> ChangeOrder(NetworkInstructionArgument arg)
 		{
 			await _execSession.ChangeOrder();
@@ -52,6 +55,7 @@ namespace Manito.Discord.Orders
 			_endButton.Enable();
 			return new(Waiting);
 		}
+
 		private async Task<NextNetworkInstruction> EndOrderExecution(NetworkInstructionArgument arg)
 		{
 			await _execSession.StopExecuting();
@@ -61,6 +65,7 @@ namespace Manito.Discord.Orders
 			_endButton.Disable();
 			return new(Waiting);
 		}
+
 		private async Task<NextNetworkInstruction> Waiting(NetworkInstructionArgument arg)
 		{
 			var msg = new UniversalMessageBuilder();
@@ -79,11 +84,11 @@ namespace Manito.Discord.Orders
 			if (comp.CompareButton(_endButton))
 				return new(EndOrderExecution);
 
-
 			return new();
 		}
 
 		public NextNetworkInstruction GetStartingInstruction() => new(Waiting);
+
 		public NextNetworkInstruction GetStartingInstruction(Object payload) => throw new NotImplementedException();
 	}
 }

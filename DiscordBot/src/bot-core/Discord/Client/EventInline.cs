@@ -1,43 +1,43 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-
 using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.EventArgs;
-using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Common.Utilities;
+using DisCatSharp.EventArgs;
+
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
 	/// <summary>
-	/// Event inliner.
-	/// Intercepts events that are being listened for from existing "sessions"
-	/// Pushes non-interesting events further to the EventFilter's buffer
+	/// Event inliner. Intercepts events that are being listened for from existing "sessions" Pushes
+	/// non-interesting events further to the EventFilter's buffer
 	/// </summary>
 	public class EventInline
 	{
 		public PerEventInline<MessageCreateEventArgs> MessageBuffer {
 			get;
 		}
+
 		public PerEventInline<InteractionCreateEventArgs> InteractionBuffer {
 			get;
 		}
+
 		public PerEventInline<ComponentInteractionCreateEventArgs> CompInteractBuffer {
 			get;
 		}
+
 		public PerEventInline<MessageReactionAddEventArgs> ReactAddBuffer {
 			get;
 		}
+
 		public PerEventInline<ContextMenuInteractionCreateEventArgs> ContInteractBuffer {
 			get;
 		}
+
 		private EventBuffer _sourceEventBuffer;
+
 		public EventInline(EventBuffer sourceEventBuffer)
 		{
 			_sourceEventBuffer = sourceEventBuffer;
@@ -47,11 +47,13 @@ namespace Manito.Discord.Client
 			ReactAddBuffer = new(sourceEventBuffer.MsgAddReact);
 			ContInteractBuffer = new(sourceEventBuffer.ContInteract);
 		}
+
 		public Task Run() => _sourceEventBuffer.EventLoops();
 	}
+
 	/// <summary>
-	/// Single event pipe inliner.
-	/// Forwards events to respective listeners, if not catched, forwards to base listeners.
+	/// Single event pipe inliner. Forwards events to respective listeners, if not catched, forwards
+	/// to base listeners.
 	/// </summary>
 	/// <typeparam name="TEvent"></typeparam>
 	public class PerEventInline<TEvent> where TEvent : DiscordEventArgs
@@ -60,13 +62,16 @@ namespace Manito.Discord.Client
 		private Dictionary<int, List<Predictator<TEvent>>> _predictators;
 		private SemaphoreSlim _lock;
 		public string TypeName => GetType().FullName;
+
 		public event AsyncEventHandler<DiscordClient, TEvent> OnFail;
+
 		public PerEventInline(SingleEventBuffer<TEvent> buf)
 		{
 			_lock = new(1, 1);
 			_predictators = new();
 			buf.OnMessage += Check;
 		}
+
 		public async Task Add(int order, Predictator<TEvent> predictator)
 		{
 			await _lock.WaitAsync();
@@ -76,6 +81,7 @@ namespace Manito.Discord.Client
 			_predictators[order].Add(predictator);
 			_lock.Release();
 		}
+
 		public Task Add(Predictator<TEvent> predictator) => Add(DefaultOrder, predictator);
 
 		private async Task<IEnumerable<(int, Predictator<TEvent>)>> CheckEOL(IEnumerable<(int, Predictator<TEvent>)> input)
@@ -88,6 +94,7 @@ namespace Manito.Discord.Client
 			}
 			return rrr;
 		}
+
 		private async Task<IEnumerable<Predictator<TEvent>>> RunEvent(DiscordClient client, TEvent args, IEnumerable<Predictator<TEvent>> input)
 		{
 			var rrr = Enumerable.Empty<Predictator<TEvent>>();
@@ -102,6 +109,7 @@ namespace Manito.Discord.Client
 			}
 			return rrr;
 		}
+
 		public async Task<bool> Check(DiscordClient client, TEvent args)
 		{
 			await _lock.WaitAsync();
@@ -131,29 +139,39 @@ namespace Manito.Discord.Client
 			return !toRun.Any();
 		}
 	}
+
 	public abstract class Predictator<TEvent> where TEvent : DiscordEventArgs
 	{
 		// Maybe create an ID for predictator, which client can receive buffered events
 		public abstract Task<bool> IsFitting(DiscordClient client, TEvent args);
+
 		public abstract bool RunIfHandled {
 			get;
 		}
+
 		public abstract Task<bool> IsREOL();
+
 		protected readonly DiscordEventProxy<(Predictator<TEvent>, TEvent)> _eventProxy;
+
 		protected Predictator() => _eventProxy = new();
+
 		public Task Handle(DiscordClient client, TEvent args) =>
 			_eventProxy.Handle(client, (this, args));
+
 		protected abstract Task CancelPredictator();
+
 		public virtual Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout, CancellationToken token)
 		{
 			return GetEvent(x => Task.Delay(timeout, token));
 		}
+
 		public virtual async Task<(DiscordClient, TEvent)> GetEvent(CancellationToken token)
 		{
 			var result = await _eventProxy.GetData(token);
 
 			return (result.Item1, result.Item2.Item2);
 		}
+
 		/// <summary>
 		/// Get event in specific period of time
 		/// </summary>
@@ -171,6 +189,7 @@ namespace Manito.Discord.Client
 				throw new TimeoutException($"Event awaiting for {timeout} has timed out!", e);
 			}
 		}
+
 		/// <summary>
 		/// Gets event
 		/// </summary>
@@ -194,6 +213,7 @@ namespace Manito.Discord.Client
 
 			return (result.Item1, result.Item2.Item2);
 		}
+
 		public virtual async Task<(DiscordClient, TEvent)> GetEvent()
 		{
 			var result = await _eventProxy.GetData();

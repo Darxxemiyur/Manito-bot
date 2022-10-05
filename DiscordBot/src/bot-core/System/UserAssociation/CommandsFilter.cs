@@ -1,8 +1,3 @@
-
-
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.EventArgs;
@@ -10,6 +5,9 @@ using DisCatSharp.EventArgs;
 using Manito.Discord;
 using Manito.Discord.Client;
 using Manito.System.UserAssociation;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Manito.System.UserAssociaton
 {
@@ -19,9 +17,11 @@ namespace Manito.System.UserAssociaton
 		private DiscordEventProxy<InteractionCreateEventArgs> _queue;
 		private UserAssociatonCommands _commands;
 		private List<DiscordApplicationCommand> _commandList;
+
 		public UserPermissionChecker PermissionChecker {
 			get; private set;
 		}
+
 		public UserAssociationFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			PermissionChecker = new(_service = service);
@@ -31,6 +31,7 @@ namespace Manito.System.UserAssociaton
 			_commands = new();
 			//eventBuffer.Interact.OnMessage += FilterMessage;
 		}
+
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{
 			var res = _commands.Search(args.Interaction);

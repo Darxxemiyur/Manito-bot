@@ -1,15 +1,13 @@
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+
+using Manito.Discord.ChatNew;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DisCatSharp;
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using Microsoft.EntityFrameworkCore;
-using Manito.Discord.ChatNew;
-using DisCatSharp.Enums;
 
 namespace Manito.Discord.Chat.DialogueNet
 {
@@ -19,6 +17,7 @@ namespace Manito.Discord.Chat.DialogueNet
 		 int[] nums, int[] muls) => muls.Select(y => nums.Select(x => (new DiscordButtonComponent(
 			ButtonStyle.Secondary, $"{(x > 0 ? "add" : "sub")}{Math.Abs(x * y)}r_{Math.Abs(y)}",
 			 (x > 0 ? "+" : "") + $"{x * y}"), x * y)).ToArray()).ToArray();
+
 		public static async Task<int?> GetQuantity(int[] nums, int[] muls, DialogueNetSession session,
 		 Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder,
 		 int starting = 0)
@@ -61,6 +60,7 @@ namespace Manito.Discord.Chat.DialogueNet
 				quantity = Math.Clamp(quantity + change, 0, int.MaxValue);
 			}
 		}
+
 		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session, Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder, int starting = 0, int minimum = 0)
 		{
 			var quantity = Math.Max(minimum, starting);
@@ -108,6 +108,7 @@ namespace Manito.Discord.Chat.DialogueNet
 				quantity = Math.Clamp(quantity + change, minimum, int.MaxValue);
 			}
 		}
+
 		public static NodeResultHandler DefaultNodeResultHandler =>
 			(x) => Task.FromResult(x.NextAction != NextNetworkActions.Continue);
 	}

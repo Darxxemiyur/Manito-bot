@@ -1,21 +1,17 @@
-using System;
+using DisCatSharp.Entities;
+
+using Manito.Discord.Chat.DialogueNet;
+using Manito.Discord.ChatAbstract;
+using Manito.Discord.Client;
+
 using Microsoft.EntityFrameworkCore;
 
-using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
-using Manito.Discord.Database;
-using System.Threading.Tasks;
-using Manito.Discord.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using DisCatSharp;
-using Manito.Discord.Chat.DialogueNet;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
-using DisCatSharp.EventArgs;
-using Name.Bayfaderix.Darxxemiyur.Common;
-using Manito.Discord.ChatNew;
-using Manito.Discord.ChatAbstract;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.PermanentMessage
 {
@@ -23,18 +19,23 @@ namespace Manito.Discord.PermanentMessage
 	{
 		public MyDiscordClient Client => Domain.MyDiscordClient;
 		public IPermMessageDbFactory Factory => Domain.DbFactory;
+
 		public MyDomain Domain {
 			get; private set;
 		}
+
 		public MsgContext(MyDomain domain) => this.Domain = domain;
 	}
+
 	public class MessageController : IModule
 	{
 		private MyDomain _domain;
 		private DialogueNetSessionTab<MsgContext> _sessionTab;
+
 		public List<ImportedMessage> ImportedMessages {
 			get; private set;
 		}
+
 		public MessageController(MyDomain domain)
 		{
 			_domain = domain;
@@ -42,11 +43,12 @@ namespace Manito.Discord.PermanentMessage
 			_postMessageUpdateQueue = new();
 			ImportedMessages = new();
 		}
+
 		public async Task RunModule()
 		{
-
 			await Task.WhenAll(PostMessageUpdateLoop());
 		}
+
 		private async Task PostMessageUpdateLoop()
 		{
 			while (true)
@@ -77,6 +79,7 @@ namespace Manito.Discord.PermanentMessage
 				}
 			}
 		}
+
 		/// <summary>
 		/// Posts an update request and return proxy for result.
 		/// </summary>
@@ -90,10 +93,12 @@ namespace Manito.Discord.PermanentMessage
 
 			return callback.Task;
 		}
+
 		/// <summary>
 		/// List of post update requests containing translator ID and a callback that resolves after update;
 		/// </summary>
 		private readonly TaskEventProxy<(long, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
+
 		public async Task StartSession(DiscordInteraction args)
 		{
 			await _sessionTab.CreateSession(new InteractiveInteraction(args),

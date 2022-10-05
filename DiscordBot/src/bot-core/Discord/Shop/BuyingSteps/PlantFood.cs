@@ -1,23 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using DisCatSharp;
 using DisCatSharp.Entities;
-using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Enums;
-using Microsoft.EntityFrameworkCore;
 
 using Manito.Discord.Chat.DialogueNet;
-using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
-using Manito.System.Economy;
-using Manito.Discord;
 using Manito.Discord.Orders;
-using System.Threading.Channels;
+using Manito.System.Economy;
+
+using Name.Bayfaderix.Darxxemiyur.Node.Network;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
 {
@@ -29,8 +21,11 @@ namespace Manito.Discord.Shop
 		private int _quantity;
 
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
+
 		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity, NextNetworkActions.Continue);
+
 		public BuyingStepsForPlantFood(DialogueTabSession<ShopContext> session, ShopItem food)
 		{
 			_session = session;
@@ -88,11 +83,11 @@ namespace Manito.Discord.Shop
 
 			order.SetSteps(seq);
 
-
 			await _session.Client.Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, food, _session.Context.Wallet)));
 
 			return new();
 		}
+
 		private async Task<NextNetworkInstruction> ForceChange(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
