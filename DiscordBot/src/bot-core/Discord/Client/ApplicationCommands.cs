@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +10,8 @@ using DisCatSharp.EventArgs;
 using DisCatSharp.Interactivity.Extensions;
 using DisCatSharp.ApplicationCommands;
 using Microsoft.Extensions.DependencyInjection;
+using Cyriller;
+using Cyriller.Model;
 
 namespace Manito.Discord.Client
 {
@@ -29,12 +31,29 @@ namespace Manito.Discord.Client
 		}
 		public void Add(string key, IEnumerable<DiscordApplicationCommand> value) =>
 			Commands.Add(key, value);
+		private async Task NotifyAdminOnline()
+		{
+			while (true)
+			{
+				var admins = _collection.Filters.AdminOrder.Pool.AdminsOnline;
+
+				var msg = $"за {admins} админами в сети";
+				var activity = new DiscordActivity(msg, ActivityType.Watching);
+				try
+				{
+					await _collection.MyDiscordClient.Client.UpdateStatusAsync(activity);
+				}
+				catch { }
+				await Task.Delay(20000);
+			}
+		}
 		private async Task DoUpdateCommands(DiscordClient client, ReadyEventArgs args)
 		{
 			Client.Ready -= DoUpdateCommands;
 			var commands = Commands.SelectMany(x => x.Value);
 			args.Handled = true;
 			await _collection.ExecutionThread.AddNew(() => Client.BulkOverwriteGlobalApplicationCommandsAsync(commands));
+			await _collection.ExecutionThread.AddNew(() => NotifyAdminOnline());
 		}
 		public readonly Dictionary<string, IEnumerable<DiscordApplicationCommand>> Commands;
 		public async Task Autocomplete()

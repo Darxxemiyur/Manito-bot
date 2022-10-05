@@ -13,7 +13,6 @@ using DisCatSharp.Enums;
 using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.ChatNew;
-using static System.Collections.Specialized.BitVector32;
 using Microsoft.EntityFrameworkCore;
 
 namespace Manito.System.Economy
@@ -148,45 +147,49 @@ namespace Manito.System.Economy
 			var session = new ComponentDialogueSession(_client, args);
 			var wallet = _economy.GetPlayerWallet(target);
 			await session.DoLaterReply();
+#if DEBUG
+			var time = TimeSpan.FromSeconds(20);
+#else
+			var time = TimeSpan.FromHours(4);
+#endif
+			await using var _ = await _lock.BlockAsyncLock();
+			await using var db = await _client.Domain.DbFactory.CreateMyDbContextAsync();
 
+			if (!await db.PlayerWorks.AnyAsync(x => x.DiscordID == target))
 			{
-				await using var _ = await _lock.BlockAsyncLock();
-				await using var db = await _client.Domain.DbFactory.CreateMyDbContextAsync();
-
-
-				if (!await db.PlayerWorks.AnyAsync(x => x.DiscordID == target))
-				{
-					await db.PlayerWorks.AddAsync(new PlayerEconomyWork(target));
-					await db.SaveChangesAsync();
-				}
-
-				var work = await db.PlayerWorks.FirstAsync(x => x.DiscordID == target);
-
-				if (DateTimeOffset.UtcNow - work.LastWork < TimeSpan.FromHours(4))
-				{
-					await session.SendMessage(new DiscordEmbedBuilder().WithDescription("Вы уже работали"));
-					return;
-				}
-				else
-				{
-					work.LastWork = DateTimeOffset.UtcNow;
-					work.TimesWorked++;
-				}
+				await db.PlayerWorks.AddAsync(new PlayerEconomyWork(target));
 				await db.SaveChangesAsync();
 			}
 
-			for (int i = 0; i < 4; i++)
+			var work = await db.PlayerWorks.FirstAsync(x => x.DiscordID == target);
+			if (DateTimeOffset.UtcNow - work.LastWork < time)
 			{
-				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Работаем...{string.Join("", Enumerable.Range(1, i).Select(x => "."))}").WithColor(new DiscordColor(100, 100, 20)));
-				await Task.Delay(4000);
-			}
-			var money = Random.Shared.Next(200, 400);
-			await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}"));
+				var delay = DateTimeOffset.UtcNow - work.LastWork;
+				var small = TimeSpan.FromSeconds(10);
 
-			await wallet.Deposit(money, "Заработок");
-			var msg = await session.SessionMessage;
-			await Task.Delay(10000);
-			await msg.DeleteAsync();
+				delay = time - delay > small ? small : time - delay;
+				await _client.Domain.ExecutionThread.AddNew(async () => {
+					await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Вы уже работали!\nВы сможете работать <t:{(work.LastWork + time).ToUnixTimeSeconds()}:R>").WithColor(new DiscordColor(240, 140, 50)));
+					await Task.Delay(delay);
+					await session.RemoveMessage();
+				});
+				return;
+			}
+			else
+			{
+				work.LastWork = DateTimeOffset.UtcNow;
+				work.TimesWorked++;
+			}
+			await db.SaveChangesAsync();
+
+			await _client.Domain.ExecutionThread.AddNew(async () => {
+				var money = Random.Shared.Next(100, 500);
+				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}").WithColor(new DiscordColor(140, 240, 50)));
+
+				await wallet.Deposit(money, "Заработок");
+				await Task.Delay(10000);
+				await session.RemoveMessage();
+			});
 		}
 		private AsyncLocker _lock = new();
 

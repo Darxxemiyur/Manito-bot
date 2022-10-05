@@ -61,9 +61,9 @@ namespace Manito.Discord.Chat.DialogueNet
 				quantity = Math.Clamp(quantity + change, 0, int.MaxValue);
 			}
 		}
-		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session, Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder, int starting = 0)
+		public static async Task<int?> GetQuantity(int[] nums, int[] muls, IDialogueSession session, Func<int, int, Task<bool>> limiter, Func<int, Task<DiscordInteractionResponseBuilder>> responder, int starting = 0, int minimum = 0)
 		{
-			var quantity = starting;
+			var quantity = Math.Max(minimum, starting);
 			var btns = Generate(nums, muls);
 			var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
 			var resbtn = new DiscordButtonComponent(ButtonStyle.Primary, "reset", "Сбросить");
@@ -105,7 +105,7 @@ namespace Manito.Discord.Chat.DialogueNet
 					.Select(x => x.Item1).ToDictionary(x => x.CustomId));
 				var change = int.Parse(pressed.Label);
 
-				quantity = Math.Clamp(quantity + change, 0, int.MaxValue);
+				quantity = Math.Clamp(quantity + change, minimum, int.MaxValue);
 			}
 		}
 		public static NodeResultHandler DefaultNodeResultHandler =>

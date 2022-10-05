@@ -31,8 +31,8 @@ namespace Manito.Discord.Orders
 		private DialogueNetSessionTab<AdminOrderContext> _aoTab;
 		private List<DiscordApplicationCommand> _commandList;
 		private DiscordEventProxy<DiscordInteraction> _queue;
-		private PoolTaskEventProxy _pool;
-		public PoolTaskEventProxy Pool => _pool;
+		private AdminOrderPool _pool;
+		public AdminOrderPool Pool => _pool;
 		public AdminOrdersFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_pool = new();
@@ -46,8 +46,10 @@ namespace Manito.Discord.Orders
 		{
 			yield return new DiscordApplicationCommand("admin",
 			 "Начать администрировать");
+#if DEBUG
 			yield return new DiscordApplicationCommand("admin_add_test",
 			 "Добавить 5 заказов.");
+#endif
 		}
 
 		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

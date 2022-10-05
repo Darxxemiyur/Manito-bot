@@ -30,23 +30,16 @@ namespace Manito.Discord.Shop
 			_session = session;
 			_food = food;
 		}
-
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
 			var ms1 = $"Выберите количество {_food.Name}";
 			var price = _food.Price;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 },
-				_session,
-			 async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 0),
-			 async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent()
-			 .WithDescription($"{ms1}\nВыбранное количество {x} кг за {x * price}.")), _quantity);
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 50, 100, 500 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 0), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} ед за {x * price}.")), _quantity, 100);
 
 			if (!qua.HasValue)
 				return new();
-
-			if ((_quantity = qua.Value) <= 0)
-				return new(SelectQuantity);
+			_quantity = qua.Value;
 
 			return new(ExecuteTransaction);
 		}

@@ -14,7 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using Manito.Discord.Chat.DialogueNet;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using Manito.Discord.ChatNew;
-using Manito.System.Economy; using Manito.Discord;
+using Manito.System.Economy;
+using Manito.Discord;
 using Manito.Discord.Orders;
 using System.Threading.Channels;
 
@@ -43,9 +44,7 @@ namespace Manito.Discord.Shop
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5, 10 }, _session, async (x, y) => y < 0 || await wallet.CanAfford((x + y) * price),
-			 async x => resp.GetResponse(resp.BaseContent()
-			 .WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity);
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5, 10 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 0), async x => resp.GetResponse(resp.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity);
 
 			if (!qua.HasValue)
 				return new NextNetworkInstruction(null, NextNetworkActions.Stop);

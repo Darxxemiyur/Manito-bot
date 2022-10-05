@@ -22,8 +22,6 @@ namespace Manito.Discord.Shop
 		public OrderAwait(UniversalSession session, Order order, ShopItem.InCart item, PlayerWallet wallet) => (_session, _order, _item, _wallet) = (session, order, item, wallet);
 		private async Task<NextNetworkInstruction> ReleaseAwaiting(NetworkInstructionArgument args)
 		{
-			await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(_order);
-
 			var completed = _order.OrderCompleteTask;
 			var noRet = new CancellationTokenSource();
 			var nonCanc = Task.Run(async () => {
@@ -40,6 +38,7 @@ namespace Manito.Discord.Shop
 			var doCancel = _session.GetComponentInteraction(both.Token);
 			var list = new List<Task> { completed, nonCanc, cancelled, doCancel };
 
+			await _session.Client.Domain.Filters.AdminOrder.Pool.PlaceOrder(_order);
 			var timeout = TimeSpan.FromSeconds(20);
 
 			while (true)

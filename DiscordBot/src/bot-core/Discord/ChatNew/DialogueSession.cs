@@ -302,15 +302,15 @@ namespace Manito.Discord.ChatNew
 					NextType = InteractionResponseType.Pong;
 					break;
 				case InteractionResponseType.Pong:
-					await Interactive.Interaction.EditOriginalResponseAsync(message);
+					await MarkTheMessage(await Interactive.Interaction.EditOriginalResponseAsync(message));
 					break;
 			}
 			_innerMsgBuilder = message;
 		}
 
-		private async Task MarkTheMessage()
+		private async Task MarkTheMessage(DiscordMessage msg = default)
 		{
-			Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, await SessionMessage));
+			Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, msg ?? await SessionMessage));
 		}
 
 		private async Task CancelClickability()

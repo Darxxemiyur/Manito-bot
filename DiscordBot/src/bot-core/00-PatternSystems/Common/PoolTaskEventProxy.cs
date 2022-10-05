@@ -41,6 +41,11 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			await using var _ = await _lock.BlockAsyncLock();
 			await InnerPlaceOrder(order);
 		}
+		public async Task<bool> AnyOrders()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			return _queue.Any();
+		}
 		private async Task<Task<Order>> InnerGetOrder(CancellationToken token = default)
 		{
 			if (_queue.Count > 0)
@@ -52,7 +57,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 			return relay.Task;
 		}
-		public async Task<Order> GetOrder(CancellationToken token = default)
+		public async Task<Task<Order>> GetOrder(CancellationToken token = default)
 		{
 			Task<Order> orderGet = null;
 			await using (var _ = await _lock.BlockAsyncLock(CancellationToken.None))
@@ -60,7 +65,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 				orderGet = await InnerGetOrder(token);
 			}
 
-			return await orderGet;
+			return orderGet;
 		}
 	}
 }

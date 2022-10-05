@@ -23,8 +23,9 @@ namespace Manito.Discord.Orders
 		private DiscordButtonComponent _beginButton;
 		private DiscordButtonComponent _changeButton;
 		private DiscordButtonComponent _endButton;
-		private PoolTaskEventProxy _pool;
-		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, PoolTaskEventProxy pool)
+		private AdminOrderPool _pool;
+		public AdminOrderPool Pool => _pool;
+		public AdminOrderControl(DialogueTabSession<AdminOrderContext> session, AdminOrderPool pool)
 		{
 			_pool = pool;
 			_session = session;

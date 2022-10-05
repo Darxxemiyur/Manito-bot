@@ -25,7 +25,7 @@ namespace Manito.Discord.Orders
 		private CancellationTokenSource _swapToken;
 		private CancellationTokenSource _cancelOrder;
 		private CancellationTokenSource _localToken;
-		private readonly PoolTaskEventProxy _pool;
+		private readonly AdminOrderPool _pool;
 		private readonly DiscordChannel _channel;
 		private readonly DiscordUser _admin;
 		private IEnumerator<Step> _steps;
@@ -37,7 +37,7 @@ namespace Manito.Discord.Orders
 				_steps = value?.Steps?.GetEnumerator();
 			}
 		}
-		public AdminOrderExec(PoolTaskEventProxy pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
+		public AdminOrderExec(AdminOrderPool pool, UniversalSession session, DiscordChannel channel, DiscordUser user)
 		{
 			_pool = pool;
 			_quitToken = new();
@@ -112,6 +112,7 @@ namespace Manito.Discord.Orders
 				await _pool.PlaceOrder(ExOrder);
 				ExOrder = null;
 				await Session.RemoveMessage();
+				await _pool.StopAdministrating();
 				return new();
 			}
 
@@ -260,7 +261,12 @@ namespace Manito.Discord.Orders
 				return new(DoOrderCancellation);
 			}
 		}
-		public NextNetworkInstruction GetStartingInstruction() => new(FetchNextStep);
+		private async Task<NextNetworkInstruction> SetupStep(NetworkInstructionArgument arg)
+		{
+			await _pool.StartAdministrating();
+			return new(FetchNextStep);
+		}
+		public NextNetworkInstruction GetStartingInstruction() => new(SetupStep);
 		public NextNetworkInstruction GetStartingInstruction(Object payload) => throw new NotImplementedException();
 	}
 }

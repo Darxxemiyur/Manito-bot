@@ -16,6 +16,7 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.System.Economy; using Manito.Discord;
 using System.Threading;
+using DisCatSharp.Exceptions;
 
 namespace Manito.Discord.Shop
 {
@@ -40,7 +41,7 @@ namespace Manito.Discord.Shop
 			{
 				var msg = await chnl.GetMessageAsync(msgId);
 			}
-			catch (DisCatSharp.Exceptions.NotFoundException)
+			catch (NotFoundException)
 			{
 				return (await chnl.SendMessageAsync(GetMsg())).Id;
 			}
