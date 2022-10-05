@@ -28,15 +28,16 @@ namespace Manito.Discord.Orders
 				await HandleAsCommand(data);
 			}
 		}
-		private DialogueNetSessionTab<AdminOrderContext> _aoTab;
-		private List<DiscordApplicationCommand> _commandList;
-		private DiscordEventProxy<DiscordInteraction> _queue;
-		private AdminOrderPool _pool;
+		private readonly DialogueNetSessionTab<AdminOrderContext> _aoTab;
+		private readonly List<DiscordApplicationCommand> _commandList;
+		private readonly DiscordEventProxy<DiscordInteraction> _queue;
+		private readonly AdminOrderPool _pool;
+		private readonly MyDomain _domain;
 		public AdminOrderPool Pool => _pool;
 		public AdminOrdersFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_pool = new();
-			_aoTab = new(service);
+			_aoTab = new(_domain = service);
 			_commandList = GetCommands().ToList();
 			_queue = new();
 			service.MyDiscordClient.AppCommands.Add("AdmOrdFlt", _commandList);
@@ -60,8 +61,16 @@ namespace Manito.Discord.Orders
 			await _queue.Handle(client, args.Interaction);
 			args.Handled = true;
 		}
+		private Task<bool> IsWorthy(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
+			if (!await IsWorthy(args.User))
+			{
+				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
+				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
+				return;
+			}
+
 			if (args.Data.Name.Equals("admin"))
 				await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x, _pool)));
 			if (args.Data.Name.Equals("admin_add_test"))

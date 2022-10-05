@@ -26,9 +26,7 @@ namespace Manito.Discord.PermanentMessage
 		private DiscordEventProxy<DiscordInteraction> _queue;
 		public MsgWallFilter(MyDomain domain, EventBuffer buffer)
 		{
-			_domain = domain;
-			_queue = new();
-			_commandList = GetCommands().ToList();
+			(_domain, _queue, _commandList) = (domain, new(), GetCommands().ToList());
 			domain.MyDiscordClient.AppCommands.Add("MsgControll", _commandList);
 			buffer.Interact.OnMessage += FilterMessage;
 			buffer.ContInteract.OnMessage += FilterMessage;
@@ -37,9 +35,9 @@ namespace Manito.Discord.PermanentMessage
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
 		private IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
-			yield return new DiscordApplicationCommand("msgwall", "Edit wall", null, 
+			yield return new DiscordApplicationCommand("msgwall", "Edit wall", null,
 				ApplicationCommandType.ChatInput, GetLoc("стенасооб"), GetLoc("Редактировать стены"));
-			yield return new DiscordApplicationCommand("Message wall import", "", null, 
+			yield return new DiscordApplicationCommand("Message wall import", "", null,
 				ApplicationCommandType.Message, GetLoc("Импорт сообщения в строку стены"));
 		}
 
@@ -66,19 +64,7 @@ namespace Manito.Discord.PermanentMessage
 			args.Handled = true;
 		}
 		private Task<bool> IsWorthy(DiscordInteraction interaction) => IsWorthy(interaction.User);
-		private Task<bool> IsWorthy(DiscordUser user) => IsWorthy(user.Id);
-		private async Task<bool> IsWorthy(ulong id)
-		{
-			try
-			{
-				var guild = await _domain.MyDiscordClient.ManitoGuild;
-
-				var user = await guild.GetMemberAsync(id);
-
-				return user.Permissions.HasPermission(Permissions.Administrator);
-			}
-			catch { return false; }
-		}
+		private Task<bool> IsWorthy(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
 		public async Task RunModule()
 		{
 			while (true)

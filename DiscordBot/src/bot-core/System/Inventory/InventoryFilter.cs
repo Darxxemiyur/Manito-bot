@@ -43,7 +43,7 @@ namespace Manito.Discord.Inventory
 			_commandList = _commands.GetCommands().ToList();
 			//service.MyDiscordClient.AppCommands.Add("Inventory", _commandList);
 			_queue = new();
-			eventBuffer.Interact.OnMessage += _queue.Handle;
+			//eventBuffer.Interact.OnMessage += _queue.Handle;
 		}
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DisCatSharp.Entities;
 
-namespace Manito.Discord.UserAssociaton
+namespace Manito.System.UserAssociaton
 {
     public class UserAssociatonCommands
     {

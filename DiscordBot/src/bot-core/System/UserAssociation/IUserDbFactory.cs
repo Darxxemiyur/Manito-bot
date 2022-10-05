@@ -7,7 +7,7 @@ using DisCatSharp.ApplicationCommands;
 using Manito.Discord.Database;
 using System.Threading.Tasks;
 
-namespace Manito.Discord.UserAssociaton
+namespace Manito.System.UserAssociaton
 {
 
     public interface IUserDbFactory : IMyDbFactory

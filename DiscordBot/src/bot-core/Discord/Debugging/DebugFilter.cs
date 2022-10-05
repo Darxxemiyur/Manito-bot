@@ -20,9 +20,7 @@ namespace Manito.System.Economy
 
 	public class DebugFilter : IModule
 	{
-
-		public Task RunModule() => HandleLoop();
-		private async Task HandleLoop()
+		public async Task RunModule()
 		{
 			while (true)
 			{
@@ -30,9 +28,9 @@ namespace Manito.System.Economy
 				await _service.ExecutionThread.AddNew(() => FilterMessage(data.Item1, data.Item2));
 			}
 		}
-		private DebugCommands _commands;
-		private DiscordEventProxy<InteractionCreateEventArgs> _queue;
-		private MyDomain _service;
+		private readonly DebugCommands _commands;
+		private readonly DiscordEventProxy<InteractionCreateEventArgs> _queue;
+		private readonly MyDomain _service;
 		public DebugFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_commands = new DebugCommands(service);
@@ -44,10 +42,8 @@ namespace Manito.System.Economy
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{
 			var res = _commands.Search(args.Interaction);
-			if (res == null)
-				return;
-
-			if (args.Interaction.User.Id != 860897395109789706)
+			var checker = _service.Filters.AssociationFilter.PermissionChecker;
+			if (res == null || !await checker.IsGod(args.Interaction.User))
 				return;
 
 			await res(args.Interaction);

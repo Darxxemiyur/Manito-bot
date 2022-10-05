@@ -14,6 +14,7 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Manito.Discord.ChatNew;
 using Microsoft.EntityFrameworkCore;
+using Manito.Discord;
 
 namespace Manito.System.Economy
 {
@@ -39,6 +40,7 @@ namespace Manito.System.Economy
 			}
 			return null;
 		}
+		private Task<bool> IsWorthy(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
 		{
@@ -226,6 +228,13 @@ namespace Manito.System.Economy
 		}
 		private async Task Withdraw(DiscordInteraction args)
 		{
+			if (!await IsWorthy(args.User))
+			{
+				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
+				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
+				return;
+			}
+
 			var argtools = new AppCommandArgsTools(args);
 
 			var tgt = argtools.AddReqArg("target");
@@ -255,6 +264,13 @@ namespace Manito.System.Economy
 		}
 		private async Task Deposit(DiscordInteraction args)
 		{
+			if (!await IsWorthy(args.User))
+			{
+				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
+				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
+				return;
+			}
+
 			var argtools = new AppCommandArgsTools(args);
 
 			var tgt = argtools.AddReqArg("target");

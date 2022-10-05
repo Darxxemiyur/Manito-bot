@@ -6,7 +6,7 @@ using DisCatSharp.ApplicationCommands;
 
 using Manito.Discord.Database;
 
-namespace Manito.Discord.UserAssociaton
+namespace Manito.System.UserAssociaton
 {
 
     public interface IUsersDb : IMyDatabase
