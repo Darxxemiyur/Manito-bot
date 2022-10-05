@@ -1,3 +1,5 @@
+﻿using DisCatSharp.Entities;
+
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 
@@ -17,10 +19,11 @@ namespace Manito.Discord.Shop
 
 		public NextNetworkInstruction GetStartingInstruction(object payload) => GetStartingInstruction();
 
-		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity, NextNetworkActions.Continue);
+		public NextNetworkInstruction GetStartingInstruction() => new(SelectQuantity);
 
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
+			await _session.SendMessage(new DiscordEmbedBuilder().WithDescription("Мена пока нельзя купить!\nПриносим свои извинения :c").WithColor(new DiscordColor(200, 50, 20)));
 			await _session.DoLaterReply();
 			return new(null);
 		}

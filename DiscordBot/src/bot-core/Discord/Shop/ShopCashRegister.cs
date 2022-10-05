@@ -18,24 +18,54 @@ namespace Manito.Discord.Shop
 			yield return new ShopItem {
 				Name = "Каркас без насыщения",
 				Category = ItemCategory.Carcass,
-				SpawnCommand = "SpawnCarcass {0} {0} false",
+				RelatedCommand = "SpawnCarcass {0} {0} false",
 				Price = 1,
 			};
 			yield return new ShopItem {
 				Name = "Каркас c насыщением",
 				Category = ItemCategory.SatiationCarcass,
-				SpawnCommand = "SpawnCarcass {0} {0} true",
-				Price = 4,
+				RelatedCommand = "SpawnCarcass {0} {0} true",
+				Price = 3,
 			};
 			yield return new ShopItem {
 				Name = "Светляк",
 				Category = ItemCategory.Plant,
-				SpawnCommand = "SpawnPlant",
-				Price = 40,
+				RelatedCommand = "SpawnPlant",
+				Price = 570,
 			};
 			yield return new ShopItem {
 				Name = "Воскрешение",
 				Category = ItemCategory.Revive,
+				RelatedCommand = "Reskin {0}",
+				Price = 100,
+			};
+			yield return new ShopItem {
+				Name = "Рескин",
+				Category = ItemCategory.Reskin,
+				RelatedCommand = "Reskin {0}",
+				Price = 100,
+			};
+			yield return new ShopItem {
+				Name = "Сброс талантов",
+				Category = ItemCategory.ResetTalent,
+				RelatedCommand = "ResetTalents {0}",
+				Price = 100,
+			};
+			yield return new ShopItem {
+				Name = "Смена пола",
+				Category = ItemCategory.SwapGender,
+				RelatedCommand = "SetGender {0} {1}",
+				Price = 100,
+			};
+			yield return new ShopItem {
+				Name = "Телепорт",
+				Category = ItemCategory.Teleport,
+				RelatedCommand = "TeleportPtoP {0} {1}",
+				Price = 100,
+			};
+			yield return new ShopItem {
+				Name = "Проверка яиц",
+				Category = ItemCategory.EggCheck,
 				Price = 100,
 			};
 		}

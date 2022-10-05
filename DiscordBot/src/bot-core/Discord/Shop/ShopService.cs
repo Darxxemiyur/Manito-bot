@@ -6,6 +6,8 @@ using Manito.Discord.ChatAbstract;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
 
+using Name.Bayfaderix.Darxxemiyur.Common;
+
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +20,11 @@ namespace Manito.Discord.Shop
 		private MyDiscordClient _client;
 		private ShopCashRegister _cashRegister;
 		private DialogueNetSessionTab<ShopContext> _shopTab;
-		private SemaphoreSlim _lock;
+		private AsyncLocker _lock;
 
 		public ShopService(MyDomain service)
 		{
-			_lock = new SemaphoreSlim(1, 1);
+			_lock = new();
 			_service = service;
 			_client = service.MyDiscordClient;
 			_shopTab = new(service);
@@ -31,7 +33,7 @@ namespace Manito.Discord.Shop
 
 		public async Task<DialogueTabSession<ShopContext>> StartSession(DiscordUser customer, DiscordInteraction intr)
 		{
-			await _lock.WaitAsync();
+			await using var _ = await _lock.BlockAsyncLock();
 
 			DialogueTabSession<ShopContext> session = null;
 
@@ -40,18 +42,12 @@ namespace Manito.Discord.Shop
 				_service.Economy.GetPlayerWallet(customer.Id), _cashRegister, this),
 				(x) => Task.FromResult((IDialogueNet)new ShopDialogue(x)));
 
-			_lock.Release();
+
 
 			return session;
 		}
 
 		public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
 			_cashRegister.Default(bld);
-
-		public DiscordMessageBuilder GetEnterMessage()
-		{
-			return new DiscordMessageBuilder().AddEmbed(Default().WithDescription("{}"))
-				.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "Start", "Шоппинг!"));
-		}
 	}
 }

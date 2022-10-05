@@ -19,7 +19,6 @@ namespace Manito.Discord.Client
 		private MyDomain _service;
 		private EventBuffer _eventBuffer;
 		private ShopFilter _shopFilter;
-		private NoiseFilter _noiseFilter;
 		private InventoryFilter _inventoryFilter;
 		private EconomyFilter _economyFilter;
 		private DebugFilter _debugFilter;
@@ -31,7 +30,6 @@ namespace Manito.Discord.Client
 		public WelcomerFilter Welcomer => _welcomer;
 		public EventBuffer MyEventBuffer => _eventBuffer;
 		public ShopFilter Shop => _shopFilter;
-		public NoiseFilter Noise => _noiseFilter;
 		public InventoryFilter InventoryFilter => _inventoryFilter;
 		public EconomyFilter Economy => _economyFilter;
 		public DebugFilter Debug => _debugFilter;
@@ -46,7 +44,6 @@ namespace Manito.Discord.Client
 		public async Task Initialize()
 		{
 			_msgWallFilter = new MsgWallFilter(_service, _eventBuffer);
-			_noiseFilter = new NoiseFilter(_eventBuffer);
 			_economyFilter = new EconomyFilter(_service, _eventBuffer);
 			_inventoryFilter = new InventoryFilter(_service, _eventBuffer);
 			_welcomer = new WelcomerFilter(_service.MyDiscordClient);

@@ -187,7 +187,7 @@ namespace Manito.System.Economy
 			await db.SaveChangesAsync();
 
 			await _client.Domain.ExecutionThread.AddNew(async () => {
-				var money = Random.Shared.Next(100, 500);
+				var money = Random.Shared.Next(270, 500);
 				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}").WithColor(new DiscordColor(140, 240, 50)));
 
 				await wallet.Deposit(money, "Заработок");

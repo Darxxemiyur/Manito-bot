@@ -23,8 +23,7 @@ namespace Manito.Discord.Shop
 		private Task StopSession() => _session.EndSession();
 
 		private IDialogueNet DialogNetwork(ShopItem item) => item.Category switch {
-			ItemCategory.SatiationCarcass or ItemCategory.Carcass =>
-				new BuyingStepsForMeatFood(_session, item),
+			ItemCategory.SatiationCarcass or ItemCategory.Carcass => new BuyingStepsForMeatFood(_session, item),
 			ItemCategory.Plant => new BuyingStepsForPlantFood(_session, item),
 			_ => new BuyingStepsForError(_session),
 		};
@@ -47,7 +46,8 @@ namespace Manito.Discord.Shop
 						break;
 
 					await _session.DoLaterReply();
-					await ItemSelected(argv.GetOption(shopItems.ToDictionary(x => x.Name)));
+					var chain = DialogNetwork(argv.GetOption(shopItems.ToDictionary(x => x.Name)));
+					await NetworkCommon.RunNetwork(chain);
 				}
 
 				await _session.SendMessage(_session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена.")));
@@ -63,15 +63,10 @@ namespace Manito.Discord.Shop
 				await Task.Delay(5000);
 				await _session.RemoveMessage();
 				await StopSession();
+				throw;
 			}
 
 			return new();
-		}
-
-		private async Task ItemSelected(ShopItem item)
-		{
-			var chain = DialogNetwork(item);
-			await NetworkCommon.RunNetwork(chain);
 		}
 
 		public NextNetworkInstruction GetStartingInstruction() => new(EnterMenu);

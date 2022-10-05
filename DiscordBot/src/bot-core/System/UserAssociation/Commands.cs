@@ -14,12 +14,13 @@ namespace Manito.System.UserAssociaton
 
 		public List<DiscordApplicationCommand> GetCommands()
 		{
-			throw new NotImplementedException();
+			return new();
 		}
 
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
-			throw new NotImplementedException();
+
+			return null;
 		}
 
 		public async Task EnterMenu()

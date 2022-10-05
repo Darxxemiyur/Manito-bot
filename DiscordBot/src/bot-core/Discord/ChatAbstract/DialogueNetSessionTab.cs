@@ -22,8 +22,7 @@ namespace Manito.Discord.ChatAbstract
 			_domain = domain;
 		}
 
-		public async Task<DialogueTabSession<T>> CreateSession(InteractiveInteraction interactive,
-			T context, Func<DialogueTabSession<T>, Task<IDialogueNet>> builder)
+		public async Task<DialogueTabSession<T>> CreateSession(InteractiveInteraction interactive, T context, Func<DialogueTabSession<T>, Task<IDialogueNet>> builder)
 		{
 			var session = await _sessionTab.CreateSync(interactive, context);
 

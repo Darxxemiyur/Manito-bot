@@ -24,11 +24,11 @@ namespace Manito.System.UserAssociaton
 
 		public UserAssociationFilter(MyDomain service, EventBuffer eventBuffer)
 		{
+			_queue = new();
+			_commands = new();
 			PermissionChecker = new(_service = service);
 			_commandList = _commands.GetCommands();
 			//service.MyDiscordClient.AppCommands.Add("UserAssoc", _commandList);
-			_queue = new();
-			_commands = new();
 			//eventBuffer.Interact.OnMessage += FilterMessage;
 		}
 

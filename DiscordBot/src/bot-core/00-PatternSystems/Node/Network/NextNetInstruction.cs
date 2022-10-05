@@ -32,7 +32,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Network
 		public NextNetworkInstruction(Node nextStep)
 		{
 			NextStep = nextStep;
-			NextAction = NextNetworkActions.Continue;
+			NextAction = nextStep != null ? NextNetworkActions.Continue : NextNetworkActions.Stop;
 			Payload = null;
 		}
 		public NextNetworkInstruction(object payload)

@@ -110,6 +110,6 @@ namespace Manito.Discord.Chat.DialogueNet
 		}
 
 		public static NodeResultHandler DefaultNodeResultHandler =>
-			(x) => Task.FromResult(x.NextAction != NextNetworkActions.Continue);
+			(x) => Task.FromResult(x.NextAction == NextNetworkActions.Continue);
 	}
 }

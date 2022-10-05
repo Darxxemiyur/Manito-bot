@@ -32,7 +32,7 @@ namespace Manito.Discord.Shop
 
 			await _session.Context.Wallet.Deposit(_item.Price);
 
-			return new();
+			return new(true);
 		}
 
 		private async Task<NextNetworkInstruction> WaitForOrder(NetworkInstructionArgument args)

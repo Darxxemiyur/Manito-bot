@@ -15,7 +15,7 @@ namespace Manito.Discord.Shop
 		/// <summary>
 		/// Spawn command
 		/// </summary>
-		public string SpawnCommand;
+		public string RelatedCommand;
 
 		/// <summary>
 		/// Price for unit of Item
@@ -27,7 +27,7 @@ namespace Manito.Discord.Shop
 			public readonly ShopItem Item;
 			public readonly int Amount;
 			public int Price => Item.Price * Amount;
-			public string SpawnCommand => string.Format(Item.SpawnCommand, Amount);
+			public string SpawnCommand => string.Format(Item.RelatedCommand, Amount);
 
 			public InCart(ShopItem item, int amount) => (Item, Amount) = (item, amount);
 		}
