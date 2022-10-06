@@ -19,7 +19,6 @@ namespace Manito.System.UserAssociaton
 
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
-
 			return null;
 		}
 

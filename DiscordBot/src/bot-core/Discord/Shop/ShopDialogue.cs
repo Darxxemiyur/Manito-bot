@@ -3,6 +3,7 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Shop.BuyingSteps;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
@@ -25,6 +26,10 @@ namespace Manito.Discord.Shop
 		private IDialogueNet DialogNetwork(ShopItem item) => item.Category switch {
 			ItemCategory.SatiationCarcass or ItemCategory.Carcass => new BuyingStepsForMeatFood(_session, item),
 			ItemCategory.Plant => new BuyingStepsForPlantFood(_session, item),
+			ItemCategory.Reskin => new Reskin(_session, item),
+			ItemCategory.SwapGender => new GenderSwap(_session, item),
+			ItemCategory.ResetTalent => new TalentsReset(_session, item),
+			ItemCategory.EggCheck => new EggCheck(_session, item),
 			_ => new BuyingStepsForError(_session),
 		};
 

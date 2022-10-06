@@ -86,9 +86,7 @@ namespace Manito.Discord.Orders
 				var step = (InformStep)arg.Payload;
 
 				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "executed", "Выполнено.");
-				var embed = new DiscordEmbedBuilder();
-				embed.WithColor(new DiscordColor(255, 255, 0));
-				embed.WithDescription($"{step.Description}\nНапишите игроку \"{step.Info}\" и нажмите \"{asked.Label}\"");
+				var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 255, 0)).WithDescription($"{step.Description}\nНапишите игроку \"{step.Info}\" и нажмите \"{asked.Label}\"");
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked));
 
@@ -231,8 +229,19 @@ namespace Manito.Discord.Orders
 				embed.WithDescription($"{step.Description}");
 				await Session.SendMessage(new UniversalMessageBuilder()
 					.AddEmbed(embed).AddComponents(change, cont));
+				var timeout = TimeSpan.FromSeconds(20);
 
-				var res = await Session.GetComponentInteraction(_localToken.Token);
+				var getter = Session.GetComponentInteraction(_localToken.Token);
+				var timer = Task.Delay(timeout);
+				var any = await Task.WhenAny(getter, timer);
+
+				if (any == timer)
+				{
+					await ChangeOrder();
+					await Task.FromCanceled(_swapToken.Token);
+				}
+
+				var res = await getter;
 
 				if (res.CompareButton(change))
 				{
@@ -263,8 +272,7 @@ namespace Manito.Discord.Orders
 
 				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 
-				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder()
-					.SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
+				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder().SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 
 				await Session.Client.Domain.ExecutionThread.AddNew(() => msg.DeleteAsync());
 

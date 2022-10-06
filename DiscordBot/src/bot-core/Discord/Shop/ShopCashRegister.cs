@@ -6,11 +6,11 @@ namespace Manito.Discord.Shop
 {
 	public class ShopCashRegister
 	{
-		private IShopDbFactory _myDb;
+		private MyDomain _domain;
 
-		public ShopCashRegister(IShopDbFactory myDb)
+		public ShopCashRegister(MyDomain domain)
 		{
-			_myDb = myDb;
+			_domain = domain;
 		}
 
 		public IEnumerable<ShopItem> GetShopItems()
@@ -25,7 +25,7 @@ namespace Manito.Discord.Shop
 				Name = "Каркас c насыщением",
 				Category = ItemCategory.SatiationCarcass,
 				RelatedCommand = "SpawnCarcass {0} {0} true",
-				Price = 3,
+				Price = 2,
 			};
 			yield return new ShopItem {
 				Name = "Светляк",
@@ -34,44 +34,47 @@ namespace Manito.Discord.Shop
 				Price = 570,
 			};
 			yield return new ShopItem {
-				Name = "Воскрешение",
-				Category = ItemCategory.Revive,
-				RelatedCommand = "Reskin {0}",
-				Price = 100,
-			};
-			yield return new ShopItem {
 				Name = "Рескин",
 				Category = ItemCategory.Reskin,
 				RelatedCommand = "Reskin {0}",
-				Price = 100,
+				Price = 5700,
 			};
 			yield return new ShopItem {
 				Name = "Сброс талантов",
 				Category = ItemCategory.ResetTalent,
 				RelatedCommand = "ResetTalents {0}",
-				Price = 100,
+				Price = 40000,
 			};
 			yield return new ShopItem {
 				Name = "Смена пола",
 				Category = ItemCategory.SwapGender,
 				RelatedCommand = "SetGender {0} {1}",
+				Price = 17000,
+			};
+			yield return new ShopItem {
+				Name = "Проверка яиц",
+				Category = ItemCategory.EggCheck,
 				Price = 100,
+				IsAvailable = false,
+			};
+			yield return new ShopItem {
+				Name = "Воскрешение",
+				Category = ItemCategory.Revive,
+				RelatedCommand = "Reskin {0}",
+				Price = 100,
+				IsAvailable = false,
 			};
 			yield return new ShopItem {
 				Name = "Телепорт",
 				Category = ItemCategory.Teleport,
 				RelatedCommand = "TeleportPtoP {0} {1}",
 				Price = 100,
-			};
-			yield return new ShopItem {
-				Name = "Проверка яиц",
-				Category = ItemCategory.EggCheck,
-				Price = 100,
+				IsAvailable = false,
 			};
 		}
 
 		public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
-			(bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~")
+			(bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~").WithFooter($"Администраторов в сети: {_domain.Filters.AdminOrder.Pool.AdminsOnline}")
 			.WithColor(DiscordColor.Blurple);
 	}
 }

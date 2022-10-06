@@ -57,8 +57,9 @@ namespace Manito.Discord.Shop
 			{
 				var single = Math.Min(size, carcMax);
 				size -= single;
+				var food = new ShopItem.InCart(_item.Item, single);
 				var pieceStr = pieces > 1 ? $"\nЧасть {piece++} из {pieces}" : "";
-				seq.Add(new Order.CommandStep(id, $"Выдача {_item.Item.Name.ToLower()} на {single} игроку с айди {id}{pieceStr}", _item.SpawnCommand));
+				seq.Add(new Order.CommandStep(id, $"Выдача {food.Item.Name.ToLower()} на {single} игроку с айди {id}{pieceStr}", food.RelatedCommand));
 			}
 
 			order.SetSteps(seq);

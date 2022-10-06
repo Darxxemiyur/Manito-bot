@@ -22,12 +22,16 @@ namespace Manito.Discord.Shop
 		/// </summary>
 		public int Price;
 
+		public bool IsAvailable = true;
+
 		public struct InCart
 		{
 			public readonly ShopItem Item;
 			public readonly int Amount;
+			public string Name => Item.Name;
+			public ItemCategory Category => Item.Category;
 			public int Price => Item.Price * Amount;
-			public string SpawnCommand => string.Format(Item.RelatedCommand, Amount);
+			public string RelatedCommand => string.Format(Item.RelatedCommand, Amount);
 
 			public InCart(ShopItem item, int amount) => (Item, Amount) = (item, amount);
 		}

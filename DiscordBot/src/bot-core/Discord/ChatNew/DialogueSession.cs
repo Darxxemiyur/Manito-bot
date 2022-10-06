@@ -303,6 +303,7 @@ namespace Manito.Discord.ChatNew
 		}
 
 		private UniversalMessageBuilder _innerMsgBuilder;
+		private DiscordMessage _msg;
 
 		public MyDiscordClient Client {
 			get;
@@ -363,24 +364,23 @@ namespace Manito.Discord.ChatNew
 			_innerMsgBuilder = message;
 		}
 
-		private async Task MarkTheMessage(DiscordMessage msg = default)
-		{
-			Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, msg ?? await SessionMessage));
-		}
+		private async Task MarkTheMessage(DiscordMessage msg = default) => Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, _msg = msg ?? await SessionMessage));
 
 		private async Task CancelClickability()
 		{
-			var builder = new UniversalMessageBuilder(_innerMsgBuilder);
+			var msg = _innerMsgBuilder;
+			var builder = new UniversalMessageBuilder(msg);
 
 			var components = builder.Components.Select(y => y.Select(x => {
 				if (x is DiscordButtonComponent f)
-					return f.Disable();
+					return new DiscordButtonComponent(f).Disable();
 				if (x is DiscordSelectComponent g)
-					return g.Disable();
+					return new DiscordSelectComponent(g.Placeholder, g.Options, g.CustomId, (int)g.MinimumSelectedValues, (int)g.MaximumSelectedValues, true);
 				return x;
 			}).ToArray()).ToArray();
 
 			await SendMessageLocal(builder.SetComponents(components));
+			_innerMsgBuilder = msg;
 			NextType = InteractionResponseType.Pong;
 		}
 
@@ -413,16 +413,14 @@ namespace Manito.Discord.ChatNew
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
-			var msg = await Client.ActivityTools
-				.WaitForMessage(x => Identifier.DoesBelongToUs(x.Message), token);
+			var msg = await Client.ActivityTools.WaitForMessage(x => Identifier.DoesBelongToUs(x.Message), token);
 
 			return msg.Message;
 		}
 
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{
-			InteractiveInteraction intr = await Client.ActivityTools
-				.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
+			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
 			await using var _ = await _lock.BlockAsyncLock();
 			Identifier = new DialogueCompInterIdentifier(Interactive = intr);
@@ -434,7 +432,22 @@ namespace Manito.Discord.ChatNew
 		public async Task RemoveMessage()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			await Interactive.Interaction.DeleteOriginalResponseAsync();
+			try
+			{
+				await Interactive.Interaction.DeleteOriginalResponseAsync();
+			}
+			catch
+			{
+				try
+				{
+					var msg = await SessionMessage;
+					await msg.DeleteAsync();
+				}
+				catch
+				{
+					await _msg.DeleteAsync();
+				}
+			}
 		}
 
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();

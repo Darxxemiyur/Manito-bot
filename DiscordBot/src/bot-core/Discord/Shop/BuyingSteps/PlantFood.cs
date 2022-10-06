@@ -17,8 +17,8 @@ namespace Manito.Discord.Shop
 	{
 		private ShopItem _food;
 		private DialogueTabSession<ShopContext> _session;
-		private PlayerWallet Wallet => _session.Context.Wallet;
 		private int _quantity;
+		private PlayerWallet Wallet => _session.Context.Wallet;
 
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 
@@ -39,32 +39,34 @@ namespace Manito.Discord.Shop
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5, 10 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 0), async x => resp.GetResponse(resp.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity);
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 1), async x => resp.GetResponse(resp.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity, 1);
 
 			if (!qua.HasValue)
-				return new NextNetworkInstruction(null, NextNetworkActions.Stop);
+				return new();
 
 			_quantity = qua.Value;
 
-			return new(ExecuteTransaction, NextNetworkActions.Continue);
+			return new(ExecuteTransaction);
 		}
 
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
-			//var inventory = _session.Context.Inventory;
 			var food = new ShopItem.InCart(_food, _quantity);
 
 			if (!await wallet.CanAfford(food.Price))
-				return new(ForceChange, NextNetworkActions.Continue);
+				return new(ForceChange);
 
 			await wallet.Withdraw(food.Price, $"Покупка {food.Item.Name} за {food.Item.Price} в кол-ве {food.Amount} за {food.Price}");
 
 			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
 
 			if (idi is not int id)
+			{
+				await Wallet.Deposit(food.Price);
 				return new();
+			}
 
 			var order = new Order(_session.Context.CustomerId);
 			var seq = new List<Order.Step> {
@@ -78,7 +80,7 @@ namespace Manito.Discord.Shop
 			for (int i = 0; i < food.Amount; i++)
 			{
 				var pieceStr = food.Amount > 1 ? $"\nЧасть {i + 1} из {food.Amount}" : "";
-				seq.Add(new Order.CommandStep(id, $"Выдача `{food.Item.Name.ToLower()}` игроку с айди {id}{pieceStr}", food.SpawnCommand));
+				seq.Add(new Order.CommandStep(id, $"Выдача `{food.Item.Name.ToLower()}` игроку с айди {id}{pieceStr}", food.RelatedCommand));
 			}
 
 			order.SetSteps(seq);

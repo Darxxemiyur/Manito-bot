@@ -34,7 +34,14 @@ namespace Manito.Discord.Shop
 			});
 			var cancelled = _order.OrderCancelledTask;
 
-			var rmsg = new DiscordEmbedBuilder().WithDescription($"Ожидание исполнения Вашего заказа №{_order.OrderId}.").WithColor(new DiscordColor(255, 255, 0));
+			var time = DateTimeOffset.Now;
+
+			var ms1 = $"Ожидание исполнения Вашего заказа №{_order.OrderId}.";
+			var mm1 = $"<t:{time.ToUnixTimeSeconds()}>";
+			var mm2 = $"<t:{time.ToUnixTimeSeconds()}:R>";
+			var ms2 = $"Поставлен в очередь {mm2}(в {mm1})";
+
+			var rmsg = new DiscordEmbedBuilder().WithDescription($"{ms1}\n{ms2}").WithColor(new DiscordColor(255, 255, 0));
 
 			var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
 			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));

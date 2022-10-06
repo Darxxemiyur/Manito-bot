@@ -53,7 +53,7 @@ namespace Manito.Discord.ChatNew
 
 		private async Task<bool> Remove(IDialogueSession x)
 		{
-			return OnStatusChange != null ? await OnRemove(x as DialogueTabSession<T>) : false;
+			return OnRemove != null && await OnRemove(x as DialogueTabSession<T>);
 		}
 	}
 }

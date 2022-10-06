@@ -18,7 +18,7 @@ namespace Manito.Discord.Shop
 			while (true)
 			{
 				var data = (await _queue.GetData()).Item2;
-				await HandleAsCommand(data);
+				await _service.ExecutionThread.AddNew(() => HandleAsCommand(data));
 			}
 		}
 
@@ -53,9 +53,7 @@ namespace Manito.Discord.Shop
 
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
-			var res = _shopService.StartSession(args.User, args);
-
-			if (res == null)
+			if (await _shopService.StartSession(args.User, args) == null)
 			{
 				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(_shopService.Default().WithDescription("Вы уже открыли магазин!")).AsEphemeral(true));
 			}

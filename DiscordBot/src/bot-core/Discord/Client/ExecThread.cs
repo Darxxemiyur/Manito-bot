@@ -33,28 +33,28 @@ namespace Manito.Discord.Client
 		{
 			while (true)
 			{
-				// Handle the add queue
-				await _sync.AsyncLock();
-				_executingTasks.AddRange(_toExecuteTasks.Select(x => x()));
-				_toExecuteTasks.Clear();
-				var list = _executingTasks.Append(_onNew.Task).ToArray();
-				await _sync.AsyncUnlock();
-
+				{
+					// Handle the add queue
+					await using var _ = await _sync.BlockAsyncLock();
+					_executingTasks.AddRange(_toExecuteTasks.Select(x => x()));
+					_toExecuteTasks.Clear();
+				}
 				//Wait for any task to complete in the list;
-				var completedTask = await Task.WhenAny(list);
+				var completedTask = await Task.WhenAny(_executingTasks.Append(_onNew.Task).ToArray());
 
-				//Handle the removal of completed tasks yielded from awaiting for any
-				await _sync.AsyncLock();
+				{
+					//Handle the removal of completed tasks yielded from awaiting for any
+					await using var _ = await _sync.BlockAsyncLock();
 
-				//Forward all exceptions to the stderr-ish
-				if (completedTask?.Exception != null)
-					await Console.Error.WriteLineAsync($"{completedTask.Exception}");
-				//await completedTask;
+					//Forward all exceptions to the stderr-ish
+					if (completedTask?.Exception != null)
+						await Console.Error.WriteLineAsync($"{completedTask.Exception}");
+					//await completedTask;
 
-				//Returns false if it tries to remove 'timeout' task, and true if succeeds
-				_executingTasks.Remove(completedTask);
-				_onNew = new();
-				await _sync.AsyncUnlock();
+					//Returns false if it tries to remove 'timeout' task, and true if succeeds
+					_executingTasks.Remove(completedTask);
+					_onNew = new();
+				}
 			}
 		}
 	}

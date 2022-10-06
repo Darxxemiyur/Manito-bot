@@ -1,7 +1,8 @@
 ﻿using Manito.Discord.Client;
 
+using Name.Bayfaderix.Darxxemiyur.Common;
+
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
@@ -22,34 +23,31 @@ namespace Manito.Discord.ChatNew
 		public IReadOnlyList<DialogueTabSession<T>> Sessions => _sessions;
 
 		// Used to sync creation and deletion of sessions
-		private SemaphoreSlim _sync;
+		private AsyncLocker _sync;
 
 		public DialogueTabSessionTab(MyDiscordClient client)
 		{
-			_sync = new(1, 1);
+			_sync = new();
 			_sessions = new();
 			Client = client;
 		}
 
 		public async Task<DialogueTabSession<T>> CreateSync(InteractiveInteraction interactive, T context)
 		{
-			await _sync.WaitAsync();
+			await using var _ = await _sync.BlockAsyncLock();
 
 			var session = new DialogueTabSession<T>(this, interactive, context);
 			session.OnRemove += RemoveSession;
 			_sessions.Add(session);
-
-			_sync.Release();
 
 			return session;
 		}
 
 		public async Task<bool> RemoveSession(IDialogueSession session)
 		{
-			await _sync.WaitAsync();
+			await using var _ = await _sync.BlockAsyncLock();
 			session.OnRemove -= RemoveSession;
 			var res = _sessions.Remove(session as DialogueTabSession<T>);
-			_sync.Release();
 
 			return res;
 		}

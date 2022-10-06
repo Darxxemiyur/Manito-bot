@@ -145,30 +145,34 @@ namespace Manito.System.Economy
 		{
 			var target = args.User.Id;
 
-			//var oth = args.Data.Options.First().Options.FirstOrDefault(x => x.Name == "target");
-			//if (oth != null)
-			//	target = (ulong)oth.Value;
 			var session = new ComponentDialogueSession(_client, args);
 			var wallet = _economy.GetPlayerWallet(target);
 			await session.DoLaterReply();
+
+			var min = 68;
+			var max = 118;
+			var interv = 4;
 #if DEBUG
-			var time = TimeSpan.FromSeconds(20);
+			var time = TimeSpan.FromHours(interv);
 #else
-			var time = TimeSpan.FromHours(4);
+			var time = TimeSpan.FromHours(interv);
 #endif
 			await using var _ = await _lock.BlockAsyncLock();
 			await using var db = await _client.Domain.DbFactory.CreateMyDbContextAsync();
 
 			if (!await db.PlayerWorks.AnyAsync(x => x.DiscordID == target))
 			{
-				await db.PlayerWorks.AddAsync(new PlayerEconomyWork(target));
+				var worker = new PlayerEconomyWork(target);
+				worker.LastWork = DateTimeOffset.UtcNow - time;
+				await db.PlayerWorks.AddAsync(worker);
 				await db.SaveChangesAsync();
 			}
 
 			var work = await db.PlayerWorks.FirstAsync(x => x.DiscordID == target);
-			if (DateTimeOffset.UtcNow - work.LastWork < time)
+			var theSpan = DateTimeOffset.UtcNow - work.LastWork;
+			if (theSpan < time)
 			{
-				var delay = DateTimeOffset.UtcNow - work.LastWork;
+				var delay = theSpan;
 				var small = TimeSpan.FromSeconds(10);
 
 				delay = time - delay > small ? small : time - delay;
@@ -187,10 +191,13 @@ namespace Manito.System.Economy
 			await db.SaveChangesAsync();
 
 			await _client.Domain.ExecutionThread.AddNew(async () => {
-				var money = Random.Shared.Next(270, 500);
-				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}").WithColor(new DiscordColor(140, 240, 50)));
+				var gggg = Math.Max(0, (int)Math.Floor(theSpan.TotalSeconds / time.TotalSeconds) - 1);
 
-				await wallet.Deposit(money, "Заработок");
+				var fmoney = (int)Math.Pow(Enumerable.Range(1, gggg).Select(x => (double)Random.Shared.Next(min * interv, max * interv)).Sum(), (double)63 / 100);
+				var money = Random.Shared.Next(min * interv, max * interv);
+				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}" + (gggg > 0 ? $"\n+{fmoney} {wallet.CurrencyEmoji} за {gggg} пропущеных ворков." : ".")).WithColor(new DiscordColor(140, 240, 50)));
+
+				await wallet.Deposit(money + fmoney, "Заработок");
 				await Task.Delay(10000);
 				await session.RemoveMessage();
 			});

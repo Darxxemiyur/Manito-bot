@@ -21,7 +21,7 @@ namespace Manito.System.Economy
 		public PlayerEconomyDeposit(ulong discordID)
 		{
 			DiscordID = discordID;
-			ScalesCurr = 5000;
+			ScalesCurr = 20000;
 			ChupatCurr = 0;
 			DonatCurr = 0;
 		}

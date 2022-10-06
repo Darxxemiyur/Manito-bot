@@ -1,5 +1,4 @@
 using DisCatSharp.Entities;
-using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatAbstract;
@@ -9,7 +8,6 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.Shop
@@ -28,7 +26,7 @@ namespace Manito.Discord.Shop
 			_service = service;
 			_client = service.MyDiscordClient;
 			_shopTab = new(service);
-			_cashRegister = new(null);
+			_cashRegister = new(service);
 		}
 
 		public async Task<DialogueTabSession<ShopContext>> StartSession(DiscordUser customer, DiscordInteraction intr)
@@ -41,8 +39,6 @@ namespace Manito.Discord.Shop
 				session = await _shopTab.CreateSession(new(intr), new(customer.Id,
 				_service.Economy.GetPlayerWallet(customer.Id), _cashRegister, this),
 				(x) => Task.FromResult((IDialogueNet)new ShopDialogue(x)));
-
-
 
 			return session;
 		}
