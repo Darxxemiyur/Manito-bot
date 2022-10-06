@@ -28,6 +28,7 @@ namespace Manito.Discord.Client
 			_toExecuteTasks.Add(runner);
 			_onNew.TrySetResult();
 		}
+
 		public async Task RunModule()
 		{
 			while (true)

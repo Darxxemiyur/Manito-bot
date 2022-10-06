@@ -320,7 +320,7 @@ namespace Manito.System.Economy
 					if (userRoles.Length == 0)
 						continue;
 
-					await _economy.Deposit(user.Id, userRoles.Length * 15000, "Начисление за купоны");
+					await _economy.Deposit(user.Id, userRoles.Length * 15000, $"Начисление за {userRoles.Length} шт. купонов");
 
 					await user.ReplaceRolesAsync(userLeftRoles);
 				}

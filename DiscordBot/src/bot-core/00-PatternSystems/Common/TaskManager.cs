@@ -1,9 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-
-using DisCatSharp.EventArgs;
-
 
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
@@ -14,5 +9,4 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	{
 		private IEnumerable<ITaskManagable> _taskManagables;
 	}
-
 }

@@ -8,6 +8,7 @@ namespace Manito.System.Logging
 		public long ID {
 			get; set;
 		}
+
 		public DateTimeOffset LoggedTime {
 			get; set;
 		}
@@ -15,6 +16,7 @@ namespace Manito.System.Logging
 		public string District {
 			get; set;
 		}
+
 		public string Category {
 			get; set;
 		}

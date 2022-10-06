@@ -6,12 +6,10 @@ using Manito.Discord.Client;
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 using JsonException = System.Text.Json.JsonException;
@@ -37,6 +35,7 @@ namespace Manito.System.Logging
 		{
 			await _client.Domain.ExecutionThread.AddNew(() => _relay.Handle(("DiscordBotLog", e.Json)));
 		}
+
 		private async Task<(bool, JsonDocument)> TryParseAsync(string log)
 		{
 			try
@@ -53,6 +52,7 @@ namespace Manito.System.Logging
 				return (false, null);
 			}
 		}
+
 		public async Task WriteLog(string district, string log)
 		{
 			var (res, jlog) = await TryParseAsync(log);

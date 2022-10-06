@@ -7,7 +7,6 @@ using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.DependencyInjection;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
 
@@ -20,15 +19,17 @@ namespace Manito.Discord.Database
 		private class DTDCF : IDbContextFactory<DbContextImplementation>, IDesignTimeDbContextFactory<DbContextImplementation>
 		{
 			private readonly DatabaseConfig _dbConfig;
+
 			public DTDCF()
 			{
 			}
+
 			public DTDCF(DatabaseConfig dbConfig) => _dbConfig = dbConfig;
 
 			public DbContextImplementation CreateDbContext(string[] args) => CreateDbContext();
+
 			public DbContextImplementation CreateDbContext()
 			{
-
 				var optionsBuilder = new DbContextOptionsBuilder<DbContextImplementation>();
 
 				optionsBuilder.UseNpgsql(_dbConfig?.ConnectionString ?? "Data Source=blog.db");
@@ -43,7 +44,9 @@ namespace Manito.Discord.Database
 		public IDesignTimeDbContextFactory<DbContextImplementation> OriginalFactory {
 			get; private set;
 		}
+
 		private AsyncLocker _lock;
+
 		public MyDbFactory(MyDomain domain, DatabaseConfig dbConfig)
 		{
 			OriginalFactory = new DTDCF(dbConfig);

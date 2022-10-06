@@ -10,6 +10,7 @@ namespace Manito.System.Economy
 	public class EconomyLogging : IModule
 	{
 		#region ToRework
+
 #if DEBUG
 		private ulong logid = 973271532681982022;
 #else

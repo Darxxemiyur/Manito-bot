@@ -47,6 +47,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 
 			return new(true);
 		}
+
 		private async Task<NextNetworkInstruction> Start(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
