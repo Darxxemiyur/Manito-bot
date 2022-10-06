@@ -68,7 +68,11 @@ namespace Manito.Discord.PermanentMessage
 			}
 
 			if (response.CompareButton(exitBtn))
+			{
+				await _session.EndSession();
+				await _session.RemoveMessage();
 				return new();
+			}
 
 			return new(SelectWhatToDo);
 		}
