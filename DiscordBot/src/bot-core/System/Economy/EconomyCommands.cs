@@ -42,6 +42,7 @@ namespace Manito.System.Economy
 		}
 
 		private Task<bool> IsWorthy(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
+		private Task<bool> IsGod(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.IsGod(user);
 
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });
 
@@ -297,12 +298,13 @@ namespace Manito.System.Economy
 
 		private async Task DoCouponChange(DiscordInteraction args)
 		{
-			if (!await IsWorthy(args.User))
+			if (!await IsGod(args.User))
 			{
 				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
 				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
 				return;
 			}
+
 			var session = new ComponentDialogueSession(_client, args);
 			await session.DoLaterReply();
 
@@ -320,7 +322,7 @@ namespace Manito.System.Economy
 					if (userRoles.Length == 0)
 						continue;
 
-					await _economy.Deposit(user.Id, userRoles.Length * 15000, $"Начисление за {userRoles.Length} шт. купонов");
+					await _economy.Deposit(user.Id, userRoles.Length * 12000, $"Начисление за {userRoles.Length} шт. купонов");
 
 					await user.ReplaceRolesAsync(userLeftRoles);
 				}
