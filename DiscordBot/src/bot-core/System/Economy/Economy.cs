@@ -39,7 +39,11 @@ namespace Manito.System.Economy
 
 	public class ServerEconomy : IModule
 	{
+#if DEBUG
 		private ulong _emojiId => 997272231384207470;
+#else
+		private ulong _emojiId => 997279571655282718;
+#endif
 		private string _emoji => $"<:{_emojiId}:{_emojiId}>";
 		public ulong CurrencyEmojiId => _emojiId;
 		public string CurrencyEmoji => _emoji;

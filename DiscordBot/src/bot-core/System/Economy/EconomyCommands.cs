@@ -6,6 +6,8 @@ using Manito.Discord.Client;
 
 using Microsoft.EntityFrameworkCore;
 
+using MongoDB.Driver.Linq;
+
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
@@ -76,6 +78,19 @@ namespace Manito.System.Economy
 			 descriptionLocalizations: GetLoc("Перевести средства")),
 			 TransferMoney);
 
+			yield return (new DiscordApplicationCommandOption("coupon_change", "Change coupons",
+			 ApplicationCommandOptionType.SubCommand, false, null,/* new[] {
+				new DiscordApplicationCommandOption("target", "Recipient", ApplicationCommandOptionType.User,
+				 true, nameLocalizations: GetLoc("получатель"),
+				 descriptionLocalizations: GetLoc("Получатель")),
+				new DiscordApplicationCommandOption("amount", "Amount", ApplicationCommandOptionType.Integer,
+				 true, nameLocalizations: GetLoc("сумма"),
+				 descriptionLocalizations: GetLoc("Сумма"))
+			 },*/
+			 nameLocalizations: GetLoc("обмен_купонов"),
+			 descriptionLocalizations: GetLoc("Обменять купоны")),
+			 DoCouponChange);
+
 			yield return (new DiscordApplicationCommandOption("give", "Add funds",
 			 ApplicationCommandOptionType.SubCommand, false, null, new[] {
 				new DiscordApplicationCommandOption("target", "Account", ApplicationCommandOptionType.User,
@@ -135,6 +150,9 @@ namespace Manito.System.Economy
 			 .WithTitle("Валюта"));
 
 			await session.SendMessage(msg);
+			await Task.Delay(120000);
+			await session.RemoveMessage();
+			await session.EndSession();
 		}
 
 		/// <summary>
@@ -198,7 +216,7 @@ namespace Manito.System.Economy
 				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}" + (gggg > 0 ? $"\n+{fmoney} {wallet.CurrencyEmoji} за {gggg} пропущеных ворков." : ".")).WithColor(new DiscordColor(140, 240, 50)));
 
 				await wallet.Deposit(money + fmoney, "Заработок");
-				await Task.Delay(10000);
+				await Task.Delay(60000);
 				await session.RemoveMessage();
 			});
 		}
@@ -272,6 +290,46 @@ namespace Manito.System.Economy
 			msg.WithContent($"Успешно удалено {amt} {_economy.CurrencyEmoji} со счёта <@{to}>");
 
 			await session.SendMessage(msg);
+			await Task.Delay(120000);
+			await session.RemoveMessage();
+			await session.EndSession();
+		}
+
+		private async Task DoCouponChange(DiscordInteraction args)
+		{
+			if (!await IsWorthy(args.User))
+			{
+				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
+				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
+				return;
+			}
+			var session = new ComponentDialogueSession(_client, args);
+			await session.DoLaterReply();
+
+			await _client.Domain.ExecutionThread.AddNew(async () => {
+				var guild = await _client.ManitoGuild;
+				var roles = guild.Roles.Select(x => x.Value).Where(x => x.Name.ToLower().Contains("купон"));
+
+				var members = await guild.GetAllMembersAsync();
+
+				foreach (var user in members)
+				{
+					var userRoles = user.Roles.Where(x => roles.Any(y => x.Id == y.Id)).ToArray();
+					var userLeftRoles = user.Roles.Where(x => roles.All(y => x.Id != y.Id)).ToArray();
+
+					if (userRoles.Length == 0)
+						continue;
+
+					await _economy.Deposit(user.Id, userRoles.Length * 15000, "Начисление за купоны");
+
+					await user.ReplaceRolesAsync(userLeftRoles);
+				}
+				await session.SendMessage(new DiscordEmbedBuilder().WithDescription("Готово"));
+
+				await Task.Delay(120000);
+				await session.RemoveMessage();
+				await session.EndSession();
+			});
 		}
 
 		private async Task Deposit(DiscordInteraction args)
@@ -308,6 +366,9 @@ namespace Manito.System.Economy
 			msg.WithContent($"Успешно добавлено {amt} {_economy.CurrencyEmoji} на счёт <@{to}>");
 
 			await session.SendMessage(msg);
+			await Task.Delay(120000);
+			await session.RemoveMessage();
+			await session.EndSession();
 		}
 	}
 }

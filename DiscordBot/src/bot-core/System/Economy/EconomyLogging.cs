@@ -10,8 +10,11 @@ namespace Manito.System.Economy
 	public class EconomyLogging : IModule
 	{
 		#region ToRework
-
+#if DEBUG
 		private ulong logid = 973271532681982022;
+#else
+		private ulong logid = 1027659223070425229;
+#endif
 		private TaskEventProxy<string> _logQueue = new();
 		private MyDomain _service;
 
@@ -29,6 +32,7 @@ namespace Manito.System.Economy
 			while (true)
 			{
 				var str = await _logQueue.GetData();
+				await _service.Logging.WriteLog("TransactionLogging", str);
 				var ch = await _service.MyDiscordClient.Client.GetChannelAsync(logid);
 				await ch.SendMessageAsync(str);
 			}

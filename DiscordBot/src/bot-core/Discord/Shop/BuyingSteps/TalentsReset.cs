@@ -1,4 +1,7 @@
-﻿using Manito.Discord.Chat.DialogueNet;
+﻿using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+
+using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Orders;
 using Manito.System.Economy;
@@ -29,6 +32,20 @@ namespace Manito.Discord.Shop.BuyingSteps
 			_item = item;
 		}
 
+		private async Task<NextNetworkInstruction> CantAfford(NetworkInstructionArgument args)
+		{
+			var ms1 = $"Вы не можете позволить  {_item.Name} за {_item.Price}.";
+			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
+
+			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Ок");
+			rsp.AddComponents(cancel);
+
+			await _session.SendMessage(rsp);
+
+			await _session.GetComponentInteraction();
+
+			return new(true);
+		}
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
@@ -36,7 +53,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 			var item = new ShopItem.InCart(_item, 1);
 
 			if (!await wallet.CanAfford(item.Price))
-				return new(true);
+				return new(CantAfford);
 
 			await wallet.Withdraw(item.Price, $"Покупка {item.Name} за {item.Price}");
 

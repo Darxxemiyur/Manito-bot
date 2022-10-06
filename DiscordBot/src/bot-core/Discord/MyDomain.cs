@@ -79,7 +79,8 @@ namespace Manito.Discord
 
 		private IEnumerable<Task> GetTasks()
 		{
-			yield return _executionThread.Run();
+			yield return _db.RunModule();
+			yield return _executionThread.RunModule();
 			yield return _myDiscordClient.StartLongTerm();
 			yield return _filters.RunModule();
 			yield return _economy.RunModule();

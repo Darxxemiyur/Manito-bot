@@ -25,7 +25,7 @@ namespace Manito.Discord.Shop
 
 		public UniversalMessageBuilder GetResponse(DiscordEmbedBuilder builder = null) => new(GetDResponse(builder));
 
-		public DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null, IEnumerable<ShopItem> list = null) => (list ?? _cashRegister.GetShopItems()).Where(x => x.IsAvailable).Aggregate(prev ?? BaseContent(), (x, y) => x.AddField(new DiscordEmbedField($"**{y.Name}**", $"**Цена за 1 ед:** {_wallet.CurrencyEmoji} {y.Price}", true)));
+		public DiscordEmbedBuilder GetShopItems(DiscordEmbedBuilder prev = null, IEnumerable<ShopItem> list = null) => (list ?? _cashRegister.GetShopItems()).Aggregate(prev ?? BaseContent(), (x, y) => x.AddField(new DiscordEmbedField($"**{y.Name}" + (!y.IsAvailable ? "\n(Недоступно)" : "") + "**", $"**Цена за 1 ед:** {_wallet.CurrencyEmoji} {y.Price}", true)));
 
 		public DiscordSelectComponent GetSelector(IEnumerable<ShopItem> list = null) => new DiscordSelectComponent("Selection", "Выберите товар", (list ?? _cashRegister.GetShopItems()).Where(x => x.IsAvailable).Select(x => new DiscordSelectComponentOption(x.Name, x.Name, $"{x.Price}", false, new DiscordComponentEmoji(_wallet.CurrencyEmojiId))));
 	}

@@ -4,13 +4,15 @@ using Manito.System.Economy;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Manito.Discord.Database
 {
 	public class DbContextImplementation : DbContext
 	{
-		public DbContextImplementation(DbContextOptions options) : base(options)
+		public DbContextImplementation(DbContextOptions<DbContextImplementation> options) : base(options)
 		{
+
 		}
 
 		public DbSet<ShopItem> ShopItems {
@@ -40,7 +42,6 @@ namespace Manito.Discord.Database
 		public DbSet<PlayerEconomyWork> PlayerWorks {
 			get; set;
 		}
-
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<MessageWallTranslator>().HasKey(x => x.ID);
@@ -56,10 +57,7 @@ namespace Manito.Discord.Database
 
 			modelBuilder.Entity<PlayerEconomyDeposit>().HasKey(x => x.DiscordID);
 
-			modelBuilder.Entity<PlayerEconomyWork>(x => {
-				x.HasKey(x => x.DiscordID);
-				x.Property(x => x.LastWork);
-			});
+			modelBuilder.Entity<PlayerEconomyWork>(x => x.HasKey(x => x.DiscordID));
 
 			modelBuilder.Entity<ShopItem>().HasNoKey();
 
@@ -69,5 +67,6 @@ namespace Manito.Discord.Database
 				x.Property(b => b.Data).HasColumnType("jsonb");
 			});
 		}
+
 	}
 }

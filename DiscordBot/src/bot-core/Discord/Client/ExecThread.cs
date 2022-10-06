@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
-	public class ExecThread
+	public class ExecThread : IModule
 	{
 		private readonly List<Task> _executingTasks;
 		private readonly List<Func<Task>> _toExecuteTasks;
@@ -28,8 +28,7 @@ namespace Manito.Discord.Client
 			_toExecuteTasks.Add(runner);
 			_onNew.TrySetResult();
 		}
-
-		public async Task Run()
+		public async Task RunModule()
 		{
 			while (true)
 			{

@@ -16,9 +16,5 @@ namespace Manito.Discord.Database
 		IMyDatabase CreateMyDbContext();
 
 		Task<IMyDatabase> CreateMyDbContextAsync();
-
-		void SetUpFactory();
-
-		Task SetUpFactoryAsync();
 	}
 }

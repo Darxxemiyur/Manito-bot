@@ -33,13 +33,27 @@ namespace Manito.Discord.Shop.BuyingSteps
 			_item = new ShopItem.InCart(item, 1);
 		}
 
+		private async Task<NextNetworkInstruction> CantAfford(NetworkInstructionArgument args)
+		{
+			var ms1 = $"Вы не можете позволить  {_item.Name} за {_item.Price}.";
+			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
+
+			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Ок");
+			rsp.AddComponents(cancel);
+
+			await _session.SendMessage(rsp);
+
+			await _session.GetComponentInteraction();
+
+			return new(true);
+		}
 		private async Task<NextNetworkInstruction> Start(NetworkInstructionArgument args)
 		{
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
 			if (!await wallet.CanAfford(_item.Price))
-				return new();
+				return new(CantAfford);
 
 			await wallet.Withdraw(_item.Price, $"Покупка {_item.Name} за {_item.Price}");
 			return new(SelectID);

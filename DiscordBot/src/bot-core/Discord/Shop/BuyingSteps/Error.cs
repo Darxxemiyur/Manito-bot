@@ -23,7 +23,7 @@ namespace Manito.Discord.Shop
 
 		private async Task<NextNetworkInstruction> SelectQuantity(NetworkInstructionArgument args)
 		{
-			await _session.SendMessage(new DiscordEmbedBuilder().WithDescription("Мена пока нельзя купить!\nПриносим свои извинения :c").WithColor(new DiscordColor(200, 50, 20)));
+			await _session.SendMessage(new DiscordEmbedBuilder().WithDescription("Меня пока нельзя купить!\nПриносим свои извинения :c").WithColor(new DiscordColor(200, 50, 20)));
 			await _session.DoLaterReply();
 			return new(null);
 		}

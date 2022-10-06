@@ -48,7 +48,7 @@ namespace Manito.Discord.Shop
 			yield return new ShopItem {
 				Name = "Смена пола",
 				Category = ItemCategory.SwapGender,
-				RelatedCommand = "SetGender {0} {1}",
+				RelatedCommand = "SetGender {1} {0}",
 				Price = 17000,
 			};
 			yield return new ShopItem {
