@@ -53,10 +53,11 @@ namespace Manito.Discord.Orders
 		public async Task<bool> PlaceOrder(Order order)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			if (AnyAdminOnline)
-				await _pool.PlaceOrder(order);
-			else
-				await order.CancelOrder("Администраторов в сети нет.");
+			if (order != null)
+				if (AnyAdminOnline)
+					await _pool.PlaceOrder(order);
+				else
+					await order.CancelOrder("Администраторов в сети нет.");
 
 			return AnyAdminOnline;
 		}

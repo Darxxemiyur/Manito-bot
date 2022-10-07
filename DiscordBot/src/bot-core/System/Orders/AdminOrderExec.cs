@@ -115,9 +115,9 @@ namespace Manito.Discord.Orders
 			{
 				_quitToken = new();
 				await _pool.PlaceOrder(ExOrder);
-				ExOrder = null;
-				await Session.RemoveMessage();
 				await _pool.StopAdministrating();
+				await Session.RemoveMessage();
+				ExOrder = null;
 				return new();
 			}
 
@@ -266,9 +266,11 @@ namespace Manito.Discord.Orders
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"Ожидание заказов...");
+				Console.WriteLine("WasCancelledBeforeNormal01");
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
 
 				ExOrder = await _pool.GetOrder(_quitToken.Token);
+				Console.WriteLine("WasCancelledBeforeNormal1");
 
 				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 
@@ -280,6 +282,7 @@ namespace Manito.Discord.Orders
 			}
 			catch (TaskCanceledException)
 			{
+				Console.WriteLine("WasCancelledBeforeNormal2");
 				return new(DoOrderCancellation);
 			}
 		}

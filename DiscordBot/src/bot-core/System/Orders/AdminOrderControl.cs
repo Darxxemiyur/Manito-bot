@@ -23,6 +23,7 @@ namespace Manito.Discord.Orders
 		private DiscordButtonComponent _beginButton;
 		private DiscordButtonComponent _changeButton;
 		private DiscordButtonComponent _endButton;
+		private DiscordButtonComponent _exitButton;
 		private AdminOrderPool _pool;
 		public AdminOrderPool Pool => _pool;
 
@@ -30,9 +31,10 @@ namespace Manito.Discord.Orders
 		{
 			_pool = pool;
 			_session = session;
-			_beginButton = new(ButtonStyle.Success, "beginworking", "Начать работу.");
-			_changeButton = new(ButtonStyle.Primary, "changeorder", "Сменить заказ.", true);
-			_endButton = new(ButtonStyle.Danger, "endworking", "Закончить работу.", true);
+			_beginButton = new(ButtonStyle.Success, "beginworking", "Начать работу");
+			_changeButton = new(ButtonStyle.Primary, "changeorder", "Сменить заказ", true);
+			_endButton = new(ButtonStyle.Danger, "endworking", "Закончить работу", true);
+			_exitButton = new(ButtonStyle.Danger, "quitworking", "Выйти");
 		}
 
 		private async Task<NextNetworkInstruction> BeginOrderExecution(NetworkInstructionArgument arg)
@@ -59,6 +61,7 @@ namespace Manito.Discord.Orders
 		private async Task<NextNetworkInstruction> EndOrderExecution(NetworkInstructionArgument arg)
 		{
 			await _execSession.StopExecuting();
+			_execSession = null;
 
 			_beginButton.Enable();
 			_changeButton.Disable();
@@ -68,14 +71,12 @@ namespace Manito.Discord.Orders
 
 		private async Task<NextNetworkInstruction> Waiting(NetworkInstructionArgument arg)
 		{
-			var msg = new UniversalMessageBuilder();
-			msg.AddComponents(_beginButton, _changeButton, _endButton);
-			msg.AddEmbed(new DiscordEmbedBuilder()
-				.WithDescription("**\\*Исполнение заказов\\***"));
+			var msg = new UniversalMessageBuilder().AddComponents(_beginButton, _changeButton, _endButton, _exitButton).AddEmbed(new DiscordEmbedBuilder().WithDescription("**\\*Исполнение заказов\\***"));
 
 			await _session.SendMessage(msg);
 
 			var comp = await _session.GetComponentInteraction();
+			await _session.DoLaterReply();
 
 			if (comp.CompareButton(_beginButton))
 				return new(BeginOrderExecution, (comp.Interaction.Channel, comp.Interaction.User));
@@ -84,6 +85,13 @@ namespace Manito.Discord.Orders
 			if (comp.CompareButton(_endButton))
 				return new(EndOrderExecution);
 
+
+			//In case _exitButton is clicked
+
+			if (_execSession != null)
+				await _execSession.StopExecuting();
+			await _session.RemoveMessage();
+			await _session.EndSession();
 			return new();
 		}
 

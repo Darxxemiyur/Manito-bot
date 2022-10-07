@@ -1,5 +1,6 @@
 ﻿using Manito.Discord.Orders;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -28,9 +29,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			if (_executors.Count > 0)
 			{
 				var rem = _executors.Dequeue();
-				if (rem != null && !rem.Task.IsCanceled)
-					rem.TrySetResult(order);
-				else
+				if (rem == null || !rem.TrySetResult(order))
 					await InnerPlaceOrder(order);
 			}
 			else
@@ -56,7 +55,9 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 			var relay = new TaskCompletionSource<Order>();
 			_executors.Enqueue(relay);
-			token.Register(() => relay.TrySetCanceled());
+			token.Register(() => {
+				Console.WriteLine($"Cancelled {relay.TrySetCanceled()}");
+			});
 
 			return relay.Task;
 		}
