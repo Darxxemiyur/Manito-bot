@@ -42,6 +42,7 @@ namespace Manito.System.Economy
 		}
 
 		private Task<bool> IsWorthy(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
+
 		private Task<bool> IsGod(DiscordUser user) => _client.Domain.Filters.AssociationFilter.PermissionChecker.IsGod(user);
 
 		private DiscordApplicationCommandLocalization GetLoc(string trans) => new(new() { { Locale, trans } });

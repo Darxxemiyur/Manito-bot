@@ -1,6 +1,8 @@
-using DisCatSharp;
+﻿using DisCatSharp;
 using DisCatSharp.Common.Utilities;
 using DisCatSharp.EventArgs;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;
@@ -60,26 +62,25 @@ namespace Manito.Discord.Client
 	{
 		public static int DefaultOrder = 10;
 		private Dictionary<int, List<Predictator<TEvent>>> _predictators;
-		private SemaphoreSlim _lock;
+		private AsyncLocker _lock;
 		public string TypeName => GetType().FullName;
 
 		public event AsyncEventHandler<DiscordClient, TEvent> OnFail;
 
 		public PerEventInline(SingleEventBuffer<TEvent> buf)
 		{
-			_lock = new(1, 1);
+			_lock = new();
 			_predictators = new();
 			buf.OnMessage += Check;
 		}
 
 		public async Task Add(int order, Predictator<TEvent> predictator)
 		{
-			await _lock.WaitAsync();
+			await using var _ = await _lock.BlockAsyncLock();
 			if (!_predictators.ContainsKey(order))
 				_predictators[order] = new();
 
 			_predictators[order].Add(predictator);
-			_lock.Release();
 		}
 
 		public Task Add(Predictator<TEvent> predictator) => Add(DefaultOrder, predictator);
@@ -89,7 +90,7 @@ namespace Manito.Discord.Client
 			var rrr = Enumerable.Empty<(int, Predictator<TEvent>)>();
 			foreach (var ch in input)
 			{
-				if (await ch.Item2.IsREOL())
+				if (await ch.Item2.ShouldDelete())
 					rrr = rrr.Append((ch.Item1, ch.Item2));
 			}
 			return rrr;
@@ -112,7 +113,7 @@ namespace Manito.Discord.Client
 
 		public async Task<bool> Check(DiscordClient client, TEvent args)
 		{
-			await _lock.WaitAsync();
+			await using var __ = await _lock.BlockAsyncLock();
 
 			var itms = _predictators.SelectMany(x => x.Value.Select(y => (x.Key, y)));
 
@@ -130,8 +131,6 @@ namespace Manito.Discord.Client
 			//Deletes and works!
 			_ = itmsToDlt.Where(x => _predictators[x.Item1].Remove(x.Item2)
 			 && _predictators[x.Item1].Count == 0 && _predictators.Remove(x.Item1)).ToArray();
-
-			_lock.Release();
 
 			if (!toRun.Any() && OnFail != null)
 				await OnFail(client, args);
@@ -151,23 +150,23 @@ namespace Manito.Discord.Client
 
 		public abstract Task<bool> IsREOL();
 
+		public async Task<bool> ShouldDelete() => await IsREOL() || _token.IsCancellationRequested;
+
 		protected readonly DiscordEventProxy<(Predictator<TEvent>, TEvent)> _eventProxy;
+		private readonly CancellationToken _token;
 
-		protected Predictator() => _eventProxy = new();
+		protected Predictator(CancellationToken token = default) => (_eventProxy, _token) = (new(), token);
 
-		public Task Handle(DiscordClient client, TEvent args) =>
-			_eventProxy.Handle(client, (this, args));
-
-		protected abstract Task CancelPredictator();
+		public Task Handle(DiscordClient client, TEvent args) => _eventProxy.Handle(client, (this, args));
 
 		public virtual Task<(DiscordClient, TEvent)> GetEvent(TimeSpan timeout, CancellationToken token)
 		{
-			return GetEvent(x => Task.Delay(timeout, token));
+			return GetEvent(x => Task.Delay(timeout, CancellationTokenSource.CreateLinkedTokenSource(_token, token).Token));
 		}
 
 		public virtual async Task<(DiscordClient, TEvent)> GetEvent(CancellationToken token)
 		{
-			var result = await _eventProxy.GetData(token);
+			var result = await _eventProxy.GetData(CancellationTokenSource.CreateLinkedTokenSource(_token, token).Token);
 
 			return (result.Item1, result.Item2.Item2);
 		}
@@ -199,13 +198,14 @@ namespace Manito.Discord.Client
 		public async Task<(DiscordClient, TEvent)> GetEvent(
 			Func<Task<(DiscordClient, (Predictator<TEvent>, TEvent))>, Task> genCancel)
 		{
-			var gettingData = _eventProxy.GetData();
+			var tokenSource = new CancellationTokenSource();
+			var gettingData = _eventProxy.GetData(CancellationTokenSource.CreateLinkedTokenSource(_token, tokenSource.Token).Token);
 			var cancelTask = genCancel(gettingData);
 			var either = await Task.WhenAny(cancelTask, gettingData);
 
 			if (either == cancelTask)
 			{
-				await CancelPredictator();
+				tokenSource.Cancel();
 				throw new TaskCanceledException($"Event awaiting has been cancelled!");
 			}
 
@@ -216,7 +216,7 @@ namespace Manito.Discord.Client
 
 		public virtual async Task<(DiscordClient, TEvent)> GetEvent()
 		{
-			var result = await _eventProxy.GetData();
+			var result = await _eventProxy.GetData(_token);
 
 			return (result.Item1, result.Item2.Item2);
 		}

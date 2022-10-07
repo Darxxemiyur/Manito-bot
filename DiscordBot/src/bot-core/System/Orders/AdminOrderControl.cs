@@ -85,7 +85,6 @@ namespace Manito.Discord.Orders
 			if (comp.CompareButton(_endButton))
 				return new(EndOrderExecution);
 
-
 			//In case _exitButton is clicked
 
 			if (_execSession != null)

@@ -1,6 +1,5 @@
 ﻿using Manito.Discord.Orders;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -55,9 +54,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 			var relay = new TaskCompletionSource<Order>();
 			_executors.Enqueue(relay);
-			token.Register(() => {
-				Console.WriteLine($"Cancelled {relay.TrySetCanceled()}");
-			});
+			token.Register(() => relay.TrySetCanceled());
 
 			return relay.Task;
 		}

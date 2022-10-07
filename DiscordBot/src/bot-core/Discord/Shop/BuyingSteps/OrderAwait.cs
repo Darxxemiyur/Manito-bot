@@ -67,7 +67,7 @@ namespace Manito.Discord.Shop
 
 					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(255, 50, 50))));
 
-					await _wallet.Deposit(_item.Price);
+					await _wallet.Deposit(_item.Price, $"Возврат средств за отменённый заказ №{_order.OrderId}.\nПричина: {await cancelled}");
 
 					break;
 				}

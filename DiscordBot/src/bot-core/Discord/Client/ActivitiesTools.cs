@@ -45,7 +45,7 @@ namespace Manito.Discord.Client
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, TimeSpan timeout, CancellationToken token)
 		{
-			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker);
+			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker, false, token);
 			await _evInline.CompInteractBuffer.Add(catcher);
 			var evnv = await catcher.GetEvent(timeout, token);
 
@@ -55,7 +55,7 @@ namespace Manito.Discord.Client
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, TimeSpan timeout)
 		{
-			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker);
+			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker, false);
 			await _evInline.CompInteractBuffer.Add(catcher);
 			var evnv = await catcher.GetEvent(timeout);
 
@@ -65,9 +65,9 @@ namespace Manito.Discord.Client
 		public async Task<ComponentInteractionCreateEventArgs> WaitForComponentInteraction(
 			Func<ComponentInteractionCreateEventArgs, bool> checker, CancellationToken token)
 		{
-			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker);
+			var catcher = new SingleEventCatcher<ComponentInteractionCreateEventArgs>(checker, false, token);
 			await _evInline.CompInteractBuffer.Add(catcher);
-			var evnv = await catcher.GetEvent(token);
+			var evnv = await catcher.GetEvent();
 
 			return evnv.Item2;
 		}
@@ -105,7 +105,7 @@ namespace Manito.Discord.Client
 		public async Task<MessageCreateEventArgs> WaitForMessage(
 			Func<MessageCreateEventArgs, bool> pred, TimeSpan timeout, CancellationToken token = default)
 		{
-			var catcher = new SingleEventCatcher<MessageCreateEventArgs>(pred);
+			var catcher = new SingleEventCatcher<MessageCreateEventArgs>(pred, false, token);
 			await _evInline.MessageBuffer.Add(catcher);
 			var evnv = await catcher.GetEvent(timeout, token);
 

@@ -12,11 +12,13 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		{
 			_sync = new();
 			_chain = new();
+			_prepin = new();
 			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
 		}
 
 		private TaskCompletionSource<T> _generator;
 		private readonly Queue<Task<T>> _chain;
+		private readonly Stack<Task<T>> _prepin;
 		private readonly AsyncLocker _sync;
 
 		public Task<bool> HasAny() => Task.FromResult(_chain.Any(x => x.IsCompleted));
@@ -43,7 +45,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			Task<T> result = null;
 			{
 				await using var _ = await _sync.BlockAsyncLock();
-				result = _chain.Dequeue();
+				result = _prepin.Count > 0 ? _prepin.Pop() : _chain.Dequeue();
 			}
 
 			var revert = new TaskCompletionSource();
@@ -55,7 +57,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			{
 				await using var _ = await _sync.BlockAsyncLock();
 				await Task.Run(fallback.Unregister);
-				_chain.Enqueue(result);
+				_prepin.Push(result);
 				await revert.Task;
 			}
 

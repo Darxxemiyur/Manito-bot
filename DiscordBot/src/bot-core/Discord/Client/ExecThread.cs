@@ -28,6 +28,7 @@ namespace Manito.Discord.Client
 			_toExecuteTasks.Add(runner);
 			_onNew.TrySetResult();
 		}
+
 		private async Task<Exception> SafeHandler(Func<Task> invoke)
 		{
 			try
@@ -40,6 +41,7 @@ namespace Manito.Discord.Client
 			}
 			return null;
 		}
+
 		public async Task RunModule()
 		{
 			while (true)
@@ -60,7 +62,6 @@ namespace Manito.Discord.Client
 					//Forward all exceptions to the stderr-ish
 					if (result != null)
 						await Console.Error.WriteLineAsync($"{result}");
-					//await completedTask;
 
 					//Returns false if it tries to remove 'timeout' task, and true if succeeds
 					_executingTasks.Remove(completedTask);

@@ -27,7 +27,6 @@ namespace Manito.System.UserAssociation
 
 			var admRoles = new ulong[] { 916654996081217596, 915927647756877865, 916296659472891974, 1006227774526210098, 915927566152511519 };
 
-
 			return guser.Permissions.HasFlag(Permissions.Administrator) || guser.Roles.Any(x => admRoles.Any(y => y == x.Id));
 		}
 	}

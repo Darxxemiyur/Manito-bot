@@ -2,6 +2,7 @@ using DisCatSharp;
 using DisCatSharp.EventArgs;
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
@@ -12,7 +13,7 @@ namespace Manito.Discord.Client
 		private bool _runIfHandled;
 		private bool _hasRan;
 
-		public SingleEventCatcher(Func<TEvent, bool> predictator, bool runIfHandled = false)
+		public SingleEventCatcher(Func<TEvent, bool> predictator, bool runIfHandled = false, CancellationToken token = default) : base(token)
 		{
 			_runIfHandled = runIfHandled;
 			_predictator = predictator;
@@ -31,7 +32,5 @@ namespace Manito.Discord.Client
 		public override bool RunIfHandled => _runIfHandled;
 
 		public override Task<bool> IsREOL() => Task.FromResult(_hasRan);
-
-		protected override Task CancelPredictator() => Task.FromResult(_hasRan = true);
 	}
 }
