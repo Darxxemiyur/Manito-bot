@@ -270,6 +270,8 @@ namespace Manito.Discord.Orders
 
 				ExOrder = await _pool.GetOrder(_localToken.Token);
 
+				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
+
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder().SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 
 				await Session.Client.Domain.ExecutionThread.AddNew(() => msg.DeleteAsync());
