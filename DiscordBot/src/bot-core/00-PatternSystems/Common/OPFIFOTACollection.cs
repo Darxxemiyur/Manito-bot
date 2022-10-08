@@ -50,6 +50,16 @@ namespace Manito._00_PatternSystems.Common
 
 			await comp;
 		}
+		/// <summary>
+		/// Gets all items safely.
+		/// </summary>
+		/// <param name="token"></param>
+		/// <returns></returns>
+		public async Task<IEnumerable<T>> GetAllSafe(CancellationToken token = default)
+		{
+			await UntilPlaced(token);
+			return await GetAll();
+		}
 
 		public async Task<IEnumerable<T>> GetAll()
 		{
@@ -59,6 +69,7 @@ namespace Manito._00_PatternSystems.Common
 			while (_queue.Count > 0)
 				outQueue.Add(_queue.Dequeue());
 
+			_cranck = new();
 			return outQueue;
 		}
 	}

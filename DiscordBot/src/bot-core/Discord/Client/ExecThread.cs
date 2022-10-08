@@ -24,8 +24,18 @@ namespace Manito.Discord.Client
 			_domain = domain;
 		}
 
+		/// <summary>
+		/// Returns a task that represent process of passed task, which on completion will return the completed task;
+		/// </summary>
+		/// <param name="runners"></param>
+		/// <returns></returns>
 		public async Task<Task<Task>> AddNew(Func<Task> runner) => (await AddNew(new[] { runner })).First();
 
+		/// <summary>
+		/// Returns a list of tasks that represent process of passed tasks, which on completion will return the completed tasks;
+		/// </summary>
+		/// <param name="runners"></param>
+		/// <returns></returns>
 		public Task<IEnumerable<Task<Task>>> AddNew(params Func<Task>[] runners) => AddNew(runners.AsEnumerable());
 		/// <summary>
 		/// Returns a list of tasks that represent process of passed tasks, which on completion will return the completed tasks;

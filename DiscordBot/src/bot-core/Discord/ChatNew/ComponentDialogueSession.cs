@@ -213,8 +213,8 @@ namespace Manito.Discord.ChatNew
 			}
 		}
 
-		private static TimeSpan ErrorDelayTime = TimeSpan.FromSeconds(6);
-		private static int ErrorMaxRepeatTimes = 2000;
+		private static TimeSpan ErrorDelayTime = TimeSpan.FromSeconds(10);
+		private static int ErrorMaxRepeatTimes = 360;
 
 		public async Task RemoveMessage()
 		{
