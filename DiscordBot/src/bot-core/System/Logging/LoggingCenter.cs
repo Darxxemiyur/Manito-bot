@@ -56,8 +56,8 @@ namespace Manito.System.Logging
 
 		public async Task WriteErrorClassedLog(string district, string log, bool isHandled)
 		{
-			using var jlog = await MakeJsonLog(log);
-			using var jflog = await MakeJsonLog(JsonConvert.SerializeObject(new
+			var jlog = await MakeJsonLog(log);
+			var jflog = await MakeJsonLog(JsonConvert.SerializeObject(new
 			{
 				type = "error",
 				dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
@@ -109,8 +109,12 @@ namespace Manito.System.Logging
 				await _queue.UntilPlaced();
 				await using var db = await _factory.CreateLoggingDBContextAsync();
 
-				await db.LogLines.AddRangeAsync(await _queue.GetAll());
+				var range = await _queue.GetAll();
+				await db.LogLines.AddRangeAsync(range);
 				await db.SaveChangesAsync();
+
+				foreach (var item in range)
+					item.Dispose();
 			}
 		}
 	}
