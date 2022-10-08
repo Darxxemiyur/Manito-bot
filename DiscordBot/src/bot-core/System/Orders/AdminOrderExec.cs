@@ -8,6 +8,7 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -107,8 +108,9 @@ namespace Manito.Discord.Orders
 			{
 				_quitToken = new();
 				await _pool.PlaceOrder(ExOrder);
-				await _pool.StopAdministrating();
+				await _pool.StopAdministrating(this);
 				await Session.RemoveMessage();
+				await Session.EndSession();
 				ExOrder = null;
 				return new();
 			}
@@ -259,16 +261,14 @@ namespace Manito.Discord.Orders
 		{
 			try
 			{
-				_localToken = null;
+				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"Ожидание заказов...");
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
 
-				ExOrder = await _pool.GetOrder(_quitToken.Token);
-
-				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
+				ExOrder = await _pool.GetOrder(_localToken.Token);
 
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder().SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 
@@ -284,7 +284,7 @@ namespace Manito.Discord.Orders
 
 		private async Task<NextNetworkInstruction> SetupStep(NetworkInstructionArgument arg)
 		{
-			await _pool.StartAdministrating();
+			await _pool.StartAdministrating(this);
 			return new(FetchNextStep);
 		}
 

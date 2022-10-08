@@ -1,6 +1,8 @@
 ﻿using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,34 +10,35 @@ namespace Manito.Discord.Orders
 {
 	public class AdminOrderPool
 	{
-		public int AdminsOnline {
-			get;
-			private set;
-		}
+		public int AdminsOnline => _admins.Count;
 
 		public bool AnyAdminOnline => AdminsOnline > 0;
 		private readonly AsyncLocker _lock;
 		private readonly OPFIFOFIFOTCollection<Order> _pool;
+		private readonly List<AdminOrderExec> _admins;
 
 		public AdminOrderPool()
 		{
-			AdminsOnline = 0;
 			_lock = new();
+			_admins = new();
 			_pool = new();
 		}
 
-		public async Task StartAdministrating()
+		public async Task StartAdministrating(AdminOrderExec admin)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 
-			AdminsOnline += 1;
+			if (_admins.All(x => x != admin))
+				_admins.Add(admin);
+
+
 		}
 
-		public async Task StopAdministrating()
+		public async Task StopAdministrating(AdminOrderExec admin)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 
-			AdminsOnline = Math.Max(0, AdminsOnline - 1);
+			_admins.RemoveAll(x => x == admin);
 
 			while (!AnyAdminOnline && await _pool.AnyOrders())
 			{

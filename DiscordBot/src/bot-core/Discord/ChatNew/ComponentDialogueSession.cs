@@ -84,7 +84,7 @@ namespace Manito.Discord.ChatNew
 					}
 					_innerMsgBuilder = message;
 				}
-				catch (Exception e) when (e is not BadRequestException and not NotFoundException)
+				catch (Exception e)
 				{
 					if (ErrorMaxRepeatTimes < times)
 						throw;
@@ -137,7 +137,7 @@ namespace Manito.Discord.ChatNew
 							break;
 					}
 				}
-				catch (Exception e) when (e is not BadRequestException and not NotFoundException)
+				catch (Exception e)
 				{
 					if (ErrorMaxRepeatTimes < times)
 						throw;
@@ -199,7 +199,7 @@ namespace Manito.Discord.ChatNew
 						{
 							await _msg.DeleteAsync();
 						}
-						catch (Exception e3) when (e3 is not BadRequestException and not NotFoundException)
+						catch (Exception e3)
 						{
 							if (ErrorMaxRepeatTimes < times)
 								throw new AggregateException(e1, e2, e3);
