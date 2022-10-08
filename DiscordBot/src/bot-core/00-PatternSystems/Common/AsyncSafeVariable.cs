@@ -42,13 +42,14 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			return val;
 		}
 
-		public async Task<T> GetValue(Func<T, Task<T>> value)
+		public async Task<T> LocklyModValue(Func<T, Task<T>> value)
 		{
 			await using var _ = await _sync.BlockAsyncLock();
-			var val = await value(_value);
-			return val;
+			return _value = await value(_value);
 		}
 
 		public static implicit operator T(AsyncSafeVariable<T> val) => val._value;
+
+		public static implicit operator AsyncSafeVariable<T>(T val) => new(val);
 	}
 }

@@ -15,7 +15,7 @@ namespace Manito.Discord.Shop
 	public class ShopService
 	{
 		private MyDomain _service;
-		private MyDiscordClient _client;
+		private MyClientBundle _client;
 		private ShopCashRegister _cashRegister;
 		private DialogueNetSessionTab<ShopContext> _shopTab;
 		private AsyncLocker _lock;

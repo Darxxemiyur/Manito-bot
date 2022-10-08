@@ -21,9 +21,9 @@ namespace Manito.System.Economy
 	{
 		private const string Locale = "ru";
 		private readonly ServerEconomy _economy;
-		private readonly MyDiscordClient _client;
+		private readonly MyClientBundle _client;
 
-		public EconomyCommands(ServerEconomy economy, MyDiscordClient client) => (_economy, _client) = (economy, client);
+		public EconomyCommands(ServerEconomy economy, MyClientBundle client) => (_economy, _client) = (economy, client);
 
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{

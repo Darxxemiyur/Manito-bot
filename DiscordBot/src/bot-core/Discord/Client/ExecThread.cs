@@ -13,19 +13,25 @@ namespace Manito.Discord.Client
 		private readonly List<Func<Task>> _toExecuteTasks;
 		private readonly AsyncLocker _sync;
 		private TaskCompletionSource _onNew;
+		private MyDomain _domain;
 
-		public ExecThread()
+		public ExecThread(MyDomain domain)
 		{
 			_sync = new();
 			_executingTasks = new();
 			_toExecuteTasks = new();
 			_onNew = new();
+			_domain = domain;
 		}
 
-		public async Task AddNew(Func<Task> runner)
+		public Task AddNew(Func<Task> runner) => AddNew(new[] { runner });
+
+		public Task AddNew(params Func<Task>[] runners) => AddNew(runners.AsEnumerable());
+
+		public async Task AddNew(IEnumerable<Func<Task>> runners)
 		{
 			using var g = await _sync.BlockAsyncLock();
-			_toExecuteTasks.Add(runner);
+			_toExecuteTasks.AddRange(runners);
 			_onNew.TrySetResult();
 		}
 
@@ -61,8 +67,10 @@ namespace Manito.Discord.Client
 					var result = await completedTask;
 					//Forward all exceptions to the stderr-ish
 					if (result != null)
+					{
 						await Console.Error.WriteLineAsync($"{result}");
-
+						await _domain.Logging.WriteErrorClassedLog(GetType().Name, $"{result}", false);
+					}
 					//Returns false if it tries to remove 'timeout' task, and true if succeeds
 					_executingTasks.Remove(completedTask);
 					_onNew = new();

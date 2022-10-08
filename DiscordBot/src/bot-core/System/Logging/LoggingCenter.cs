@@ -1,6 +1,7 @@
 ﻿using DisCatSharp;
 using DisCatSharp.EventArgs;
 
+using Manito._00_PatternSystems.Common;
 using Manito.Discord.Client;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
@@ -18,23 +19,21 @@ namespace Manito.System.Logging
 {
 	public class LoggingCenter : IModule
 	{
-		private readonly AsyncLocker _locker = new();
-		private readonly MyDiscordClient _client;
+		private OPFIFOTACollection<LogLine> _queue;
+		private readonly MyClientBundle _client;
 		private readonly ILoggingDBFactory _factory;
-		private readonly TaskEventProxy<(string, string)> _relay;
+		private readonly FIFOACollection<(string, string)> _relay;
 
-		public LoggingCenter(MyDiscordClient client, ILoggingDBFactory factory)
+		public LoggingCenter(MyClientBundle client, ILoggingDBFactory factory)
 		{
 			(_client, _factory) = (client, factory);
 			var dc = client.Client;
 			_relay = new();
+			_queue = new();
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
 
-		private async Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e)
-		{
-			await _client.Domain.ExecutionThread.AddNew(() => _relay.Handle(("DiscordBotLog", e.Json)));
-		}
+		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(() => _relay.Handle(("DiscordBotLog", e.Json)));
 
 		private async Task<(bool, JsonDocument)> TryParseAsync(string log)
 		{
@@ -53,7 +52,24 @@ namespace Manito.System.Logging
 			}
 		}
 
-		public async Task WriteLog(string district, string log)
+		public Task WriteErrorClassedLog(string district, Exception err, bool isHandled) => WriteErrorClassedLog(district, $"{err}", isHandled);
+
+		public async Task WriteErrorClassedLog(string district, string log, bool isHandled)
+		{
+			using var jlog = await MakeJsonLog(log);
+			using var jflog = await MakeJsonLog(JsonConvert.SerializeObject(new
+			{
+				type = "error",
+				dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
+				isHandled,
+				data = jlog
+			}));
+			await InnerWriteLogToDB(district, jflog);
+		}
+
+		public Task WriteJsonLog(string district, JsonDocument log) => InnerWriteLogToDB(district, log);
+
+		private async Task<JsonDocument> MakeJsonLog(string log)
 		{
 			var (res, jlog) = await TryParseAsync(log);
 			if (!res)
@@ -63,24 +79,38 @@ namespace Manito.System.Logging
 					type = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
 					data = log
 				});
-				await WriteLog(district, convertedLog);
-				return;
+				return await MakeJsonLog(convertedLog);
 			}
-
-			await using var _ = await _locker.BlockAsyncLock();
-			await using var db = await _factory.CreateLoggingDBContextAsync();
-
-			db.LogLines.Add(new LogLine("Discord", district, jlog));
-
-			await db.SaveChangesAsync();
+			return jlog;
 		}
 
-		public async Task RunModule()
+		private async Task InnerWriteLogToDB(string district, JsonDocument jlog)
+		{
+			await _queue.Place(new LogLine("Discord", district, jlog));
+		}
+
+		public async Task WriteLog(string district, string log) => await InnerWriteLogToDB(district, await MakeJsonLog(log));
+
+		public Task RunModule() => Task.WhenAll(DiscordEventLogging(), RunDbLogging());
+
+		private async Task DiscordEventLogging()
 		{
 			while (true)
 			{
 				var (district, log) = await _relay.GetData();
 				await _client.Domain.ExecutionThread.AddNew(() => WriteLog(district, log));
+			}
+		}
+
+		private async Task RunDbLogging()
+		{
+			while (true)
+			{
+				await _queue.UntilPlaced();
+				await using var db = await _factory.CreateLoggingDBContextAsync();
+
+				await db.LogLines.AddRangeAsync(await _queue.GetAll());
+				await db.SaveChangesAsync();
 			}
 		}
 	}

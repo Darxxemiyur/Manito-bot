@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
-	public class MyDiscordClient
+	public class MyClientBundle
 	{
 		private MyDomain _collection;
 		public MyDomain Domain => _collection;
@@ -18,6 +18,7 @@ namespace Manito.Discord.Client
 		public ApplicationCommands AppCommands => _appCommands;
 		private EventInline _eventInliner;
 		public EventInline EventInliner => _eventInliner;
+		private MyDiscordClient _mclient;
 		private DiscordClient _client;
 		public DiscordClient Client => _client;
 #if DEBUG
@@ -28,15 +29,19 @@ namespace Manito.Discord.Client
 		private ActivitiesTools _activitiesTools;
 		public ActivitiesTools ActivityTools => _activitiesTools;
 
-		public MyDiscordClient(MyDomain collection, RootConfig rconfig)
+		public MyClientBundle(MyDomain collection, RootConfig rconfig)
 		{
+			_collection = collection;
+			//TODO: Make safe for use client impementation.
+			_mclient = new(this);
+
 			var config = new DiscordConfiguration {
 				Token = rconfig.ClientCfg.ClientKey,
 				Intents = DiscordIntents.All
 			};
+
 			_client = new DiscordClient(config);
 			_appCommands = new ApplicationCommands(collection);
-			_collection = collection;
 
 			_eventInliner = new EventInline(new EventBuffer(_client));
 

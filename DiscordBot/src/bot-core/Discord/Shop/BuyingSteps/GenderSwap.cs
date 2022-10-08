@@ -36,7 +36,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 		private async Task<NextNetworkInstruction> CantAfford(NetworkInstructionArgument args)
 		{
 			var ms1 = $"Вы не можете позволить  {_item.Name} за {_item.Price}.";
-			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
+			var rsp = await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
 
 			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Ок");
 			rsp.AddComponents(cancel);
@@ -62,7 +62,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 
 		private async Task<NextNetworkInstruction> SelectID(NetworkInstructionArgument args)
 		{
-			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), _id);
+			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), _id);
 
 			if (idi is not int id)
 				return new(Revert);
@@ -77,7 +77,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 			var female = new DiscordButtonComponent(ButtonStyle.Primary, "female", "Самка", false, new DiscordComponentEmoji("♀️"));
 			var ret = new DiscordButtonComponent(ButtonStyle.Danger, "exit", "Назад");
 
-			var msg = new UniversalMessageBuilder().AddComponents(male, female).AddComponents(ret).AddEmbed(new DiscordEmbedBuilder().WithDescription("Выберите желаемый пол динозавра."));
+			var msg = (await _session.Context.Format.GetResponse(new DiscordEmbedBuilder().WithDescription("Выберите желаемый пол динозавра."))).AddComponents(male, female).AddComponents(ret);
 
 			await _session.SendMessage(msg);
 			var click = await _session.GetComponentInteraction();

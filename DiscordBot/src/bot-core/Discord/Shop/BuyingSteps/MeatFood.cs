@@ -32,7 +32,7 @@ namespace Manito.Discord.Shop
 			var ms1 = $"Выберите количество {_food.Name}";
 			var price = _food.Price;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 50, 100, 500 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 100), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} ед за {x * price}.")), _quantity, 100);
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 50, 100, 500 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 100), async x => await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} ед за {x * price}.")), _quantity, 100);
 
 			if (!qua.HasValue)
 				return new();
@@ -66,7 +66,7 @@ namespace Manito.Discord.Shop
 			var price = _quantity * _food.Price;
 			var ms1 = $"Вы не можете позволить {_quantity} ед. {_food.Name} за {price}.";
 			var ms2 = $"Пожалуйста измените выбранное количество {_food.Name} и попробуйте снова.";
-			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\n{ms2}"));
+			var rsp = await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\n{ms2}"));
 
 			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Отмена");
 			var chnamt = new DiscordButtonComponent(ButtonStyle.Primary, "Back", "Изменить кол-во");

@@ -16,7 +16,7 @@ namespace Manito.Discord.Chat.DialogueNet
 
 		private MyDomain _service;
 		public MyDomain Service => _service;
-		public MyDiscordClient Client => Service.MyDiscordClient;
+		public MyClientBundle Client => Service.MyDiscordClient;
 		private SemaphoreSlim _lock;
 
 		public DialogueNetSessionControls(MyDomain service)

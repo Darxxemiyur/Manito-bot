@@ -17,7 +17,7 @@ namespace Manito.Discord.PermanentMessage
 {
 	public class MsgContext
 	{
-		public MyDiscordClient Client => Domain.MyDiscordClient;
+		public MyClientBundle Client => Domain.MyDiscordClient;
 		public IPermMessageDbFactory Factory => Domain.DbFactory;
 
 		public MyDomain Domain {
@@ -97,7 +97,7 @@ namespace Manito.Discord.PermanentMessage
 		/// <summary>
 		/// List of post update requests containing translator ID and a callback that resolves after update;
 		/// </summary>
-		private readonly TaskEventProxy<(long, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
+		private readonly FIFOACollection<(long, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
 
 		public async Task StartSession(DiscordInteraction args)
 		{

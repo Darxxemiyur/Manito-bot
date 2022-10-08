@@ -14,7 +14,7 @@ namespace Manito.Discord.Inventory
 		private InventoryController _controller;
 		public PlayerInventory PInventory => Inventory.GetPlayerInventory(_user);
 
-		public InventorySession(InteractiveInteraction iargs, MyDiscordClient client,
+		public InventorySession(InteractiveInteraction iargs, MyClientBundle client,
 		 IInventorySystem inventory, DiscordUser user, InventoryController controller)
 		  : base(iargs, client, user) => (_controller, _inventory) = (controller, inventory);
 

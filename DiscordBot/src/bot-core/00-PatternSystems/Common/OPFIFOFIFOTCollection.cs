@@ -1,6 +1,4 @@
-﻿using Manito.Discord.Orders;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,22 +6,22 @@ using System.Threading.Tasks;
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	/// <summary>
-	/// Pool of placed orders
+	/// Ordered place FIFO, FIFO take, non-blocking async collection.
 	/// </summary>
-	public class PoolTaskEventProxy
+	public class OPFIFOFIFOTCollection<T>
 	{
-		private readonly Queue<Order> _queue;
-		private readonly Queue<TaskCompletionSource<Order>> _executors;
+		private readonly Queue<T> _queue;
+		private readonly Queue<TaskCompletionSource<T>> _executors;
 		private readonly AsyncLocker _lock;
 
-		public PoolTaskEventProxy()
+		public OPFIFOFIFOTCollection()
 		{
 			_lock = new();
 			_queue = new();
 			_executors = new();
 		}
 
-		private async Task InnerPlaceOrder(Order order)
+		private async Task InnerPlaceOrder(T order)
 		{
 			if (_executors.Count > 0)
 			{
@@ -35,7 +33,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 				_queue.Enqueue(order);
 		}
 
-		public async Task PlaceOrder(Order order)
+		public async Task PlaceOrder(T order)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			await InnerPlaceOrder(order);
@@ -47,22 +45,22 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			return _queue.Any();
 		}
 
-		private async Task<Task<Order>> InnerGetOrder(CancellationToken token = default)
+		private async Task<Task<T>> InnerGetOrder(CancellationToken token = default)
 		{
 			if (_queue.Count > 0)
-				return _queue.Dequeue() is var g && g != null && !g.OrderCancelledTask.IsCompleted ? Task.FromResult(g) : await InnerGetOrder(token);
+				return _queue.Dequeue() is var g && g != null ? Task.FromResult(g) : await InnerGetOrder(token);
 
-			var relay = new TaskCompletionSource<Order>();
+			var relay = new TaskCompletionSource<T>();
 			_executors.Enqueue(relay);
 			token.Register(() => relay.TrySetCanceled());
 
 			return relay.Task;
 		}
 
-		public async Task<Task<Order>> GetOrder(CancellationToken token = default)
+		public async Task<Task<T>> GetOrder(CancellationToken token = default)
 		{
-			Task<Order> orderGet = null;
-			await using (var _ = await _lock.BlockAsyncLock(CancellationToken.None))
+			Task<T> orderGet = null;
+			await using (var _ = await _lock.BlockAsyncLock())
 			{
 				orderGet = await InnerGetOrder(token);
 			}

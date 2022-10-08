@@ -35,7 +35,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 		private async Task<NextNetworkInstruction> CantAfford(NetworkInstructionArgument args)
 		{
 			var ms1 = $"Вы не можете позволить  {_item.Name} за {_item.Price}.";
-			var rsp = _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
+			var rsp = await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}"));
 
 			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Ок");
 			rsp.AddComponents(cancel);
@@ -58,12 +58,12 @@ namespace Manito.Discord.Shop.BuyingSteps
 
 			await wallet.Withdraw(item.Price, $"Покупка {item.Name} за {item.Price}");
 
-			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
+			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
 
 			if (idi is not int id)
 			{
 				await Wallet.Deposit(_item.Price);
-				return new(ExecuteTransaction);
+				return new(true);
 			}
 
 			var order = new Order(_session.Context.CustomerId);

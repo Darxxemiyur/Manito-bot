@@ -20,7 +20,7 @@ namespace Manito.Discord
 		private MyDbFactory _db;
 		public MyDbFactory DbFactory => _db;
 		private ApplicationCommands _appCommands;
-		private MyDiscordClient _myDiscordClient;
+		private MyClientBundle _myDiscordClient;
 		private EventFilters _filters;
 		private ExecThread _executionThread;
 		private ServerEconomy _economy;
@@ -30,12 +30,13 @@ namespace Manito.Discord
 		private MessageController _msgWallCtr;
 		private LoggingCenter _logging;
 		public IServiceCollection ServiceCollection => _serviceCollection;
-		public MyDiscordClient MyDiscordClient => _myDiscordClient;
+		public MyClientBundle MyDiscordClient => _myDiscordClient;
 		public ExecThread ExecutionThread => _executionThread;
 		public ServerEconomy Economy => _economy;
 		public IInventorySystem Inventory => _inventory;
 		public EventFilters Filters => _filters;
 		public ShopService ShopService => _shopService;
+		public RootConfig RootConfig => _rootConfig;
 		public MessageController MsgWallCtr => _msgWallCtr;
 		public LoggingCenter Logging => _logging;
 
@@ -55,17 +56,17 @@ namespace Manito.Discord
 		private async Task Initialize()
 		{
 			_rootConfig = RootConfig.GetConfig();
-
 			_db = new(this, _rootConfig.DatabaseCfg);
+			_executionThread = new(this);
+
 			_inventory = new TestInventorySystem();
 			_economy = new(this, _db);
-			_myDiscordClient = new MyDiscordClient(this, _rootConfig);
+			_myDiscordClient = new(this, _rootConfig);
 			_msgWallCtr = new(this);
-			_shopService = new ShopService(this);
-			_logging = new(_myDiscordClient, _db);
+			_shopService = new(this);
 			_appCommands = _myDiscordClient.AppCommands;
-			_executionThread = new ExecThread();
-			_filters = new EventFilters(this, _myDiscordClient.EventsBuffer);
+			_filters = new(this, _myDiscordClient.EventsBuffer);
+			_logging = new(_myDiscordClient, _db);
 			await _filters.Initialize();
 		}
 

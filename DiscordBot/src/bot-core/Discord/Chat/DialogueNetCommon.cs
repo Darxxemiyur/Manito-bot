@@ -88,6 +88,7 @@ namespace Manito.Discord.Chat.DialogueNet
 				await session.SendMessage(mg2);
 
 				var comp = await session.GetComponentInteraction();
+				await session.DoLaterReply();
 
 				if (comp.CompareButton(exbtn))
 					return null;

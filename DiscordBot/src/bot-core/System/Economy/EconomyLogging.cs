@@ -16,7 +16,7 @@ namespace Manito.System.Economy
 #else
 		private ulong logid = 1027659223070425229;
 #endif
-		private TaskEventProxy<string> _logQueue = new();
+		private FIFOACollection<string> _logQueue = new();
 		private MyDomain _service;
 
 		public EconomyLogging(MyDomain service)

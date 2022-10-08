@@ -39,7 +39,7 @@ namespace Manito.Discord.Shop
 			var wallet = _session.Context.Wallet;
 			var resp = _session.Context.Format;
 
-			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 1), async x => resp.GetResponse(resp.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity, 1);
+			var qua = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 5 }, _session, async (x, y) => (y > 0 && await _session.Context.Wallet.CanAfford((x + y) * price)) || (y < 0 && x > 1), async x => await resp.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\nВыбранное количество {x} шт за {x * price}.")), _quantity, 1);
 
 			if (!qua.HasValue)
 				return new();
@@ -60,7 +60,7 @@ namespace Manito.Discord.Shop
 
 			await wallet.Withdraw(food.Price, $"Покупка {food.Item.Name} за {food.Item.Price} в кол-ве {food.Amount} за {food.Price}");
 
-			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
+			var idi = await Common.GetQuantity(new[] { -5, -2, 1, 2, 5 }, new[] { 1, 10, 100 }, _session, (x, y) => Task.FromResult(true), async x => await _session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription($"ID получающий ваш заказ - {x}")), 0);
 
 			if (idi is not int id)
 			{
@@ -98,7 +98,7 @@ namespace Manito.Discord.Shop
 			var price = _quantity * _food.Price;
 			var ms1 = $"Вы не можете позволить {_quantity} {_food.Name} за {price}.";
 			var ms2 = $"Пожалуйста измените выбранное количество {_food.Name} и попробуйте снова.";
-			var rsp = resp.GetResponse(resp.BaseContent().WithDescription($"{ms1}\n{ms2}"));
+			var rsp = await resp.GetResponse(_session.Context.Format.BaseContent().WithDescription($"{ms1}\n{ms2}"));
 
 			var cancel = new DiscordButtonComponent(ButtonStyle.Danger, "Cancel", "Отмена");
 			var chnamt = new DiscordButtonComponent(ButtonStyle.Primary, "Back", "Изменить кол-во");

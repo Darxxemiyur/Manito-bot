@@ -13,14 +13,14 @@ namespace Manito.Discord.Chat.DialogueNet
 	public abstract class DialogueNetSession
 	{
 		protected DiscordUser _user;
-		protected MyDiscordClient _client;
+		protected MyClientBundle _client;
 		protected InteractiveInteraction _iargs;
 		protected ulong? _gdId;
 		protected ulong? _chId;
 		protected ulong? _msId;
 		private bool _irtt;
 		public DiscordUser User => _user;
-		public MyDiscordClient Client => _client;
+		public MyClientBundle Client => _client;
 		public DiscordInteraction Args => IArgs.Interaction;
 		public InteractiveInteraction IArgs => _iargs;
 		public ulong? GdId => _gdId;
@@ -38,7 +38,7 @@ namespace Manito.Discord.Chat.DialogueNet
 		/// <param name="client"></param>
 		/// <param name="user"></param>
 		/// <param name="isEphemeral"></param>
-		public DialogueNetSession(InteractiveInteraction iargs, MyDiscordClient client,
+		public DialogueNetSession(InteractiveInteraction iargs, MyClientBundle client,
 		 DiscordUser user, bool isEphemeral = false)
 		{
 			_iargs = iargs;

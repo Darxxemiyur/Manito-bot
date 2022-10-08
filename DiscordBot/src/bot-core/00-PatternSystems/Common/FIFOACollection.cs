@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
-	public class TaskEventProxy<T> : IDisposable
+	/// <summary>
+	/// First in First out fetch blocking Async Collection FIFOACollection
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	public class FIFOACollection<T> : IDisposable
 	{
-		public TaskEventProxy()
+		public FIFOACollection()
 		{
 			_sync = new();
 			_chain = new();
@@ -92,7 +96,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			GC.SuppressFinalize(this);
 		}
 
-		~TaskEventProxy()
+		~FIFOACollection()
 		{
 			// Do not re-create Dispose clean-up code here. Calling Dispose(false) is optimal in
 			// terms of readability and maintainability.
@@ -100,14 +104,18 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		}
 	}
 
-	public class TaskEventProxy : IDisposable
+	/// <summary>
+	/// First in First out fetch blocking Async Collection FIFOACollection
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	public class FIFOACollection : IDisposable
 	{
-		public TaskEventProxy()
+		public FIFOACollection()
 		{
 			_facade = new();
 		}
 
-		private TaskEventProxy<bool> _facade;
+		private FIFOACollection<bool> _facade;
 
 		public Task<bool> HasAny() => _facade.HasAny();
 
@@ -145,7 +153,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			GC.SuppressFinalize(this);
 		}
 
-		~TaskEventProxy()
+		~FIFOACollection()
 		{
 			// Do not re-create Dispose clean-up code here. Calling Dispose(false) is optimal in
 			// terms of readability and maintainability.

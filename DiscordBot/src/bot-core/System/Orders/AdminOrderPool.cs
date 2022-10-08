@@ -15,7 +15,7 @@ namespace Manito.Discord.Orders
 
 		public bool AnyAdminOnline => AdminsOnline > 0;
 		private readonly AsyncLocker _lock;
-		private readonly PoolTaskEventProxy _pool;
+		private readonly OPFIFOFIFOTCollection<Order> _pool;
 
 		public AdminOrderPool()
 		{
@@ -69,7 +69,7 @@ namespace Manito.Discord.Orders
 				await using var _ = await _lock.BlockAsyncLock();
 				order = await _pool.GetOrder(token);
 			}
-			return await order;
+			return (await order).OrderCancelledTask.IsCompleted ? await GetOrder(token) : await order;
 		}
 	}
 }

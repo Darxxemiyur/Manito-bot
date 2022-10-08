@@ -37,15 +37,17 @@ namespace Manito.Discord.Shop
 		{
 			try
 			{
+				await _session.DoLaterReply();
 				var exbtn = new DiscordButtonComponent(ButtonStyle.Danger, "Exit", "Выйти");
 				while (true)
 				{
 					var shopItems = _session.Context.CashRegister.GetShopItems();
 					var items = _session.Context.Format.GetSelector(shopItems);
-					var mg = _session.Context.Format.GetResponse(_session.Context.Format.GetShopItems(null, shopItems)).AddComponents(items).AddComponents(exbtn);
+					var mg = (await _session.Context.Format.GetResponse(_session.Context.Format.GetShopItems(null, shopItems))).AddComponents(items).AddComponents(exbtn);
 					await _session.SendMessage(mg);
 
 					var argv = await _session.GetComponentInteraction();
+					await _session.DoLaterReply();
 
 					if (argv.CompareButton(exbtn))
 						break;
@@ -55,7 +57,7 @@ namespace Manito.Discord.Shop
 					await NetworkCommon.RunNetwork(chain);
 				}
 
-				await _session.SendMessage(_session.Context.Format.GetResponse(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена.")));
+				await _session.SendMessage(_session.Context.Format.BaseContent().WithDescription("Сессия успешно завершена."));
 				await Task.Delay(5000);
 				await _session.RemoveMessage();
 

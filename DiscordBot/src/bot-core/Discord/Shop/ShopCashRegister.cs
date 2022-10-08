@@ -74,7 +74,6 @@ namespace Manito.Discord.Shop
 		}
 
 		public DiscordEmbedBuilder Default(DiscordEmbedBuilder bld = null) =>
-			(bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~").WithFooter($"Администраторов в сети: {_domain.Filters.AdminOrder.Pool.AdminsOnline}")
-			.WithColor(DiscordColor.Blurple);
+			(bld ?? new DiscordEmbedBuilder()).WithTitle("~Магазин Манито~").WithColor(DiscordColor.Blurple);
 	}
 }

@@ -80,6 +80,7 @@ namespace Manito.System.Economy
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
 			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
+			await rs.DoLaterReply();
 
 			await rs.DoLaterReply();
 			await rs.SendMessage(new UniversalMessageBuilder().SetContent("Goodi job!").AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!")));

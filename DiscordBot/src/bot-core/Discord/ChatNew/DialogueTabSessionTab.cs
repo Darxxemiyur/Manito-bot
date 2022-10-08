@@ -13,7 +13,7 @@ namespace Manito.Discord.ChatNew
 	/// <typeparam name="T"></typeparam>
 	public class DialogueTabSessionTab<T>
 	{
-		public MyDiscordClient Client {
+		public MyClientBundle Client {
 			get; private set;
 		}
 
@@ -25,7 +25,7 @@ namespace Manito.Discord.ChatNew
 		// Used to sync creation and deletion of sessions
 		private AsyncLocker _sync;
 
-		public DialogueTabSessionTab(MyDiscordClient client)
+		public DialogueTabSessionTab(MyClientBundle client)
 		{
 			_sync = new();
 			_sessions = new();

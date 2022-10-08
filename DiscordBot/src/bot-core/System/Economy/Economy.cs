@@ -14,6 +14,7 @@ namespace Manito.System.Economy
 	public class PlayerWallet
 	{
 		private readonly ServerEconomy _economy;
+		public ServerEconomy Economy => _economy;
 		private readonly ulong _userId;
 		public ulong UserId => _userId;
 		public ulong CurrencyEmojiId => _economy.CurrencyEmojiId;
@@ -51,13 +52,17 @@ namespace Manito.System.Economy
 		private EconomyLogging _logger;
 		private AsyncLocker _lock;
 
+		public MyDomain Service {
+			get;
+		}
+
 		public Task RunModule() => _logger.RunModule();
 
 		public ServerEconomy(MyDomain service, IEconomyDbFactory factory)
 		{
 			_dbFactory = factory;
 			_lock = new();
-			_logger = new(service);
+			_logger = new(Service = service);
 		}
 
 		public async Task<long> GetScales(ulong whose)

@@ -119,7 +119,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Linkable
 	public class NodeReceiver : INodeReceiver
 	{
 		private readonly List<INodeLink> _inputLinks;
-		private readonly TaskEventProxy<INodeContainer> _itemList;
+		private readonly FIFOACollection<INodeContainer> _itemList;
 
 		public NodeReceiver() => (_inputLinks, _itemList) = (new(), new());
 
@@ -164,7 +164,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Node.Linkable
 
 	public class ItemQueuedTransferLink : INodeLink
 	{
-		private readonly TaskEventProxy<INodeContainer> _itemList;
+		private readonly FIFOACollection<INodeContainer> _itemList;
 		private readonly INodeTranceiver _from;
 		private readonly INodeReceiver _to;
 

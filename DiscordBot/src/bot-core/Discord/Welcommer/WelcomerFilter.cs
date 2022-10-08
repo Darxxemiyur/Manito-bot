@@ -45,10 +45,10 @@ namespace Manito.Discord.Welcommer
 		public static string M3Ch => $"{E}<#{LimitsChannel}>\n{E}<#{RolesChannel}>\n{E}<#{PrayChannel}>";
 		public static string MCh => $"Для вашего удобства рекомендуется ознакомиться с:\n{M1Ch}\n{M2Ch}\n{M3Ch}";
 		public static string WelcomeMessage => "<@{0}>\nДобро пожаловать на наш {1} проект!\n" + MCh;
-		private MyDiscordClient _client;
-		private TaskEventProxy<DiscordMember> _toAddQueue;
+		private MyClientBundle _client;
+		private FIFOACollection<DiscordMember> _toAddQueue;
 
-		public WelcomerFilter(MyDiscordClient client)
+		public WelcomerFilter(MyClientBundle client)
 		{
 			_client = client;
 			_toAddQueue = new();
