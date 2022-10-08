@@ -17,10 +17,10 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			_sync = new();
 			_chain = new();
 			_prepin = new();
-			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
+			_chain.Enqueue((_generator = new()).MyTask);
 		}
 
-		private TaskCompletionSource<T> _generator;
+		private MyTaskSource<T> _generator;
 		private readonly Queue<Task<T>> _chain;
 		private readonly Stack<Task<T>> _prepin;
 		private readonly AsyncLocker _sync;
@@ -31,17 +31,17 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		{
 			await using var _ = await _sync.BlockAsyncLock();
 
-			if (_generator.Task.IsCanceled)
+			if (_generator.MyTask.IsCanceled)
 				throw new TaskCanceledException();
 
-			_generator.SetResult(stuff);
-			_chain.Enqueue((_generator = new TaskCompletionSource<T>()).Task);
+			_generator.TrySetResult(stuff);
+			_chain.Enqueue((_generator = new()).MyTask);
 		}
 
 		public async Task Cancel()
 		{
 			await using var _ = await _sync.BlockAsyncLock();
-			_generator.SetCanceled();
+			_generator.TrySetCanceled();
 		}
 
 		public async Task<T> GetData(CancellationToken token = default)
@@ -52,20 +52,18 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 				result = _prepin.Count > 0 ? _prepin.Pop() : _chain.Dequeue();
 			}
 
-			var revert = new TaskCompletionSource();
-			var fallback = token.Register(revert.SetCanceled);
+			var revert = new MyTaskSource<T>(token);
 
-			var either = await Task.WhenAny(result, revert.Task);
+			var either = await Task.WhenAny(result, revert.MyTask);
 
-			if (either == revert.Task)
+			if (either == revert.MyTask)
 			{
 				await using var _ = await _sync.BlockAsyncLock();
-				await Task.Run(fallback.Unregister);
 				_prepin.Push(result);
-				await revert.Task;
+				await revert.MyTask;
 			}
 
-			return await result;
+			return await either;
 		}
 
 		private bool disposedValue;

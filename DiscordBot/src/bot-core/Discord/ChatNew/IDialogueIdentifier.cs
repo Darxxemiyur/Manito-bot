@@ -2,6 +2,8 @@
 
 using Manito.Discord.Client;
 
+using System;
+
 namespace Manito.Discord.ChatNew
 {
 	/// <summary>
@@ -41,5 +43,14 @@ namespace Manito.Discord.ChatNew
 		int HowBadWants(DiscordMessage interaction);
 
 		int HowBadIfWants(DiscordMessage interaction) => DoesBelongToUs(interaction) ? HowBadWants(interaction) : -1;
+		ulong UserId {
+			get;
+		}
+		ulong ChannelId {
+			get;
+		}
+		ulong MessageId {
+			get;
+		}
 	}
 }

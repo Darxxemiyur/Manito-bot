@@ -12,7 +12,7 @@ namespace Manito.Discord.Client
 		private readonly List<Task<Exception>> _executingTasks;
 		private readonly List<Func<Task>> _toExecuteTasks;
 		private readonly AsyncLocker _sync;
-		private TaskCompletionSource _onNew;
+		private MyTaskSource _onNew;
 		private MyDomain _domain;
 
 		public ExecThread(MyDomain domain)
@@ -52,20 +52,22 @@ namespace Manito.Discord.Client
 		}
 		private (Func<Task>, Task<Task>) SafeRelayHandler(Func<Task> invoke)
 		{
-			var relay = new TaskCompletionSource<Task>();
+			var relay = new MyTaskSource<Task>();
 			var newInvoke = async () => {
 				Task invT = null;
 				try
 				{
 					invT = invoke();
 					await invT;
+					await relay.TrySetResultAsync(invT);
 				}
-				finally
+				catch (Exception e)
 				{
-					relay.SetResult(invT);
+					await relay.TrySetExceptionAsync(e);
+					throw;
 				}
 			};
-			return (newInvoke, relay.Task);
+			return (newInvoke, relay.MyTask);
 		}
 		private async Task<Exception> SafeHandler(Func<Task> invoke)
 		{
@@ -91,7 +93,7 @@ namespace Manito.Discord.Client
 					_toExecuteTasks.Clear();
 				}
 				//Wait for any task to complete in the list;
-				var completedTask = await Task.WhenAny(_executingTasks.Append(_onNew.Task).ToArray()) as Task<Exception>;
+				var completedTask = await Task.WhenAny(_executingTasks.Append(_onNew.MyTask).ToArray()) as Task<Exception>;
 				if (completedTask != null)
 				{
 					//Handle the removal of completed tasks yielded from awaiting for any
@@ -99,10 +101,8 @@ namespace Manito.Discord.Client
 					var result = await completedTask;
 					//Forward all exceptions to the stderr-ish
 					if (result != null)
-					{
-						await Console.Error.WriteLineAsync($"{result}");
-						await _domain.Logging.WriteErrorClassedLog(GetType().Name, $"{result}", false);
-					}
+						await _domain.Logging.WriteErrorClassedLog(GetType().Name, result, false);
+
 					//Returns false if it tries to remove 'timeout' task, and true if succeeds
 					_executingTasks.Remove(completedTask);
 					_onNew = new();

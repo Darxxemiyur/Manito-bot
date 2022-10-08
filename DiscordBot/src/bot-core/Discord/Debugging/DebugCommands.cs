@@ -79,8 +79,7 @@ namespace Manito.System.Economy
 
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
-			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args);
-			await rs.DoLaterReply();
+			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
 
 			await rs.DoLaterReply();
 			await rs.SendMessage(new UniversalMessageBuilder().SetContent("Goodi job!").AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!")));
@@ -92,6 +91,9 @@ namespace Manito.System.Economy
 			if (intr.Type == InteractionTypes.Message)
 				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Msg interaction!"));
 
+			await rs.DoLaterReply();
+			await rs.DoLaterReply();
+			await rs.DoLaterReply();
 			await rs.DoLaterReply();
 		}
 

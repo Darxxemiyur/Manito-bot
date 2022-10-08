@@ -30,8 +30,6 @@ namespace Manito.Discord.Orders
 
 			if (_admins.All(x => x != admin))
 				_admins.Add(admin);
-
-
 		}
 
 		public async Task StopAdministrating(AdminOrderExec admin)

@@ -68,14 +68,14 @@ namespace Manito.Discord.PermanentMessage
 					if (translator != null)
 					{
 						var updateResult = await translator.SubmitUpdate(context.Client.Client);
-						tsk.SetResult(updateResult);
+						tsk.TrySetResult(updateResult);
 						await db.SaveChangesAsync();
 						continue; // "yield" the loop to the next item.
 					}
 				}
 				catch (Exception e)
 				{
-					tsk.SetException(e);
+					tsk.TrySetException(e);
 				}
 			}
 		}
@@ -87,17 +87,17 @@ namespace Manito.Discord.PermanentMessage
 		/// <returns></returns>
 		public async Task<Task<int?>> PostMessageUpdate(long id, MsgContext context)
 		{
-			var callback = new TaskCompletionSource<int?>();
+			var callback = new MyTaskSource<int?>();
 
 			await _postMessageUpdateQueue.Handle((id, context, callback));
 
-			return callback.Task;
+			return callback.MyTask;
 		}
 
 		/// <summary>
 		/// List of post update requests containing translator ID and a callback that resolves after update;
 		/// </summary>
-		private readonly FIFOACollection<(long, MsgContext, TaskCompletionSource<int?>)> _postMessageUpdateQueue;
+		private readonly FIFOACollection<(long, MsgContext, MyTaskSource<int?>)> _postMessageUpdateQueue;
 
 		public async Task StartSession(DiscordInteraction args)
 		{

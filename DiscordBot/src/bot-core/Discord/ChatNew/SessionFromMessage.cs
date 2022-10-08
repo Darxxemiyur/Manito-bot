@@ -27,6 +27,7 @@ namespace Manito.Discord.ChatNew
 			_channel = channel;
 			_userId = userId;
 		}
+		public UniversalSession ToUniversal() => (UniversalSession)this;
 
 		public MyClientBundle Client {
 			get;
@@ -58,7 +59,7 @@ namespace Manito.Discord.ChatNew
 				throw new NotSupportedException();
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
-			await OnStatusChange(this, new SessionInnerMessage((intr.Interaction, new DialogueCompInterIdentifier(intr), _message), "ConvertMe"));
+			await OnStatusChange(this, new SessionInnerMessage((intr.Interaction, new DialogueCompInterIdentifier(intr), _message), "ConvertMeToComp"));
 
 			return intr;
 		}
@@ -93,7 +94,7 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public Task<DiscordMessage> SessionMessage => Task.FromResult(_message);
-
 		public Task<DiscordChannel> SessionChannel => Task.FromResult(_channel);
+		public static implicit operator UniversalSession(SessionFromMessage msg) => new(msg);
 	}
 }

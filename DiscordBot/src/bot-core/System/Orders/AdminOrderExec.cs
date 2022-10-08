@@ -56,6 +56,7 @@ namespace Manito.Discord.Orders
 
 		private async Task<NextNetworkInstruction> Decider(NetworkInstructionArgument arg)
 		{
+			_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 			_steps.MoveNext();
 			var step = _steps.Current;
 			if (step != null)
@@ -134,7 +135,12 @@ namespace Manito.Discord.Orders
 
 		private string _cancelReason;
 
-		public Task ChangeOrder() => ExOrder != null ? Task.Run(_swapToken.Cancel) : Task.CompletedTask;
+		public async Task ChangeOrder()
+		{
+			await Console.Out.WriteLineAsync($"{ExOrder != null}");
+			await Task.Run(_swapToken.Cancel);
+			await Console.Out.WriteLineAsync($"{_swapToken.IsCancellationRequested}");
+		}
 
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
@@ -269,8 +275,6 @@ namespace Manito.Discord.Orders
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
 
 				ExOrder = await _pool.GetOrder(_localToken.Token);
-
-				_localToken = CancellationTokenSource.CreateLinkedTokenSource(_swapToken.Token, _quitToken.Token, _cancelOrder.Token, ExOrder?.PlayerOrderCancelToken ?? CancellationToken.None);
 
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder().SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 

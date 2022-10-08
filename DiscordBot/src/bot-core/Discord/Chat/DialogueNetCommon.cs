@@ -88,7 +88,6 @@ namespace Manito.Discord.Chat.DialogueNet
 				await session.SendMessage(mg2);
 
 				var comp = await session.GetComponentInteraction();
-				await session.DoLaterReply();
 
 				if (comp.CompareButton(exbtn))
 					return null;
@@ -101,6 +100,8 @@ namespace Manito.Discord.Chat.DialogueNet
 					quantity = starting;
 					continue;
 				}
+
+				await Task.Delay(5000);
 
 				var pressed = comp.GetButton(btns.SelectMany(x => x)
 					.Select(x => x.Item1).ToDictionary(x => x.CustomId));

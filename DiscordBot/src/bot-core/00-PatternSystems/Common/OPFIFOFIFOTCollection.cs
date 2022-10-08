@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Manito._00_PatternSystems.Common;
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +13,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	public class OPFIFOFIFOTCollection<T>
 	{
 		private readonly Queue<T> _queue;
-		private readonly Queue<(TaskCompletionSource<T>, CancellationToken)> _executors;
+		private readonly Queue<MyTaskSource<T>> _executors;
 		private readonly AsyncLocker _lock;
 
 		public OPFIFOFIFOTCollection()
@@ -26,7 +28,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			if (_executors.Count > 0)
 			{
 				var rem = _executors.Dequeue();
-				if (rem.Item2.IsCancellationRequested || !rem.Item1.TrySetResult(order))
+				if (!await rem.TrySetResultAsync(order))
 					await InnerPlaceOrder(order);
 			}
 			else
@@ -64,20 +66,10 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 		private async Task<T> Enqueer(CancellationToken token)
 		{
-			var relay = new TaskCompletionSource<T>();
-			_executors.Enqueue((relay, token));
-			using var vDancell = new CancellationTokenSource();
-			using var vCancell = CancellationTokenSource.CreateLinkedTokenSource(vDancell.Token, token);
+			var relay = new MyTaskSource<T>(token);
+			_executors.Enqueue(relay);
 
-
-			var timeout = Task.Delay(-1, vCancell.Token);
-			var theTask = await Task.WhenAny(relay.Task, timeout);
-			if (theTask == timeout)
-				relay.SetCanceled(token);
-			if (theTask == relay.Task)
-				vDancell.Cancel();
-
-			return await relay.Task;
+			return await relay.MyTask;
 		}
 
 		public async Task<Task<T>> GetOrder(CancellationToken token = default)

@@ -13,7 +13,7 @@ namespace Manito._00_PatternSystems.Common
 	{
 		private AsyncLocker _lock;
 		private Queue<T> _queue;
-		private TaskCompletionSource _cranck;
+		private MyTaskSource _cranck;
 
 		public OPFIFOTACollection()
 		{
@@ -39,16 +39,9 @@ namespace Manito._00_PatternSystems.Common
 
 		public async Task UntilPlaced(CancellationToken token = default)
 		{
-			var canc = new CancellationTokenSource();
-			var allcanc = CancellationTokenSource.CreateLinkedTokenSource(token, canc.Token).Token;
-			var timeout = Task.Delay(-1, allcanc);
+			var relay = new MyRelayTask(_cranck.MyTask, token);
 
-			var comp = await Task.WhenAny(_cranck.Task, timeout);
-
-			if (comp != timeout)
-				canc.Cancel();
-
-			await comp;
+			await relay.TheTask;
 		}
 		/// <summary>
 		/// Gets all items safely.

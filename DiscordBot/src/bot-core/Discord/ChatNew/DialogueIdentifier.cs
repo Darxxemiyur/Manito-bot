@@ -22,6 +22,9 @@ namespace Manito.Discord.ChatNew
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+		public ulong UserId => _usId;
+		public ulong ChannelId => _chId;
+		public ulong MessageId => _msId;
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -57,6 +60,9 @@ namespace Manito.Discord.ChatNew
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+		public ulong UserId => _usId;
+		public ulong ChannelId => _chId;
+		public ulong MessageId => _msId;
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -92,6 +98,9 @@ namespace Manito.Discord.ChatNew
 		private ulong _usId;
 		private ulong _chId;
 		private ulong _msId;
+		public ulong UserId => _usId;
+		public ulong ChannelId => _chId;
+		public ulong MessageId => _msId;
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -117,8 +126,18 @@ namespace Manito.Discord.ChatNew
 
 	public class DialogueCommandIdentifier : IDialogueIdentifier
 	{
+		public ulong UserId {
+			get;
+		}
+		public ulong ChannelId {
+			get;
+		}
+		public ulong MessageId => 0;
+
 		public DialogueCommandIdentifier(InteractiveInteraction interaction)
 		{
+			UserId = interaction.Interaction.User.Id;
+			ChannelId = interaction.Interaction.ChannelId;
 		}
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction) => false;

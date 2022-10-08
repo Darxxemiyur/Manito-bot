@@ -18,21 +18,21 @@ namespace Manito.Discord.Orders
 		public readonly ulong Initiator;
 		public readonly ulong OrderId = OrderIds++;
 		private static ulong OrderIds = 1;
-		private readonly TaskCompletionSource<string> OrderCancelled = new();
-		private readonly TaskCompletionSource OrderNonCancellable = new();
-		private readonly TaskCompletionSource OrderComplete = new();
+		private readonly MyTaskSource<string> OrderCancelled = new();
+		private readonly MyTaskSource OrderNonCancellable = new();
+		private readonly MyTaskSource OrderComplete = new();
 
 		/// <summary>
 		/// On order cancelled. True if cancelled by admin, false if by customer.
 		/// </summary>
-		public Task<string> OrderCancelledTask => OrderCancelled.Task;
+		public Task<string> OrderCancelledTask => OrderCancelled.MyTask;
 
 		private readonly CancellationTokenSource _playerOrderCancellation = new();
 		public CancellationToken PlayerOrderCancelToken => _playerOrderCancellation.Token;
 		private readonly CancellationTokenSource _adminOrderCancellation = new();
 		public CancellationToken AdminOrderCancelToken => _adminOrderCancellation.Token;
-		public Task OrderNonCancellableTask => OrderNonCancellable.Task;
-		public Task OrderCompleteTask => OrderComplete.Task;
+		public Task OrderNonCancellableTask => OrderNonCancellable.MyTask;
+		public Task OrderCompleteTask => OrderComplete.MyTask;
 		private readonly AsyncLocker _lock = new();
 		private bool _isNotCancellable;
 
@@ -81,7 +81,7 @@ namespace Manito.Discord.Orders
 			await using var _ = await _lock.BlockAsyncLock();
 
 			_isNotCancellable = true;
-			await Task.Run(OrderNonCancellable.SetResult);
+			await Task.Run(OrderNonCancellable.TrySetResult);
 		}
 
 		public abstract class Step

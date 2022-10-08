@@ -4,6 +4,8 @@ using DisCatSharp.Exceptions;
 
 using Manito.Discord.Client;
 
+using Microsoft.VisualBasic;
+
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
@@ -21,6 +23,7 @@ namespace Manito.Discord.ChatNew
 
 		private UniversalMessageBuilder _innerMsgBuilder;
 		private DiscordMessage _msg;
+		private DiscordChannel _chnl;
 
 		public MyClientBundle Client {
 			get;
@@ -45,6 +48,8 @@ namespace Manito.Discord.ChatNew
 
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 
+		private bool _isHazard;
+
 		public async Task EndSession()
 		{
 			if (OnSessionEnd != null)
@@ -56,47 +61,46 @@ namespace Manito.Discord.ChatNew
 		public async Task SendMessage(UniversalMessageBuilder message)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			await SendMessageLocal(message);
+			try
+			{
+				await SendMessageLocal(message);
+			}
+			catch (Exception e)
+			{
+				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
+				await FallBackToMessageSession();
+				throw;
+			}
 		}
 
 		private async Task SendMessageLocal(UniversalMessageBuilder message)
 		{
-			for (var times = 0; ; times++)
+			switch (NextType)
 			{
-				try
-				{
-					switch (NextType)
-					{
-						case InteractionResponseType.ChannelMessageWithSource:
-							await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
-							NextType = InteractionResponseType.Pong;
-							await MarkTheMessage();
-							break;
+				case InteractionResponseType.ChannelMessageWithSource:
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
+					NextType = InteractionResponseType.Pong;
+					await MarkTheMessage();
+					break;
 
-						case InteractionResponseType.UpdateMessage:
-							await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, message);
-							NextType = InteractionResponseType.Pong;
-							break;
+				case InteractionResponseType.UpdateMessage:
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, message);
+					NextType = InteractionResponseType.Pong;
+					break;
 
-						case InteractionResponseType.Pong:
-							await MarkTheMessage(await Interactive.Interaction.EditOriginalResponseAsync(message));
-							break;
-					}
-					_innerMsgBuilder = message;
-				}
-				catch (Exception e)
-				{
-					if (ErrorMaxRepeatTimes < times)
-						throw;
-					await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
-					await Task.Delay(ErrorDelayTime);
-					continue;
-				}
-				break;
+				case InteractionResponseType.Pong:
+					await MarkTheMessage(await Interactive.Interaction.EditOriginalResponseAsync(message));
+					break;
 			}
+			_innerMsgBuilder = message;
 		}
 
-		private async Task MarkTheMessage(DiscordMessage msg = default) => Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, _msg = msg ?? await SessionMessage));
+		private async Task MarkTheMessage(DiscordMessage msg = default)
+		{
+			_msg = msg ?? await SessionMessage;
+			_chnl = _msg.Channel;
+			Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, _msg));
+		}
 
 		private async Task CancelClickability()
 		{
@@ -118,44 +122,53 @@ namespace Manito.Discord.ChatNew
 
 		private async Task RespondToAnInteraction()
 		{
-			for (var times = 0; ; times++)
+			switch (NextType)
 			{
-				try
-				{
-					switch (NextType)
-					{
-						case InteractionResponseType.ChannelMessageWithSource:
-							await Interactive.Interaction
-								.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-							NextType = InteractionResponseType.Pong;
-							await MarkTheMessage();
-							break;
+				case InteractionResponseType.ChannelMessageWithSource:
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+					NextType = InteractionResponseType.Pong;
+					await MarkTheMessage();
+					break;
 
-						case InteractionResponseType.UpdateMessage:
-							await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
-							NextType = InteractionResponseType.Pong;
-							break;
-					}
-				}
-				catch (Exception e)
-				{
-					if (ErrorMaxRepeatTimes < times)
-						throw;
-					await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
-					await Task.Delay(ErrorDelayTime);
-					continue;
-				}
-				break;
+				case InteractionResponseType.UpdateMessage:
+					await Interactive.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+					NextType = InteractionResponseType.Pong;
+					break;
+			}
+
+		}
+
+		private async Task FallBackToMessageSession()
+		{
+			var chnl = await Client.Client.GetChannelAsync(Identifier.ChannelId);
+			try
+			{
+				var msg = await chnl.GetMessageAsync(Identifier.MessageId, true);
+				await OnStatusChange(this, new SessionInnerMessage((msg, Identifier.UserId), "ConvertMeToMsg1"));
+			}
+			catch (Exception ev)
+			{
+				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, ev, true);
+				await OnStatusChange(this, new SessionInnerMessage((chnl, Identifier.UserId), "ConvertMeToMsg2"));
 			}
 		}
 
 		public async Task DoLaterReply()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			if (Interactive?.Components?.Any() == true)
-				await CancelClickability();
-			else
-				await RespondToAnInteraction();
+			try
+			{
+				if (Interactive?.Components?.Any() == true)
+					await CancelClickability();
+				else
+					await RespondToAnInteraction();
+			}
+			catch (Exception e)
+			{
+				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
+				await FallBackToMessageSession();
+				throw;
+			}
 		}
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
@@ -173,48 +186,32 @@ namespace Manito.Discord.ChatNew
 			Identifier = new DialogueCompInterIdentifier(Interactive = intr);
 			NextType = InteractionResponseType.UpdateMessage;
 
+
 			return intr;
 		}
 
 		private async Task RemoveMessageLocal()
 		{
-			for (var times = 0; ; times++)
+			try
 			{
+				await Interactive.Interaction.DeleteOriginalResponseAsync();
+			}
+			catch (Exception e1)
+			{
+				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e1, true);
 				try
 				{
-					await Interactive.Interaction.DeleteOriginalResponseAsync();
+					var msg = await SessionMessage;
+					await msg.DeleteAsync();
 				}
-				catch (Exception e1)
+				catch (Exception e2)
 				{
-					await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e1, true);
-					try
-					{
-						var msg = await SessionMessage;
-						await msg.DeleteAsync();
-					}
-					catch (Exception e2)
-					{
-						await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e2, true);
-						try
-						{
-							await _msg.DeleteAsync();
-						}
-						catch (Exception e3)
-						{
-							if (ErrorMaxRepeatTimes < times)
-								throw new AggregateException(e1, e2, e3);
-							await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e3, true);
-							await Task.Delay(ErrorDelayTime);
-							continue;
-						}
-					}
+					await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e2, true);
+					await FallBackToMessageSession();
+					throw;
 				}
-				break;
 			}
 		}
-
-		private static TimeSpan ErrorDelayTime = TimeSpan.FromSeconds(10);
-		private static int ErrorMaxRepeatTimes = 360;
 
 		public async Task RemoveMessage()
 		{
@@ -223,6 +220,7 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();
+		public UniversalSession ToUniversal() => (UniversalSession)this;
 
 		public Task<DiscordMessage> SessionMessage => Interactive.Interaction.GetOriginalResponseAsync();
 
@@ -231,13 +229,13 @@ namespace Manito.Discord.ChatNew
 		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
-			NextType = interactive.Message == null ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
+			NextType = id.MessageId == 0 ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
 		}
 
 		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
-			NextType = interactive.Message == null ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
+			NextType = id.MessageId == 0 ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
 		}
 
 		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction)
@@ -246,5 +244,6 @@ namespace Manito.Discord.ChatNew
 			Identifier = new DialogueCommandIdentifier(Interactive = new(interaction));
 			NextType = InteractionResponseType.ChannelMessageWithSource;
 		}
+		public static implicit operator UniversalSession(ComponentDialogueSession msg) => new(msg);
 	}
 }

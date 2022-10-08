@@ -47,7 +47,6 @@ namespace Manito.Discord.Shop
 					await _session.SendMessage(mg);
 
 					var argv = await _session.GetComponentInteraction();
-					await _session.DoLaterReply();
 
 					if (argv.CompareButton(exbtn))
 						break;

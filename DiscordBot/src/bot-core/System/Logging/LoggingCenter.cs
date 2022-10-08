@@ -52,20 +52,19 @@ namespace Manito.System.Logging
 			}
 		}
 
-		public Task WriteErrorClassedLog(string district, Exception err, bool isHandled) => WriteErrorClassedLog(district, $"{err}", isHandled);
-
-		public async Task WriteErrorClassedLog(string district, string log, bool isHandled)
+		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
-			var jlog = await MakeJsonLog(log);
-			var jflog = await MakeJsonLog(JsonConvert.SerializeObject(new
-			{
-				type = "error",
-				dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
-				isHandled,
-				data = jlog
-			}));
-			await InnerWriteLogToDB(district, jflog);
+			await Console.Out.WriteLineAsync("!!!Exception " + (isHandled ? "safely handled" : "not handled") + $"\n{err}\n\n\n");
+			await WriteErrorClassedLog(district, $"{err}", isHandled);
 		}
+
+		public async Task WriteErrorClassedLog(string district, string log, bool isHandled) => await _relay.Handle((district, JsonConvert.SerializeObject(new
+		{
+			type = "error",
+			dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
+			isHandled,
+			data = await MakeJsonLog(log)
+		})));
 
 		public Task WriteJsonLog(string district, JsonDocument log) => InnerWriteLogToDB(district, log);
 
@@ -84,10 +83,7 @@ namespace Manito.System.Logging
 			return jlog;
 		}
 
-		private async Task InnerWriteLogToDB(string district, JsonDocument jlog)
-		{
-			await _queue.Place(new LogLine("Discord", district, jlog));
-		}
+		private Task InnerWriteLogToDB(string district, JsonDocument jlog) => _queue.Place(new LogLine("Discord", district, jlog));
 
 		public async Task WriteLog(string district, string log) => await InnerWriteLogToDB(district, await MakeJsonLog(log));
 
@@ -98,7 +94,7 @@ namespace Manito.System.Logging
 			while (true)
 			{
 				var (district, log) = await _relay.GetData();
-				await _client.Domain.ExecutionThread.AddNew(() => WriteLog(district, log));
+				await WriteLog(district, log);
 			}
 		}
 

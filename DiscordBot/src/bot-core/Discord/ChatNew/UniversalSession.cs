@@ -13,24 +13,33 @@ namespace Manito.Discord.ChatNew
 		private IDialogueSession _innerSession;
 		public MyClientBundle Client => _innerSession.Client;
 		public IDialogueIdentifier Identifier => _innerSession.Identifier;
+		public UniversalSession ToUniversal() => this;
 
-		public UniversalSession(SessionFromMessage session)
-		{
-			_innerSession = session;
-			((IDialogueSession)session).OnStatusChange += ConvertSession;
-		}
-
-		public UniversalSession(ComponentDialogueSession session) => _innerSession = session;
+		public UniversalSession(IDialogueSession session) => (_innerSession = session).OnStatusChange += ConvertSession;
 
 		private async Task ConvertSession(IDialogueSession session, SessionInnerMessage msg)
 		{
-			if (msg.Message != "ConvertMe")
+			if (!msg.Message.ToLower().Contains("convertme"))
 				return;
 
-			var msgp = ((DiscordInteraction, DialogueCompInterIdentifier, DiscordMessage))msg.Generic;
-			_innerSession = new ComponentDialogueSession(Client, msgp.Item2, new InteractiveInteraction(msgp.Item1, msgp.Item3));
+			if (msg.Message.ToLower().Contains("tocomp"))
+			{
+				var (intr, iden, msgg) = ((DiscordInteraction, DialogueCompInterIdentifier, DiscordMessage))msg.Generic;
+				_innerSession = new ComponentDialogueSession(Client, iden, new InteractiveInteraction(intr, msgg));
+			}
+			if (msg.Message.ToLower().Contains("tomsg1"))
+			{
+				var (msgg, id) = ((DiscordMessage, ulong))msg.Generic;
+				_innerSession = new SessionFromMessage(Client, msgg, id);
+			}
+			if (msg.Message.ToLower().Contains("tomsg2"))
+			{
+				var (chnl, id) = ((DiscordChannel, ulong))msg.Generic;
+				_innerSession = new SessionFromMessage(Client, chnl, id);
+			}
 
 			session.OnStatusChange -= ConvertSession;
+			_innerSession.OnStatusChange += ConvertSession;
 		}
 
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
@@ -39,9 +48,31 @@ namespace Manito.Discord.ChatNew
 
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 
-		public Task DoLaterReply() => _innerSession.DoLaterReply();
-
+		private async Task SafeWriter(Func<Task> actor)
+		{
+			var v = 10;
+			var lim = 720;
+			var timeout = TimeSpan.FromSeconds(15000);
+			for (var i = 0; ; i++)
+			{
+				for (var j = 0; j < v; j++)
+				{
+					try
+					{
+						await actor();
+						return;
+					}
+					catch (Exception e) when (((i * v) + j) < lim)
+					{
+						await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
+					}
+				}
+				await Task.Delay(timeout);
+			}
+		}
+		public Task DoLaterReply() => SafeWriter(() => _innerSession.DoLaterReply());
 		public Task EndSession() => _innerSession.EndSession();
+
 
 		public Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default) => _innerSession.GetComponentInteraction(token);
 
@@ -52,9 +83,9 @@ namespace Manito.Discord.ChatNew
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) =>
 			_innerSession.GetReplyInteraction(token);
 
-		public Task RemoveMessage() => _innerSession.RemoveMessage();
+		public Task RemoveMessage() => SafeWriter(() => _innerSession.RemoveMessage());
 
-		public Task SendMessage(UniversalMessageBuilder msg) => _innerSession.SendMessage(msg);
+		public Task SendMessage(UniversalMessageBuilder msg) => SafeWriter(() => _innerSession.SendMessage(msg));
 
 		public Task<DiscordMessage> SessionMessage => _innerSession.SessionMessage;
 
