@@ -27,6 +27,7 @@ namespace Manito.Discord.ChatNew
 			_channel = channel;
 			_userId = userId;
 		}
+
 		public UniversalSession ToUniversal() => (UniversalSession)this;
 
 		public MyClientBundle Client {
@@ -95,6 +96,7 @@ namespace Manito.Discord.ChatNew
 
 		public Task<DiscordMessage> SessionMessage => Task.FromResult(_message);
 		public Task<DiscordChannel> SessionChannel => Task.FromResult(_channel);
+
 		public static implicit operator UniversalSession(SessionFromMessage msg) => new(msg);
 	}
 }

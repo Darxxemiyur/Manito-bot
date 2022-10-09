@@ -31,13 +31,9 @@ namespace Manito.Discord.Database
 
 		public int SaveChanges() => ImplementedContext.SaveChanges();
 
-		public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-		 => ImplementedContext.SaveChangesAsync(cancellationToken);
+		public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => ImplementedContext.SaveChangesAsync(cancellationToken);
 
-		public void SetUpDatabase(IMyDbFactory factory)
-		{
-			ImplementedContext = factory.OriginalFactory.CreateDbContext(null);
-		}
+		public void SetUpDatabase(IMyDbFactory factory) => ImplementedContext = factory.OriginalFactory.CreateDbContext(null);
 
 		public Task SetUpDatabaseAsync(IMyDbFactory factory) =>
 		 Task.Run(() => SetUpDatabase(factory));

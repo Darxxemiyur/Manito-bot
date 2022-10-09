@@ -43,6 +43,7 @@ namespace Manito._00_PatternSystems.Common
 
 			await relay.TheTask;
 		}
+
 		/// <summary>
 		/// Gets all items safely.
 		/// </summary>

@@ -129,9 +129,11 @@ namespace Manito.Discord.ChatNew
 		public ulong UserId {
 			get;
 		}
+
 		public ulong ChannelId {
 			get;
 		}
+
 		public ulong MessageId => 0;
 
 		public DialogueCommandIdentifier(InteractiveInteraction interaction)

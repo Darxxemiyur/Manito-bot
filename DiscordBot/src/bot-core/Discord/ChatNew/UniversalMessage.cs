@@ -30,8 +30,9 @@ namespace Manito.Discord.ChatNew
 			_content = msg.Content;
 		}
 
-		public UniversalMessageBuilder(params UniversalMessageBuilder[] um)
+		public UniversalMessageBuilder(params UniversalMessageBuilder[] umm)
 		{
+			var um = umm.Where(x => x != null);
 			_embeds = um?.Where(x => x._embeds != null).SelectMany(x => x._embeds)?.ToList();
 			_components = um?.Where(x => x._components != null).SelectMany(x => x._components)?.ToList();
 			_files = um?.SelectMany(x => x._files)?.ToDictionary(x => x.Key, x => x.Value);

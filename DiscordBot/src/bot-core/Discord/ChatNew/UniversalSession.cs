@@ -13,6 +13,7 @@ namespace Manito.Discord.ChatNew
 		private IDialogueSession _innerSession;
 		public MyClientBundle Client => _innerSession.Client;
 		public IDialogueIdentifier Identifier => _innerSession.Identifier;
+
 		public UniversalSession ToUniversal() => this;
 
 		public UniversalSession(IDialogueSession session) => (_innerSession = session).OnStatusChange += ConvertSession;
@@ -70,9 +71,10 @@ namespace Manito.Discord.ChatNew
 				await Task.Delay(timeout);
 			}
 		}
-		public Task DoLaterReply() => SafeWriter(() => _innerSession.DoLaterReply());
-		public Task EndSession() => _innerSession.EndSession();
 
+		public Task DoLaterReply() => SafeWriter(() => _innerSession.DoLaterReply());
+
+		public Task EndSession() => _innerSession.EndSession();
 
 		public Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default) => _innerSession.GetComponentInteraction(token);
 

@@ -25,20 +25,24 @@ namespace Manito.Discord.Client
 		}
 
 		/// <summary>
-		/// Returns a task that represent process of passed task, which on completion will return the completed task;
+		/// Returns a task that represent process of passed task, which on completion will return
+		/// the completed task;
 		/// </summary>
 		/// <param name="runners"></param>
 		/// <returns></returns>
 		public async Task<Task<Task>> AddNew(Func<Task> runner) => (await AddNew(new[] { runner })).First();
 
 		/// <summary>
-		/// Returns a list of tasks that represent process of passed tasks, which on completion will return the completed tasks;
+		/// Returns a list of tasks that represent process of passed tasks, which on completion will
+		/// return the completed tasks;
 		/// </summary>
 		/// <param name="runners"></param>
 		/// <returns></returns>
 		public Task<IEnumerable<Task<Task>>> AddNew(params Func<Task>[] runners) => AddNew(runners.AsEnumerable());
+
 		/// <summary>
-		/// Returns a list of tasks that represent process of passed tasks, which on completion will return the completed tasks;
+		/// Returns a list of tasks that represent process of passed tasks, which on completion will
+		/// return the completed tasks;
 		/// </summary>
 		/// <param name="runners"></param>
 		/// <returns></returns>
@@ -50,6 +54,7 @@ namespace Manito.Discord.Client
 			_onNew.TrySetResult();
 			return runner.Select(x => x.Item2);
 		}
+
 		private (Func<Task>, Task<Task>) SafeRelayHandler(Func<Task> invoke)
 		{
 			var relay = new MyTaskSource<Task>();
@@ -69,6 +74,7 @@ namespace Manito.Discord.Client
 			};
 			return (newInvoke, relay.MyTask);
 		}
+
 		private async Task<Exception> SafeHandler(Func<Task> invoke)
 		{
 			try

@@ -80,8 +80,30 @@ namespace Manito.System.Economy
 		private async Task CheckDialogue(DiscordInteraction args)
 		{
 			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
-
 			await rs.DoLaterReply();
+
+			var chnl = await _bot.MyDiscordClient.Client.GetChannelAsync(rs.Identifier.ChannelId);
+
+			//var whook = await chnl.CreateWebhookAsync("Chronos");
+
+
+			var btn = new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!!!!");
+			//var msg = await whook.ExecuteAsync(((UniversalMessageBuilder)"Shit").AddComponents(btn));
+			for (var i = 0; i < 6; i++)
+			{
+
+				//await whook.EditMessageAsync(msg.Id, );
+				//await intre.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, ((UniversalMessageBuilder)$"Shit{i * 86}").AddComponents(btn));
+				for (int j = 1; j < 86; j++)
+					await rs.SendMessage(((UniversalMessageBuilder)$"Shit{(i * 86) + j}").AddComponents(btn));
+				var intre = await rs.GetComponentInteraction();
+			}
+			//var mmsg = await chnl.GetMessageAsync(msg.Id);
+			//await mmsg.DeleteAsync();
+
+			//await whook.DeleteAsync();
+
+
 			await rs.SendMessage(new UniversalMessageBuilder().SetContent("Goodi job!").AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!")));
 
 			var intr = await rs.GetInteraction(InteractionTypes.Component | InteractionTypes.Message);
@@ -91,9 +113,6 @@ namespace Manito.System.Economy
 			if (intr.Type == InteractionTypes.Message)
 				await rs.SendMessage(new UniversalMessageBuilder().SetContent("Msg interaction!"));
 
-			await rs.DoLaterReply();
-			await rs.DoLaterReply();
-			await rs.DoLaterReply();
 			await rs.DoLaterReply();
 		}
 

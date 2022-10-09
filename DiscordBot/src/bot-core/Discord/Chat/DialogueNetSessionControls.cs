@@ -1,11 +1,11 @@
 using Manito.Discord.Client;
 
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.Chat.DialogueNet
@@ -17,13 +17,13 @@ namespace Manito.Discord.Chat.DialogueNet
 		private MyDomain _service;
 		public MyDomain Service => _service;
 		public MyClientBundle Client => Service.MyDiscordClient;
-		private SemaphoreSlim _lock;
+		private AsyncLocker _lock;
 
 		public DialogueNetSessionControls(MyDomain service)
 		{
 			_service = service;
 			_sessions = new();
-			_lock = new(1, 1);
+			_lock = new();
 		}
 
 		public bool SessionExists(Func<T, bool> predictate) =>
@@ -35,9 +35,8 @@ namespace Manito.Discord.Chat.DialogueNet
 
 		public async Task<T1> Atomary<T1>(Func<DialogueNetSessionControls<T>, Task<T1>> run)
 		{
-			await _lock.WaitAsync();
+			await using var _ = await _lock.BlockAsyncLock();
 			var res = await run(this);
-			_lock.Release();
 			return res;
 		}
 

@@ -136,6 +136,7 @@ namespace Manito.Discord.ChatNew
 		/// Used to inform subscribers about session removal.
 		/// </summary>
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
+
 		UniversalSession ToUniversal();
 	}
 }

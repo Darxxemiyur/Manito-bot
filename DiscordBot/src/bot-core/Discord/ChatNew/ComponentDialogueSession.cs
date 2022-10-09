@@ -1,10 +1,7 @@
 ﻿using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using DisCatSharp.Exceptions;
 
 using Manito.Discord.Client;
-
-using Microsoft.VisualBasic;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
 
@@ -135,7 +132,6 @@ namespace Manito.Discord.ChatNew
 					NextType = InteractionResponseType.Pong;
 					break;
 			}
-
 		}
 
 		private async Task FallBackToMessageSession()
@@ -186,7 +182,6 @@ namespace Manito.Discord.ChatNew
 			Identifier = new DialogueCompInterIdentifier(Interactive = intr);
 			NextType = InteractionResponseType.UpdateMessage;
 
-
 			return intr;
 		}
 
@@ -220,6 +215,7 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();
+
 		public UniversalSession ToUniversal() => (UniversalSession)this;
 
 		public Task<DiscordMessage> SessionMessage => Interactive.Interaction.GetOriginalResponseAsync();
@@ -244,6 +240,7 @@ namespace Manito.Discord.ChatNew
 			Identifier = new DialogueCommandIdentifier(Interactive = new(interaction));
 			NextType = InteractionResponseType.ChannelMessageWithSource;
 		}
+
 		public static implicit operator UniversalSession(ComponentDialogueSession msg) => new(msg);
 	}
 }

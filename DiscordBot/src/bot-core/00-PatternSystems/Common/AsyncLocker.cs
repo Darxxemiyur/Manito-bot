@@ -19,8 +19,11 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 		public void Lock(TimeSpan time, CancellationToken token = default) => _lock.Wait(time, token);
 
-		public Task<BlockAsyncLock> BlockAsyncLock(CancellationToken token = default) =>
-			AsyncLock(token).ContinueWith((x) => new BlockAsyncLock(this));
+		public async Task<BlockAsyncLock> BlockAsyncLock(CancellationToken token = default)
+		{
+			await AsyncLock(token);
+			return new BlockAsyncLock(this);
+		}
 
 		public BlockAsyncLock BlockLock()
 		{

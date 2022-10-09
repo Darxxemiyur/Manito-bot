@@ -41,6 +41,7 @@ namespace Manito.Discord.Client
 			};
 
 			_client = new DiscordClient(config);
+
 			_appCommands = new ApplicationCommands(collection);
 
 			_eventInliner = new EventInline(new EventBuffer(_client));
