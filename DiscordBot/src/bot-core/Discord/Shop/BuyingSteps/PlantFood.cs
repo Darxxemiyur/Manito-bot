@@ -3,6 +3,7 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
 using Manito.Discord.Orders;
 using Manito.System.Economy;
 
@@ -68,7 +69,7 @@ namespace Manito.Discord.Shop
 				return new();
 			}
 
-			var order = new Order(_session.Context.CustomerId);
+			var order = new Order(_session.Context.CustomerId, $"{food.Name}({food.Amount}шт) для игрока с айди {id}");
 			var seq = new List<Order.Step> {
 				new Order.ShowInfoStep($"Выдача `{food.Item.Name.ToLower()}` в размере {food.Amount} единиц игроку {id}"),
 				new Order.ConfirmationStep(id, $"Подтвердите получение `{food.Item.Name.ToLower()}` на {food.Amount} единиц игроком с айди {id}", $"`/m {id} Вы подтверждаете получение {food.Item.Name.ToLower()} на {food.Amount}? (Да/Нет)`", $"Игрок с айди {id} отклонил Ваш заказ."),
@@ -85,7 +86,7 @@ namespace Manito.Discord.Shop
 
 			order.SetSteps(seq);
 
-			await _session.Client.Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, food, _session.Context.Wallet)));
+			await _session.Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, food, _session.Context.Wallet))));
 
 			return new();
 		}

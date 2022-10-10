@@ -1,3 +1,4 @@
+using Manito.Discord.Cleaning;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
@@ -41,6 +42,10 @@ namespace Manito.Discord.Database
 			get; set;
 		}
 
+		public DbSet<MessageToRemove> MessagesToRemove {
+			get; set;
+		}
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<MessageWallTranslator>().HasKey(x => x.ID);
@@ -57,6 +62,8 @@ namespace Manito.Discord.Database
 			modelBuilder.Entity<PlayerEconomyDeposit>().HasKey(x => x.DiscordID);
 
 			modelBuilder.Entity<PlayerEconomyWork>(x => x.HasKey(x => x.DiscordID));
+
+			modelBuilder.Entity<MessageToRemove>(x => x.HasKey(x => x.MessageID));
 
 			modelBuilder.Entity<ShopItem>().HasNoKey();
 

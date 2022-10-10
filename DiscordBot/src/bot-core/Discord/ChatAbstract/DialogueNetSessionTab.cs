@@ -26,7 +26,7 @@ namespace Manito.Discord.ChatAbstract
 		{
 			var session = await _sessionTab.CreateSync(interactive, context);
 
-			await _domain.ExecutionThread.AddNew(async () => {
+			await _domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => {
 				try
 				{
 					await NetworkCommon.RunNetwork(await builder(session));
@@ -45,7 +45,7 @@ namespace Manito.Discord.ChatAbstract
 					}
 					throw new AggregateException(e);
 				}
-			});
+			}));
 
 			return session;
 		}

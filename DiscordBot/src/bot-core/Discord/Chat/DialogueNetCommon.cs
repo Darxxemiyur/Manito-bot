@@ -72,12 +72,12 @@ namespace Manito.Discord.Chat.DialogueNet
 			{
 				var mg2 = await responder(quantity);
 
-				foreach (var btn in btns.SelectMany(x => x))
+				foreach (var btn in btns.SelectMany(x => x).Select(x => x.Item1))
 				{
-					if (await limiter(quantity, int.Parse(btn.Item1.Label)))
-						btn.Item1.Enable();
+					if (await limiter(quantity, int.Parse(btn.Label)))
+						btn.Enable();
 					else
-						btn.Item1.Disable();
+						btn.Disable();
 				}
 
 				foreach (var btnrs in btns)
@@ -101,8 +101,6 @@ namespace Manito.Discord.Chat.DialogueNet
 					continue;
 				}
 
-				await Task.Delay(5000);
-
 				var pressed = comp.GetButton(btns.SelectMany(x => x)
 					.Select(x => x.Item1).ToDictionary(x => x.CustomId));
 				var change = int.Parse(pressed.Label);
@@ -112,6 +110,6 @@ namespace Manito.Discord.Chat.DialogueNet
 		}
 
 		public static NodeResultHandler DefaultNodeResultHandler =>
-			(x) => Task.FromResult(x.NextAction == NextNetworkActions.Continue);
+			(x, y) => Task.FromResult(x.NextAction == NextNetworkActions.Continue && !y.IsCancellationRequested);
 	}
 }

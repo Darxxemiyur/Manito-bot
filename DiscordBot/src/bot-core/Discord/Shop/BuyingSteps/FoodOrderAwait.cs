@@ -1,5 +1,6 @@
 ﻿using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
 using Manito.Discord.Orders;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
@@ -39,10 +40,10 @@ namespace Manito.Discord.Shop
 		{
 			var id = (int)args.Payload;
 
-			var order = new Order(_session.Context.CustomerId);
+			var order = new Order(_session.Context.CustomerId, $"{_item.Name}({_item.Amount}шт) для {id}");
 			var seq = new List<Order.Step> {
-				new Order.ShowInfoStep($"Выдача `{_item.Item.Name.ToLower()}` в размере {_item.Amount} единиц игроку {id}"),
-				new Order.ConfirmationStep(id, $"Подтвердите получение `{_item.Item.Name.ToLower()}` на {_item.Amount} единиц игроком с айди {id}", $"`/m {id} Вы подтверждаете получение {_item.Item.Name.ToLower()} на {_item.Amount}? (Да/Нет)`", $"Игрок с айди {id} отклонил Ваш заказ."),
+				new Order.ShowInfoStep($"Выдача `{_item.Name.ToLower()}` в размере {_item.Amount} единиц игроку {id}"),
+				new Order.ConfirmationStep(id, $"Подтвердите получение `{_item.Name.ToLower()}` на {_item.Amount} единиц игроком с айди {id}", $"`/m {id} Вы подтверждаете получение {_item.Name.ToLower()} на {_item.Amount}? (Да/Нет)`", $"Игрок с айди {id} отклонил Ваш заказ."),
 				new Order.ChangeStateStep(),
 				new Order.InformStep(id, $"Уведомите игрока с айди {id} о выполнении заказа", $"`/m {id} Происходит исполнение заказа, пожалуйста не двигайтесь`"),
 				new Order.CommandStep(id, $"Телепортирование к {id}", $"`TeleportToP {id}`")
@@ -59,12 +60,12 @@ namespace Manito.Discord.Shop
 				size -= single;
 				var food = new ShopItem.InCart(_item.Item, single);
 				var pieceStr = pieces > 1 ? $"\nЧасть {piece++} из {pieces}" : "";
-				seq.Add(new Order.CommandStep(id, $"Выдача {food.Item.Name.ToLower()} на {single} игроку с айди {id}{pieceStr}", food.RelatedCommand));
+				seq.Add(new Order.CommandStep(id, $"Выдача {food.Name.ToLower()} на {single} игроку с айди {id}{pieceStr}", food.RelatedCommand));
 			}
 
 			order.SetSteps(seq);
 
-			await _session.Client.Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, _item, _session.Context.Wallet)));
+			await _session.Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, _item, _session.Context.Wallet))));
 
 			return new(false);
 		}

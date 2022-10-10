@@ -48,6 +48,8 @@ namespace Manito.Discord.Orders
 		{
 			yield return new DiscordApplicationCommand("admin",
 			 "Начать администрировать");
+			yield return new DiscordApplicationCommand("admin_remove",
+			 "Завершить работу администраторов.");
 #if DEBUG
 			yield return new DiscordApplicationCommand("admin_add_test",
 			 "Добавить 5 заказов.");
@@ -65,6 +67,8 @@ namespace Manito.Discord.Orders
 
 		private Task<bool> IsWorthy(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
 
+		private Task<bool> IsGod(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.IsGod(user);
+
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
 			if (!await IsWorthy(args.User))
@@ -75,11 +79,27 @@ namespace Manito.Discord.Orders
 			}
 
 			if (args.Data.Name.Equals("admin"))
-				await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x, _pool)));
+			{
+				var session = await _aoTab.CreateSession(new(args), new(), x => Task.FromResult((IDialogueNet)new AdminOrderControl(x, _pool)));
+				await Task.WhenAll(_aoTab.Sessions.Where(x => x.Identifier.UserId == args.User.Id && x != session).Select(x => x.Context.Control.QuitControl()));
+				return;
+			}
+
+			if (!await IsGod(args.User))
+			{
+				var msgnw = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Недостаточно прав!")).AsEphemeral();
+				await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnw);
+				return;
+			}
+			if (args.Data.Name.Equals("admin_remove"))
+			{
+				await Task.WhenAll(_aoTab.Sessions.Select(x => x.Context.Control.QuitControl()));
+			}
 			if (args.Data.Name.Equals("admin_add_test"))
+			{
 				for (var i = 0; i < 5; i++)
 				{
-					var order = new Order(0);
+					var order = new Order(0, "");
 
 					var oid = order.OrderId;
 
@@ -94,6 +114,9 @@ namespace Manito.Discord.Orders
 					order.SetSteps(step1, step2, step3);
 					await _pool.PlaceOrder(order);
 				}
+			}
+			var msgnwf = new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription("Готово!")).AsEphemeral();
+			await args.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, msgnwf);
 		}
 	}
 }

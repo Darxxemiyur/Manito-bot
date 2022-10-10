@@ -3,6 +3,7 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
 using Manito.Discord.Orders;
 using Manito.System.Economy;
 
@@ -102,7 +103,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 		private async Task<NextNetworkInstruction> ExecuteTransaction(NetworkInstructionArgument args)
 		{
 			var id = _id;
-			var order = new Order(_session.Context.CustomerId);
+			var order = new Order(_session.Context.CustomerId, $"{_item.Name} для игрока с айди {id}");
 			var seq = new List<Order.Step> {
 				new Order.ShowInfoStep($"Выдача `{_item.Name.ToLower()}` игроку {id}"),
 				new Order.ConfirmationStep(id, $"Подтвердите `{_item.Name.ToLower()}` игроком с айди {id}", $"`/m {id} Вы подтверждаете {_item.Name.ToLower()} для Вашего дино? (Да/Нет)`", $"Игрок с айди {id} отклонил Ваш заказ."),
@@ -115,7 +116,7 @@ namespace Manito.Discord.Shop.BuyingSteps
 			seq.Add(new Order.InformStep(id, $"Уведомите игрока с айди {id} о завершении заказа", $"`/m {id} Заказ №{order.OrderId}({_item.Name}) выполнен!`"));
 			order.SetSteps(seq);
 
-			await _session.Client.Domain.ExecutionThread.AddNew(async () => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, _item, Wallet)));
+			await _session.Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => await NetworkCommon.RunNetwork(new OrderAwait(new(new SessionFromMessage(_session.Client, await _session.SessionChannel, _session.Context.CustomerId)), order, _item, Wallet))));
 
 			return new(false);
 		}

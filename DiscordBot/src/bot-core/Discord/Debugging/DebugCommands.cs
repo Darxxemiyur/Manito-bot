@@ -86,12 +86,10 @@ namespace Manito.System.Economy
 
 			//var whook = await chnl.CreateWebhookAsync("Chronos");
 
-
 			var btn = new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!!!!");
 			//var msg = await whook.ExecuteAsync(((UniversalMessageBuilder)"Shit").AddComponents(btn));
 			for (var i = 0; i < 6; i++)
 			{
-
 				//await whook.EditMessageAsync(msg.Id, );
 				//await intre.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, ((UniversalMessageBuilder)$"Shit{i * 86}").AddComponents(btn));
 				for (int j = 1; j < 86; j++)
@@ -102,7 +100,6 @@ namespace Manito.System.Economy
 			//await mmsg.DeleteAsync();
 
 			//await whook.DeleteAsync();
-
 
 			await rs.SendMessage(new UniversalMessageBuilder().SetContent("Goodi job!").AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "theidthing", "Press me!")));
 

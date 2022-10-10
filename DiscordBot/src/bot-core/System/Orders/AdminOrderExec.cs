@@ -3,6 +3,7 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.Client;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
@@ -87,7 +88,7 @@ namespace Manito.Discord.Orders
 				var step = (InformStep)arg.Payload;
 
 				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "executed", "Выполнено.");
-				var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 255, 0)).WithDescription($"{step.Description}\nНапишите игроку \"{step.Info}\" и нажмите \"{asked.Label}\"");
+				var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 255, 0)).WithDescription($"{step.Description}\nНапишите игроку \"{step.Info}\" и нажмите \"{asked.Label}\"").WithTimestamp(DateTimeOffset.Now);
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked));
 
@@ -134,12 +135,7 @@ namespace Manito.Discord.Orders
 
 		private string _cancelReason;
 
-		public async Task ChangeOrder()
-		{
-			await Console.Out.WriteLineAsync($"{ExOrder != null}");
-			await Task.Run(_swapToken.Cancel);
-			await Console.Out.WriteLineAsync($"{_swapToken.IsCancellationRequested}");
-		}
+		public Task ChangeOrder() => Task.Run(_swapToken.Cancel);
 
 		private async Task<NextNetworkInstruction> DoConfirmation(NetworkInstructionArgument arg)
 		{
@@ -150,9 +146,7 @@ namespace Manito.Discord.Orders
 				var asked = new DiscordButtonComponent(ButtonStyle.Primary, "asked", "Опрошено");
 				var success = new DiscordButtonComponent(ButtonStyle.Success, "success", "Подтвердить", true);
 				var fail = new DiscordButtonComponent(ButtonStyle.Danger, "fail", "Отклонить", true);
-				var embed = new DiscordEmbedBuilder();
-				embed.WithColor(new DiscordColor(255, 255, 0));
-				embed.WithDescription($"{step.Description}\nНе опрошено.\nНапишите в чат \"{step.Question}\" и нажмите \"{asked.Label}\"");
+				var embed = new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 255, 0)).WithDescription($"{step.Description}\nНе опрошено.\nНапишите в чат \"{step.Question}\" и нажмите \"{asked.Label}\"").WithTimestamp(DateTimeOffset.Now);
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked).AddComponents(fail, success));
 
@@ -161,7 +155,7 @@ namespace Manito.Discord.Orders
 				asked.Disable();
 				success.Enable();
 				fail.Enable();
-				embed.WithDescription($"{step.Description}\nОпрошено.\nДождитесь ответа игрока.\nВ случае `Нет`, жмите \"{fail.Label}\", в случае `Да`, жмите \"{success.Label}\"");
+				embed.WithDescription($"{step.Description}\nОпрошено.\nДождитесь ответа игрока.\nВ случае `Нет`, жмите \"{fail.Label}\", в случае `Да`, жмите \"{success.Label}\"").WithTimestamp(DateTimeOffset.Now);
 
 				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
 					.AddComponents(asked).AddComponents(fail, success));
@@ -193,7 +187,7 @@ namespace Manito.Discord.Orders
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"{step.Description}\nНапишите в консоль \"{step.Command}\" и нажмите \"{asked.Label}\"");
-				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed)
+				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed.WithTimestamp(DateTimeOffset.Now))
 					.AddComponents(asked));
 
 				await Session.GetComponentInteraction(_localToken.Token);
@@ -229,7 +223,7 @@ namespace Manito.Discord.Orders
 
 				var change = new DiscordButtonComponent(ButtonStyle.Primary, "change", "Выбрать другой заказ.");
 				var cont = new DiscordButtonComponent(ButtonStyle.Success, "continue", "Продолжить.");
-				var embed = new DiscordEmbedBuilder();
+				var embed = new DiscordEmbedBuilder().WithTimestamp(DateTimeOffset.Now);
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"{step.Description}");
 				await Session.SendMessage(new UniversalMessageBuilder()
@@ -271,13 +265,13 @@ namespace Manito.Discord.Orders
 				var embed = new DiscordEmbedBuilder();
 				embed.WithColor(new DiscordColor(255, 255, 0));
 				embed.WithDescription($"Ожидание заказов...");
-				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed));
+				await Session.SendMessage(new UniversalMessageBuilder().AddEmbed(embed.WithTimestamp(DateTimeOffset.Now)));
 
 				ExOrder = await _pool.GetOrder(_localToken.Token);
 
 				var msg = await _channel.SendMessageAsync(new UniversalMessageBuilder().SetContent($"<@{_admin.Id}>").AddMention(new UserMention(_admin)));
 
-				await Session.Client.Domain.ExecutionThread.AddNew(() => msg.DeleteAsync());
+				await Session.Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => msg.DeleteAsync()));
 
 				return new(Decider);
 			}

@@ -18,12 +18,17 @@ namespace Manito.System.Economy
 			get; set;
 		}
 
+		public bool IsFrozen {
+			get; set;
+		}
+
 		public PlayerEconomyDeposit(ulong discordID)
 		{
 			DiscordID = discordID;
 			ScalesCurr = 10000;
 			ChupatCurr = 0;
 			DonatCurr = 0;
+			IsFrozen = false;
 		}
 	}
 }

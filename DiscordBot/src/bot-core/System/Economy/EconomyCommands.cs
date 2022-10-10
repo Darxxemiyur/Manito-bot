@@ -165,7 +165,7 @@ namespace Manito.System.Economy
 		{
 			var target = args.User.Id;
 
-			var session = new ComponentDialogueSession(_client, args);
+			var session = new ComponentDialogueSession(_client, args).ToUniversal();
 			var wallet = _economy.GetPlayerWallet(target);
 			await session.DoLaterReply();
 
@@ -196,11 +196,11 @@ namespace Manito.System.Economy
 				var small = TimeSpan.FromSeconds(10);
 
 				delay = time - delay > small ? small : time - delay;
-				await _client.Domain.ExecutionThread.AddNew(async () => {
+				await _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => {
 					await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Вы уже работали!\nВы сможете работать <t:{(work.LastWork + time).ToUnixTimeSeconds()}:R>").WithColor(new DiscordColor(240, 140, 50)));
 					await Task.Delay(delay);
 					await session.RemoveMessage();
-				});
+				}));
 				return;
 			}
 			else
@@ -210,17 +210,19 @@ namespace Manito.System.Economy
 			}
 			await db.SaveChangesAsync();
 
-			await _client.Domain.ExecutionThread.AddNew(async () => {
+			await _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => {
+				var lsession = session;
 				var gggg = Math.Max(0, (int)Math.Floor(theSpan.TotalSeconds / time.TotalSeconds) - 1);
 
 				var fmoney = (int)Math.Pow(Enumerable.Range(1, gggg).Select(x => (double)Random.Shared.Next(min * interv, max * interv)).Sum(), (double)63 / 100);
 				var money = Random.Shared.Next(min * interv, max * interv);
-				await session.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}" + (gggg > 0 ? $"\n+{fmoney} {wallet.CurrencyEmoji} за {gggg} пропущеных ворков." : ".")).WithColor(new DiscordColor(140, 240, 50)));
+				await lsession.SendMessage(new DiscordEmbedBuilder().WithDescription($"Заработано {money} {wallet.CurrencyEmoji}" + (gggg > 0 ? $"\n+{fmoney} {wallet.CurrencyEmoji} за {gggg} пропущеных ворков." : ".")).WithColor(new DiscordColor(140, 240, 50)));
 
 				await wallet.Deposit(money + fmoney, "Заработок");
 				await Task.Delay(60000);
-				await session.RemoveMessage();
-			});
+				await lsession.RemoveMessage();
+				await lsession.EndSession();
+			}));
 		}
 
 		private AsyncLocker _lock = new();
@@ -309,7 +311,7 @@ namespace Manito.System.Economy
 			var session = new ComponentDialogueSession(_client, args);
 			await session.DoLaterReply();
 
-			await _client.Domain.ExecutionThread.AddNew(async () => {
+			await _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(async (x) => {
 				var guild = await _client.ManitoGuild;
 				var roles = guild.Roles.Select(x => x.Value).Where(x => x.Name.ToLower().Contains("купон"));
 
@@ -332,7 +334,7 @@ namespace Manito.System.Economy
 				await Task.Delay(120000);
 				await session.RemoveMessage();
 				await session.EndSession();
-			});
+			}));
 		}
 
 		private async Task Deposit(DiscordInteraction args)

@@ -14,7 +14,9 @@ namespace Manito.System.UserAssociation
 
 		public UserPermissionChecker(MyDomain domain) => _domain = domain;
 
-		public Task<bool> IsGod(DiscordUser user) => Task.FromResult(860897395109789706 == user.Id);
+		public ulong GodId => 860897395109789706;
+
+		public Task<bool> IsGod(DiscordUser user) => Task.FromResult(GodId == user.Id);
 
 		public async Task<bool> DoesHaveAdminPermission(object location, DiscordUser user, object salt = default)
 		{

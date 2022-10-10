@@ -1,3 +1,4 @@
+using Manito.Discord.Cleaning;
 using Manito.Discord.Client;
 using Manito.Discord.Config;
 using Manito.Discord.PermanentMessage;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
-	public class MyDbFactory : IShopDbFactory, IEconomyDbFactory, IPermMessageDbFactory, ILoggingDBFactory, IMyDbFactory, IModule
+	public class MyDbFactory : IShopDbFactory, ICleaningDbFactory, IEconomyDbFactory, IPermMessageDbFactory, ILoggingDBFactory, IMyDbFactory, IModule
 	{
 		private class DTDCF : IDbContextFactory<DbContextImplementation>, IDesignTimeDbContextFactory<DbContextImplementation>
 		{
@@ -74,55 +75,25 @@ namespace Manito.Discord.Database
 			return db;
 		}
 
-		IShopDb IShopDbFactory.CreateMyDbContext()
-		{
-			return CreateMyDbContext();
-		}
+		IShopDb IShopDbFactory.CreateMyDbContext() => CreateMyDbContext();
 
-		async Task<IShopDb> IShopDbFactory.CreateMyDbContextAsync()
-		{
-			return await CreateMyDbContextAsync();
-		}
+		async Task<IShopDb> IShopDbFactory.CreateMyDbContextAsync() => await CreateMyDbContextAsync();
 
-		IMyDatabase IMyDbFactory.CreateMyDbContext()
-		{
-			return CreateMyDbContext();
-		}
+		IMyDatabase IMyDbFactory.CreateMyDbContext() => CreateMyDbContext();
 
-		async Task<IMyDatabase> IMyDbFactory.CreateMyDbContextAsync()
-		{
-			return await CreateMyDbContextAsync();
-		}
+		async Task<IMyDatabase> IMyDbFactory.CreateMyDbContextAsync() => await CreateMyDbContextAsync();
 
-		IPermMessageDb IPermMessageDbFactory.CreateMyDbContext()
-		{
-			return CreateMyDbContext();
-		}
+		IPermMessageDb IPermMessageDbFactory.CreateMyDbContext() => CreateMyDbContext();
 
-		async Task<IPermMessageDb> IPermMessageDbFactory.CreateMyDbContextAsync()
-		{
-			return await CreateMyDbContextAsync();
-		}
+		async Task<IPermMessageDb> IPermMessageDbFactory.CreateMyDbContextAsync() => await CreateMyDbContextAsync();
 
-		IEconomyDb IEconomyDbFactory.CreateEconomyDbContext()
-		{
-			return CreateMyDbContext();
-		}
+		IEconomyDb IEconomyDbFactory.CreateEconomyDbContext() => CreateMyDbContext();
 
-		async Task<IEconomyDb> IEconomyDbFactory.CreateEconomyDbContextAsync()
-		{
-			return await CreateMyDbContextAsync();
-		}
+		async Task<IEconomyDb> IEconomyDbFactory.CreateEconomyDbContextAsync() => await CreateMyDbContextAsync();
 
-		ILoggingDB ILoggingDBFactory.CreateLoggingDBContext()
-		{
-			return CreateMyDbContext();
-		}
+		ILoggingDB ILoggingDBFactory.CreateLoggingDBContext() => CreateMyDbContext();
 
-		async Task<ILoggingDB> ILoggingDBFactory.CreateLoggingDBContextAsync()
-		{
-			return await CreateMyDbContextAsync();
-		}
+		async Task<ILoggingDB> ILoggingDBFactory.CreateLoggingDBContextAsync() => await CreateMyDbContextAsync();
 
 		public async Task RunModule()
 		{
@@ -133,5 +104,11 @@ namespace Manito.Discord.Database
 			await db.ImplementedContext.Database.MigrateAsync();
 #endif
 		}
+
+		ICleaningDb ICleaningDbFactory.CreateMyDbContext() =>
+			 CreateMyDbContext();
+
+		async Task<ICleaningDb> ICleaningDbFactory.CreateMyDbContextAsync() =>
+			 await CreateMyDbContextAsync();
 	}
 }

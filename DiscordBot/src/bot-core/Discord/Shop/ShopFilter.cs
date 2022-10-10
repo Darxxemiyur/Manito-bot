@@ -18,7 +18,7 @@ namespace Manito.Discord.Shop
 			while (true)
 			{
 				var data = (await _queue.GetData()).Item2;
-				await _service.ExecutionThread.AddNew(() => HandleAsCommand(data));
+				await _service.ExecutionThread.AddNew(new ExecThread.Job(() => HandleAsCommand(data)));
 			}
 		}
 

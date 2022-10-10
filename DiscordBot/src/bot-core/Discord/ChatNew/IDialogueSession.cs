@@ -22,7 +22,7 @@ namespace Manito.Discord.ChatNew
 		/// <summary>
 		/// Identifier of message to pull events for.
 		/// </summary>
-		IDialogueIdentifier Identifier {
+		ISessionState Identifier {
 			get;
 		}
 

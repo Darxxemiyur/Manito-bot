@@ -1,3 +1,4 @@
+using Manito.Discord.Cleaning;
 using Manito.Discord.Client;
 using Manito.Discord.Config;
 using Manito.Discord.Database;
@@ -29,6 +30,7 @@ namespace Manito.Discord
 		private RootConfig _rootConfig;
 		private MessageController _msgWallCtr;
 		private LoggingCenter _logging;
+		private MessageRemover _msgRemover;
 		public IServiceCollection ServiceCollection => _serviceCollection;
 		public MyClientBundle MyDiscordClient => _myDiscordClient;
 		public ExecThread ExecutionThread => _executionThread;
@@ -39,6 +41,7 @@ namespace Manito.Discord
 		public RootConfig RootConfig => _rootConfig;
 		public MessageController MsgWallCtr => _msgWallCtr;
 		public LoggingCenter Logging => _logging;
+		public MessageRemover MessageRemover => _msgRemover;
 
 		public static async Task<MyDomain> Create()
 		{
@@ -67,6 +70,7 @@ namespace Manito.Discord
 			_appCommands = _myDiscordClient.AppCommands;
 			_filters = new(this, _myDiscordClient.EventsBuffer);
 			_logging = new(_myDiscordClient, _db);
+			_msgRemover = new(this, _db);
 			await _filters.Initialize();
 		}
 
@@ -82,11 +86,12 @@ namespace Manito.Discord
 		{
 			yield return _db.RunModule();
 			yield return _executionThread.RunModule();
-			yield return _myDiscordClient.StartLongTerm();
-			yield return _filters.RunModule();
-			yield return _economy.RunModule();
-			yield return _msgWallCtr.RunModule();
-			yield return _logging.RunModule();
+			yield return _executionThread.AddNew(new ExecThread.Job(_myDiscordClient.StartLongTerm));
+			yield return _executionThread.AddNew(new ExecThread.Job(_msgRemover.RunModule));
+			yield return _executionThread.AddNew(new ExecThread.Job(_filters.RunModule));
+			yield return _executionThread.AddNew(new ExecThread.Job(_economy.RunModule));
+			yield return _executionThread.AddNew(new ExecThread.Job(_msgWallCtr.RunModule));
+			yield return _executionThread.AddNew(new ExecThread.Job(_logging.RunModule));
 		}
 	}
 }

@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
+	/// <summary>
+	/// Base interface for all derivative db interfaces
+	/// </summary>
 	public interface IMyDatabase : IDisposable, IAsyncDisposable
 	{
 		DbContextImplementation ImplementedContext {

@@ -1,12 +1,9 @@
-﻿using DisCatSharp.EventArgs;
-
-using Name.Bayfaderix.Darxxemiyur.Common;
+﻿using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System.Diagnostics;
 
 namespace Tests
 {
-
 	[TestClass]
 	public class UnitTSSSSS
 	{
@@ -17,10 +14,10 @@ namespace Tests
 
 			Console.WriteLine(await source.TrySetResultAsync());
 
-
 			await source.MyTask;
 			Console.WriteLine(1000);
 		}
+
 		[TestMethod("ErrorCheck2")]
 		public async Task Method3()
 		{

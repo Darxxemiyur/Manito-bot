@@ -1,5 +1,3 @@
-using DisCatSharp.EventArgs;
-
 using Name.Bayfaderix.Darxxemiyur.Common;
 
 namespace Tests
@@ -11,6 +9,7 @@ namespace Tests
 		public void TestMethod1()
 		{
 		}
+
 		[TestMethod("SHITSHITSHIT")]
 		public async Task Method3()
 		{
@@ -18,24 +17,19 @@ namespace Tests
 
 			{
 				using var f = await locker.BlockAsyncLock();
-
 			}
 
 			{
 				using var f = await locker.BlockAsyncLock();
-
 			}
 
 			{
 				using var f = await locker.BlockAsyncLock();
-
 			}
 
 			{
 				using var f = await locker.BlockAsyncLock();
-
 			}
-
 		}
 
 		[TestMethod("TaskTest5")]
@@ -74,6 +68,7 @@ namespace Tests
 			Console.WriteLine("DoTheThings");
 			Console.WriteLine($"{DateTime.Now}");
 		}
+
 		[TestMethod("TaskTest")]
 		public async Task TestMethod2()
 		{
@@ -81,10 +76,12 @@ namespace Tests
 
 			await Task.WhenAll(Gen(proxy), Read(proxy));
 		}
+
 		private async Task Gen(FIFOACollection<int> proxy)
 		{
 			await Task.WhenAll(Enumerable.Range(1, 500).Select(x => proxy.Handle(x)));
 		}
+
 		private async Task Read(FIFOACollection<int> proxy)
 		{
 			while (await proxy.HasAny())

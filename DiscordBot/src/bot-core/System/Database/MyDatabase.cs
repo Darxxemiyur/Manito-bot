@@ -1,3 +1,4 @@
+using Manito.Discord.Cleaning;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
-	public class MyDatabase : IShopDb, ILoggingDB, IPermMessageDb, IEconomyDb, IMyDatabase
+	public class MyDatabase : IShopDb, ICleaningDb, ILoggingDB, IPermMessageDb, IEconomyDb, IMyDatabase
 	{
 		private bool disposedValue;
 
@@ -28,6 +29,8 @@ namespace Manito.Discord.Database
 		public DbSet<LogLine> LogLines => ImplementedContext.LogLines;
 
 		public DbSet<PlayerEconomyWork> PlayerWorks => ImplementedContext.PlayerWorks;
+
+		public DbSet<MessageToRemove> MsgsToRemove => ImplementedContext.MessagesToRemove;
 
 		public int SaveChanges() => ImplementedContext.SaveChanges();
 

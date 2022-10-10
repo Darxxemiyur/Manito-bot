@@ -39,7 +39,7 @@ namespace Manito.System.Economy
 			if (res == null)
 				return;
 
-			await _domain.ExecutionThread.AddNew(() => res(args.Interaction));
+			await _domain.ExecutionThread.AddNew(new ExecThread.Job(() => res(args.Interaction)));
 			args.Handled = true;
 		}
 	}

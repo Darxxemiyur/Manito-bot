@@ -33,7 +33,7 @@ namespace Manito.System.Logging
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
 
-		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(() => _relay.Handle(("DiscordBotLog", e.Json)));
+		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => _relay.Handle(("DiscordBotLog", e.Json))));
 
 		private async Task<(bool, JsonDocument)> TryParseAsync(string log)
 		{
@@ -54,7 +54,9 @@ namespace Manito.System.Logging
 
 		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
+#if DEBUG
 			await Console.Out.WriteLineAsync("!!!Exception " + (isHandled ? "safely handled" : "not handled") + $"\n{err}\n\n\n");
+#endif
 			await WriteErrorClassedLog(district, $"{err}", isHandled);
 		}
 
@@ -102,15 +104,19 @@ namespace Manito.System.Logging
 		{
 			while (true)
 			{
-				await _queue.UntilPlaced();
-				await using var db = await _factory.CreateLoggingDBContextAsync();
+				try
+				{
+					await _queue.UntilPlaced();
+					await using var db = await _factory.CreateLoggingDBContextAsync();
 
-				var range = await _queue.GetAll();
-				await db.LogLines.AddRangeAsync(range);
-				await db.SaveChangesAsync();
+					var range = await _queue.GetAll();
+					await db.LogLines.AddRangeAsync(range);
+					await db.SaveChangesAsync();
 
-				foreach (var item in range)
-					item.Dispose();
+					foreach (var item in range)
+						item.Dispose();
+				}
+				catch { await Task.Delay(TimeSpan.FromSeconds(60)); }
 			}
 		}
 	}

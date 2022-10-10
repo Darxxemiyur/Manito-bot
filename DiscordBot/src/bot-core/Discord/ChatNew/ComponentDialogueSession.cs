@@ -20,13 +20,12 @@ namespace Manito.Discord.ChatNew
 
 		private UniversalMessageBuilder _innerMsgBuilder;
 		private DiscordMessage _msg;
-		private DiscordChannel _chnl;
 
 		public MyClientBundle Client {
 			get;
 		}
 
-		public IDialogueIdentifier Identifier {
+		public ISessionState Identifier {
 			get; private set;
 		}
 
@@ -45,8 +44,6 @@ namespace Manito.Discord.ChatNew
 
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 
-		private bool _isHazard;
-
 		public async Task EndSession()
 		{
 			if (OnSessionEnd != null)
@@ -64,7 +61,6 @@ namespace Manito.Discord.ChatNew
 			}
 			catch (Exception e)
 			{
-				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e, true);
 				await FallBackToMessageSession();
 				throw;
 			}
@@ -95,26 +91,14 @@ namespace Manito.Discord.ChatNew
 		private async Task MarkTheMessage(DiscordMessage msg = default)
 		{
 			_msg = msg ?? await SessionMessage;
-			_chnl = _msg.Channel;
-			Identifier = new DialogueCompInterIdentifier(new(Interactive.Interaction, _msg));
+			Identifier = new DialogueCompInterIdentifier(Client, new(Interactive.Interaction, _msg));
 		}
 
 		private async Task CancelClickability()
 		{
 			var msg = _innerMsgBuilder;
-			var builder = new UniversalMessageBuilder(msg);
-
-			var components = builder.Components.Select(y => y.Select(x => {
-				if (x is DiscordButtonComponent f)
-					return new DiscordButtonComponent(f).Disable();
-				if (x is DiscordSelectComponent g)
-					return new DiscordSelectComponent(g.Placeholder, g.Options, g.CustomId, (int)g.MinimumSelectedValues, (int)g.MaximumSelectedValues, true);
-				return x;
-			}).ToArray()).ToArray();
-
-			await SendMessageLocal(builder.SetComponents(components));
+			await SendMessageLocal(msg.NewWithDisabledComponents());
 			_innerMsgBuilder = msg;
-			NextType = InteractionResponseType.Pong;
 		}
 
 		private async Task RespondToAnInteraction()
@@ -139,13 +123,12 @@ namespace Manito.Discord.ChatNew
 			var chnl = await Client.Client.GetChannelAsync(Identifier.ChannelId);
 			try
 			{
-				var msg = await chnl.GetMessageAsync(Identifier.MessageId, true);
-				await OnStatusChange(this, new SessionInnerMessage((msg, Identifier.UserId), "ConvertMeToMsg1"));
+				var msg = await chnl.GetMessageAsync(Identifier.MessageId ?? 0, true);
+				await OnStatusChange(this, new SessionInnerMessage((msg, _innerMsgBuilder, Identifier.UserId ?? 0), "ConvertMeToMsg1"));
 			}
-			catch (Exception ev)
+			catch (Exception)
 			{
-				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, ev, true);
-				await OnStatusChange(this, new SessionInnerMessage((chnl, Identifier.UserId), "ConvertMeToMsg2"));
+				await OnStatusChange(this, new SessionInnerMessage((chnl, _innerMsgBuilder, Identifier.UserId ?? 0), "ConvertMeToMsg2"));
 			}
 		}
 
@@ -154,7 +137,7 @@ namespace Manito.Discord.ChatNew
 			await using var _ = await _lock.BlockAsyncLock();
 			try
 			{
-				if (Interactive?.Components?.Any() == true)
+				if (_innerMsgBuilder?.Components?.SelectMany(x => x)?.Any() == true)
 					await CancelClickability();
 				else
 					await RespondToAnInteraction();
@@ -179,7 +162,7 @@ namespace Manito.Discord.ChatNew
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
 			await using var _ = await _lock.BlockAsyncLock();
-			Identifier = new DialogueCompInterIdentifier(Interactive = intr);
+			Identifier = new DialogueCompInterIdentifier(Client, Interactive = intr);
 			NextType = InteractionResponseType.UpdateMessage;
 
 			return intr;
@@ -225,13 +208,13 @@ namespace Manito.Discord.ChatNew
 		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
-			NextType = id.MessageId == 0 ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
+			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
 		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive)
 		{
 			(Client, Interactive, Identifier) = (client, interactive, id);
-			NextType = id.MessageId == 0 ? InteractionResponseType.ChannelMessageWithSource : InteractionResponseType.UpdateMessage;
+			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
 		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction)

@@ -75,6 +75,19 @@ namespace Manito.Discord.ChatNew
 			return this;
 		}
 
+		public UniversalMessageBuilder NewWithDisabledComponents()
+		{
+			var newBld = new UniversalMessageBuilder(this);
+			var components = newBld.Components.Select(y => y.Select(x => {
+				if (x is DiscordButtonComponent f)
+					return new DiscordButtonComponent(f).Disable();
+				if (x is DiscordSelectComponent g)
+					return new DiscordSelectComponent(g.Placeholder, g.Options, g.CustomId, (int)g.MinimumSelectedValues, (int)g.MaximumSelectedValues, true);
+				return x;
+			}).ToArray()).ToArray();
+			return newBld.SetComponents(components);
+		}
+
 		public UniversalMessageBuilder AddContent(string content) => SetContent(_content + content);
 
 		public UniversalMessageBuilder AddComponents(params DiscordComponent[] components)

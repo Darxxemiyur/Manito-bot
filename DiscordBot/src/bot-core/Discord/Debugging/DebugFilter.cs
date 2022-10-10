@@ -15,7 +15,7 @@ namespace Manito.System.Economy
 			while (true)
 			{
 				var data = await _queue.GetData();
-				await _service.ExecutionThread.AddNew(() => FilterMessage(data.Item1, data.Item2));
+				await _service.ExecutionThread.AddNew(new ExecThread.Job(() => FilterMessage(data.Item1, data.Item2)));
 			}
 		}
 

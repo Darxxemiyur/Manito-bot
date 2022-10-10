@@ -45,13 +45,13 @@ namespace Manito.Discord.Chat.DialogueNet
 			var sess = createSession();
 			sess.ConnectManager((x) => Task.FromResult(StopSession(x as T)));
 			_sessions.Add(sess);
-			await _service.ExecutionThread.AddNew(async () => {
+			await _service.ExecutionThread.AddNew(new ExecThread.Job(async (x) => {
 				try
 				{
 					await NetworkCommon.RunNetwork(getNet(sess));
 				}
 				catch (Exception e) { await sess.SessionExceptionHandle(e); }
-			});
+			}));
 
 			return sess;
 		}

@@ -36,12 +36,12 @@ namespace Manito.Discord.Shop
 
 			var time = DateTimeOffset.Now;
 
-			var ms1 = $"Ожидание исполнения Вашего заказа №{_order.OrderId}.";
+			var ms1 = $"Ожидание исполнения Вашего заказа №{_order.OrderId}\nОписание: `{_order.Description}`.";
 			var mm1 = $"<t:{time.ToUnixTimeSeconds()}>";
 			var mm2 = $"<t:{time.ToUnixTimeSeconds()}:R>";
 			var ms2 = $"Поставлен в очередь {mm2}(в {mm1})";
 
-			var rmsg = new DiscordEmbedBuilder().WithDescription($"{ms1}\n{ms2}").WithColor(new DiscordColor(255, 255, 0));
+			var rmsg = new DiscordEmbedBuilder().WithDescription($"{ms1}\n{ms2}").WithColor(new DiscordColor(255, 255, 0)).WithTimestamp(DateTimeOffset.Now);
 
 			var cancelBtn = new DiscordButtonComponent(ButtonStyle.Primary, "cancel", "Отменить");
 			await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn));
@@ -59,13 +59,13 @@ namespace Manito.Discord.Shop
 
 				if (first == nonCanc)
 				{
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(rmsg).AddComponents(cancelBtn.Disable()));
+					await _session.SendMessage(((UniversalMessageBuilder)rmsg).AddComponents(cancelBtn.Disable()));
 				}
 				if ((first == doCancel && !first.IsCanceled) || first == cancelled)
 				{
 					await _order.TryCancelOrder();
 
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(255, 50, 50))));
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} отменён.\nПричина: {await cancelled}\nЗакрытие окна через <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(255, 50, 50)).WithTimestamp(DateTimeOffset.Now)));
 
 					await _wallet.Deposit(_item.Price, $"Возврат средств за отменённый заказ №{_order.OrderId}.\nПричина: {await cancelled}");
 
@@ -74,7 +74,7 @@ namespace Manito.Discord.Shop
 				if (first == nonCanc)
 				{
 					await completed;
-					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(50, 255, 50))));
+					await _session.SendMessage(new UniversalMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"Заказ №{_order.OrderId} выполнен.\nЗакрытие окна <t:{(DateTimeOffset.Now + timeout).AddSeconds(.85).ToUnixTimeSeconds()}:R>.").WithColor(new DiscordColor(50, 255, 50)).WithTimestamp(DateTimeOffset.Now)));
 					break;
 				}
 			}

@@ -1,5 +1,6 @@
 ﻿using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Net;
 
 using Manito.Discord.Client;
 
@@ -10,21 +11,41 @@ namespace Manito.Discord.ChatNew
 	/// <summary>
 	/// Secondary Message Identifier
 	/// </summary>
-	public class DialogueMsgIdentifier : IDialogueIdentifier
+	public class DialogueMsgIdentifier : ISessionState
 	{
 		public DialogueMsgIdentifier(DiscordMessage message, ulong userId)
 		{
-			_usId = userId;
-			_chId = message.ChannelId;
-			_msId = message.Id;
+			UserId = userId;
+			ChannelId = message.ChannelId;
+			MessageId = message.Id;
 		}
 
-		private ulong _usId;
-		private ulong _chId;
-		private ulong _msId;
-		public ulong UserId => _usId;
-		public ulong ChannelId => _chId;
-		public ulong MessageId => _msId;
+		public ulong? UserId {
+			get;
+		}
+
+		public ulong ChannelId {
+			get;
+		}
+
+		public ulong? MessageId {
+			get;
+		}
+
+		public ulong[] UserIds => new[]
+		{
+			UserId ?? 0
+		};
+
+		public SessionKinds Kind => SessionKinds.OnDMChannel | SessionKinds.OnGuildChannel;
+
+		public MyClientBundle Bundle {
+			get;
+		}
+
+		public DiscordApiClient UsedClient {
+			get;
+		}
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -32,7 +53,7 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.Message.ChannelId;
 			var uid = interaction.Interaction.User.Id;
 
-			return _chId == cid && mid == _msId && uid == _usId;
+			return ChannelId == cid && mid == MessageId && uid == UserId;
 		}
 
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 10;
@@ -42,27 +63,47 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.ChannelId;
 			var uid = interaction.Author.Id;
 
-			return _chId == cid && uid == _usId;
+			return ChannelId == cid && uid == UserId;
 		}
 
 		public Int32 HowBadWants(DiscordMessage interaction) => 10;
 	}
 
-	public class DialogueMessageIdentifier : IDialogueIdentifier
+	public class DialogueMessageIdentifier : ISessionState
 	{
 		public DialogueMessageIdentifier(InteractiveInteraction interaction)
 		{
-			_usId = interaction.Interaction.User.Id;
-			_chId = interaction.Interaction.ChannelId;
-			_msId = interaction.Message.Id;
+			UserId = interaction.Interaction.User.Id;
+			ChannelId = interaction.Interaction.ChannelId;
+			MessageId = interaction.Message.Id;
 		}
 
-		private ulong _usId;
-		private ulong _chId;
-		private ulong _msId;
-		public ulong UserId => _usId;
-		public ulong ChannelId => _chId;
-		public ulong MessageId => _msId;
+		public ulong? UserId {
+			get;
+		}
+
+		public ulong ChannelId {
+			get;
+		}
+
+		public ulong? MessageId {
+			get;
+		}
+
+		public ulong[] UserIds => new[]
+		{
+			UserId ?? 0
+		};
+
+		public SessionKinds Kind => SessionKinds.OnDMChannel | SessionKinds.OnGuildChannel;
+
+		public MyClientBundle Bundle {
+			get;
+		}
+
+		public DiscordApiClient UsedClient {
+			get;
+		}
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -70,7 +111,7 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.Message.ChannelId;
 			var uid = interaction.Interaction.User.Id;
 
-			return _chId == cid && mid == _msId && uid == _usId;
+			return ChannelId == cid && mid == MessageId && uid == UserId;
 		}
 
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 10;
@@ -80,27 +121,46 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.ChannelId;
 			var uid = interaction.Author.Id;
 
-			return _chId == cid && uid == _usId;
+			return ChannelId == cid && uid == UserId;
 		}
 
 		public Int32 HowBadWants(DiscordMessage interaction) => 10;
 	}
 
-	public class DialogueCompInterIdentifier : IDialogueIdentifier
+	public class DialogueCompInterIdentifier : ISessionState
 	{
-		public DialogueCompInterIdentifier(InteractiveInteraction interaction)
+		public DialogueCompInterIdentifier(MyClientBundle bundle, InteractiveInteraction interaction)
 		{
-			_usId = interaction.Interaction.User.Id;
-			_chId = interaction.Interaction.ChannelId;
-			_msId = interaction.Message.Id;
+			UserId = interaction.Interaction.User.Id;
+			ChannelId = interaction.Interaction.ChannelId;
+			MessageId = interaction.Message.Id;
 		}
 
-		private ulong _usId;
-		private ulong _chId;
-		private ulong _msId;
-		public ulong UserId => _usId;
-		public ulong ChannelId => _chId;
-		public ulong MessageId => _msId;
+		public ulong? UserId {
+			get;
+		}
+
+		public ulong ChannelId {
+			get;
+		}
+
+		public ulong? MessageId {
+			get;
+		}
+
+		public ulong[] UserIds {
+			get;
+		}
+
+		public SessionKinds Kind => SessionKinds.OnDMChannel | SessionKinds.OnGuildChannel;
+
+		public MyClientBundle Bundle {
+			get;
+		}
+
+		public DiscordApiClient UsedClient {
+			get;
+		}
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction)
 		{
@@ -108,7 +168,7 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.Interaction.ChannelId;
 			var uid = interaction.Interaction.User.Id;
 
-			return _chId == cid && mid == _msId && uid == _usId && interaction.Interaction.Type == InteractionType.Component;
+			return ChannelId == cid && mid == MessageId && uid == UserId && interaction.Interaction.Type == InteractionType.Component;
 		}
 
 		public Int32 HowBadWants(InteractiveInteraction interaction) => 100;
@@ -118,15 +178,15 @@ namespace Manito.Discord.ChatNew
 			var cid = interaction.ChannelId;
 			var uid = interaction.Author.Id;
 
-			return _chId == cid && uid == _usId;
+			return ChannelId == cid && uid == UserId;
 		}
 
 		public Int32 HowBadWants(DiscordMessage interaction) => 100;
 	}
 
-	public class DialogueCommandIdentifier : IDialogueIdentifier
+	public class DialogueCommandIdentifier : ISessionState
 	{
-		public ulong UserId {
+		public ulong? UserId {
 			get;
 		}
 
@@ -134,7 +194,22 @@ namespace Manito.Discord.ChatNew
 			get;
 		}
 
-		public ulong MessageId => 0;
+		public ulong? MessageId => null;
+
+		public ulong[] UserIds => new[]
+		{
+			UserId ?? 0
+		};
+
+		public SessionKinds Kind => SessionKinds.OnDMChannel | SessionKinds.OnGuildChannel;
+
+		public MyClientBundle Bundle {
+			get;
+		}
+
+		public DiscordApiClient UsedClient {
+			get;
+		}
 
 		public DialogueCommandIdentifier(InteractiveInteraction interaction)
 		{

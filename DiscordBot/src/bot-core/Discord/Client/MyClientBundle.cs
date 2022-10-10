@@ -1,6 +1,7 @@
 using DisCatSharp;
 using DisCatSharp.Entities;
 
+using Manito.Discord.Cleaning;
 using Manito.Discord.Config;
 
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace Manito.Discord.Client
 #endif
 		private ActivitiesTools _activitiesTools;
 		public ActivitiesTools ActivityTools => _activitiesTools;
+
+		public MessageRemover Remover => _collection.MessageRemover;
 
 		public MyClientBundle(MyDomain collection, RootConfig rconfig)
 		{

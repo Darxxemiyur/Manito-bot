@@ -49,8 +49,8 @@ namespace Manito.Discord.Client
 			Client.Ready -= DoUpdateCommands;
 			var commands = Commands.SelectMany(x => x.Value);
 			args.Handled = true;
-			await _collection.ExecutionThread.AddNew(() => Client.BulkOverwriteGlobalApplicationCommandsAsync(commands));
-			await _collection.ExecutionThread.AddNew(() => NotifyAdminOnline());
+			await _collection.ExecutionThread.AddNew(new ExecThread.Job(() => Client.BulkOverwriteGlobalApplicationCommandsAsync(commands)));
+			await _collection.ExecutionThread.AddNew(new ExecThread.Job(() => NotifyAdminOnline()));
 		}
 
 		public readonly Dictionary<string, IEnumerable<DiscordApplicationCommand>> Commands;

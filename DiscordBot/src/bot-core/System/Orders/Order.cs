@@ -12,8 +12,12 @@ namespace Manito.Discord.Orders
 		private List<Step> _steps;
 		public IReadOnlyList<Step> Steps => _steps;
 
-		public Order(ulong initiator, params Step[] steps) =>
-			(Initiator, _steps) = (initiator, steps?.ToList() ?? new());
+		public string Description {
+			get;
+		}
+
+		public Order(ulong initiator, string description, params Step[] steps) =>
+			(Initiator, Description, _steps) = (initiator, description, steps?.ToList() ?? new());
 
 		public readonly ulong Initiator;
 		public readonly ulong OrderId = OrderIds++;
