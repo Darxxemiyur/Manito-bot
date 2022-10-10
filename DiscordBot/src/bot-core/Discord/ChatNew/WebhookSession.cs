@@ -33,8 +33,6 @@ namespace Manito.Discord.ChatNew
 			get;
 		}
 
-		private DiscordWebhook _client;
-
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
 
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
