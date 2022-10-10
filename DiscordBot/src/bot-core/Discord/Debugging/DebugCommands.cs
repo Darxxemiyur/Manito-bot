@@ -21,6 +21,9 @@ namespace Manito.System.Economy
 
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
+			if (command.Data.Type == ApplicationCommandType.Message)
+				return MarkToDelete;
+
 			foreach (var item in GetCommands())
 			{
 				if (command.Data.Name.Contains(item.Name))
@@ -44,6 +47,9 @@ namespace Manito.System.Economy
 			 ApplicationCommandType.ChatInput,
 			 GetLoc("дебаг"),
 			 GetLoc("Дебаг"));
+			yield return new DiscordApplicationCommand("Mark for deletion", "", null,
+			 ApplicationCommandType.Message,
+			 GetLoc("Отметить для удаления"));
 		}
 
 		private IEnumerable<(DiscordApplicationCommandOption, Func<DiscordInteraction, Task>)> GetSubCommands()
@@ -75,6 +81,21 @@ namespace Manito.System.Economy
 			 nameLocalizations: GetLoc("проверить_дс"),
 			 descriptionLocalizations: GetLoc("Проверить диалоговую систему")),
 			 CheckDialogue);
+		}
+
+		private async Task MarkToDelete(DiscordInteraction args)
+		{
+			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
+
+			var msg = args.Data.Resolved.Messages.First().Value;
+
+			await _bot.MessageRemover.RemoveMessage(msg, TimeSpan.FromMinutes(10));
+
+			await rs.SendMessage($"Сообщение с айди {msg.Id} успешно помечно для удаления через 10 минут");
+
+			await _bot.MessageRemover.RemoveMessage(rs.Identifier.ChannelId, rs.Identifier.MessageId ?? 0, TimeSpan.FromMinutes(1));
+
+			await rs.EndSession();
 		}
 
 		private async Task CheckDialogue(DiscordInteraction args)

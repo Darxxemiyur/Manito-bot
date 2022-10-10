@@ -19,15 +19,17 @@ namespace Manito.Discord.Cleaning
 		private MyDomain _domain;
 		private ICleaningDbFactory _dbFactory;
 
+		private int LSI = 0;
+
 		public MessageRemover(MyDomain domain, ICleaningDbFactory dbFactory)
 		{
 			_domain = domain;
 			_dbFactory = dbFactory;
 		}
 
-		public Task RemoveMessage(ulong channelId, ulong messageId) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow);
+		public Task RemoveMessage(ulong channelId, ulong messageId, bool isOnNext = false) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow, isOnNext);
 
-		public Task RemoveMessage(DiscordMessage message) => RemoveMessage(message.ChannelId, message.Id, DateTimeOffset.UtcNow);
+		public Task RemoveMessage(DiscordMessage message, bool isOnNext = false) => RemoveMessage(message.ChannelId, message.Id, DateTimeOffset.UtcNow, isOnNext);
 
 		public Task RemoveMessage(IEnumerable<DiscordMessage> messages) => RemoveMessage(messages.Select(x => (x, DateTimeOffset.UtcNow)));
 
@@ -43,29 +45,42 @@ namespace Manito.Discord.Cleaning
 
 		public Task RemoveMessage(ulong channelId, ulong messageId, TimeSpan timeout) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow + timeout);
 
-		public Task RemoveMessage(DiscordMessage message, DateTimeOffset time) => RemoveMessage(message.ChannelId, message.Id, time);
+		public Task RemoveMessage(DiscordMessage message, DateTimeOffset time, bool isOnNext = false) => RemoveMessage(message.ChannelId, message.Id, time, isOnNext);
 
-		public async Task RemoveMessage(ulong channelId, ulong messageId, DateTimeOffset time)
+		public async Task RemoveMessage(ulong channelId, ulong messageId, DateTimeOffset time, bool isOnNext = false)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			await using var db = await _dbFactory.CreateMyDbContextAsync();
-			await CreateOrUpdate(channelId, messageId, time, db);
+			await CreateOrUpdate(channelId, messageId, time, db, isOnNext);
 			await db.SaveChangesAsync();
 		}
 
-		private static async Task CreateOrUpdate(ulong channelId, ulong messageId, DateTimeOffset time, ICleaningDb db)
+		public async Task RemoveMessage(MessageToRemove msg, bool isOnNext)
 		{
-			if (await db.MsgsToRemove.AnyAsync(x => x.MessageID == messageId))
+			await using var _ = await _lock.BlockAsyncLock();
+			await using var db = await _dbFactory.CreateMyDbContextAsync();
+			await CreateOrUpdate(msg, db, isOnNext);
+			await db.SaveChangesAsync();
+		}
+
+		private Task CreateOrUpdate(ulong channelId, ulong messageId, DateTimeOffset time, ICleaningDb db, bool isOnNext = false) => CreateOrUpdate(new MessageToRemove(messageId, channelId, time, LSI), db, isOnNext);
+
+		private Task CreateOrUpdate(MessageToRemove msg, ICleaningDb db, bool isOnNext) => CreateOrUpdate(new MessageToRemove(msg) { LastStartId = LSI + (isOnNext ? 1 : 0) }, db);
+
+		private async Task CreateOrUpdate(MessageToRemove msg, ICleaningDb db)
+		{
+			if (await db.MsgsToRemove.AnyAsync(x => x.MessageID == msg.MessageID))
 			{
-				await foreach (var msg in db.MsgsToRemove.Where(x => x.MessageID == messageId).AsAsyncEnumerable())
+				await foreach (var dmsg in db.MsgsToRemove.Where(x => x.MessageID == msg.MessageID).AsAsyncEnumerable())
 				{
-					msg.Expiration = time;
-					db.MsgsToRemove.Update(msg);
+					dmsg.Expiration = msg.Expiration;
+					dmsg.LastStartId = msg.LastStartId;
+					db.MsgsToRemove.Update(dmsg);
 				}
 			}
 			else
 			{
-				await db.MsgsToRemove.AddAsync(new MessageToRemove(messageId, channelId, time));
+				await db.MsgsToRemove.AddAsync(new MessageToRemove(msg));
 			}
 		}
 
@@ -91,7 +106,14 @@ namespace Manito.Discord.Cleaning
 					await using var _ = await _lock.BlockAsyncLock();
 					await using var db = await _dbFactory.CreateMyDbContextAsync();
 
-					var msgs = await db.MsgsToRemove.Where(x => x.Expiration <= DateTimeOffset.UtcNow).ToListAsync();
+					if (LSI == 0)
+					{
+						var sorted = await db.MsgsToRemove.OrderByDescending(x => x.LastStartId).Take(1).FirstAsync();
+
+						LSI = sorted?.LastStartId ?? 1;
+					}
+
+					var msgs = await db.MsgsToRemove.Where(x => x.LastStartId <= LSI && x.Expiration <= DateTimeOffset.UtcNow).ToListAsync();
 					var attemptAgain = new List<MessageToRemove>(msgs.Count);
 					var toClear = new List<MessageToRemove>(msgs.Count);
 

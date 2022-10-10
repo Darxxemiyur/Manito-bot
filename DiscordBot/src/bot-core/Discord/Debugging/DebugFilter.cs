@@ -30,6 +30,7 @@ namespace Manito.System.Economy
 			_queue = new();
 			_service = service;
 			eventBuffer.Interact.OnToNextLink += _queue.Handle;
+			eventBuffer.ContInteract.OnToNextLink += _queue.Handle;
 		}
 
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

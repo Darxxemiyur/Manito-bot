@@ -46,6 +46,10 @@ namespace Manito.Discord.ChatNew
 
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 
+		public bool IsAutomaticallyDeleted {
+			get;
+		}
+
 		public async Task EndSession()
 		{
 			if (OnSessionEnd != null)
@@ -60,7 +64,9 @@ namespace Manito.Discord.ChatNew
 			try
 			{
 				await SendMessageLocal(message);
-				await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, TimeSpan.FromDays(7));
+
+				if (IsAutomaticallyDeleted)
+					await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 			}
 			catch (Exception e)
 			{
@@ -123,6 +129,9 @@ namespace Manito.Discord.ChatNew
 
 		private async Task FallBackToMessageSession()
 		{
+			if (OnStatusChange == null)
+				return;
+
 			var chnl = await Client.Client.GetChannelAsync(Identifier.ChannelId);
 			try
 			{
@@ -144,7 +153,9 @@ namespace Manito.Discord.ChatNew
 					await CancelClickability();
 				else
 					await RespondToAnInteraction();
-				await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, TimeSpan.FromDays(7));
+
+				if (IsAutomaticallyDeleted)
+					await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 			}
 			catch (Exception e)
 			{
@@ -176,22 +187,11 @@ namespace Manito.Discord.ChatNew
 		{
 			try
 			{
-				await Interactive.Interaction.DeleteOriginalResponseAsync();
+				await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0);
 			}
 			catch (Exception e1)
 			{
 				await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e1, true);
-				try
-				{
-					var msg = await SessionMessage;
-					await msg.DeleteAsync();
-				}
-				catch (Exception e2)
-				{
-					await Client.Domain.Logging.WriteErrorClassedLog(GetType().Name, e2, true);
-					await FallBackToMessageSession();
-					throw;
-				}
 			}
 		}
 
@@ -209,33 +209,34 @@ namespace Manito.Discord.ChatNew
 
 		public Task<DiscordChannel> SessionChannel => Task.Run(async () => await Client.Client.GetChannelAsync((await SessionMessage).ChannelId));
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive) : this(client)
+		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
 			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive) : this(client)
+		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
 			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
-		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction) : this(client)
+		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
 			Identifier = new DialogueCommandIdentifier(Interactive = new(interaction));
 			NextType = InteractionResponseType.ChannelMessageWithSource;
 		}
 
-		private ComponentDialogueSession(MyClientBundle client)
+		private ComponentDialogueSession(MyClientBundle client, bool isAutomaticallyDeleted)
 		{
+			IsAutomaticallyDeleted = isAutomaticallyDeleted;
 			Client = client;
-			Client.EventsBuffer.MsgDeletion.OnToNextLink += this.MsgDeletion_OnMessage;
+			Client.EventsBuffer.MsgDeletion.OnToNextLink += MsgDeletion_OnMessage;
 		}
 
 		~ComponentDialogueSession()
 		{
-			Client.EventsBuffer.MsgDeletion.OnToNextLink -= this.MsgDeletion_OnMessage;
+			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
 		}
 
 		private async Task MsgDeletion_OnMessage(DiscordClient arg1, MessageDeleteEventArgs arg2)

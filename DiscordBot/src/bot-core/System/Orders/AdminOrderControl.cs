@@ -22,7 +22,8 @@ namespace Manito.Discord.Orders
 		private readonly DialogueTabSession<AdminOrderContext> _session;
 		public DialogueTabSession<AdminOrderContext> Session => _session;
 		private readonly CancellationTokenSource _remover;
-		private MyDomain Domain => _session.Client.Domain;
+		private MyDomain Domain => Client.Domain;
+		private MyClientBundle Client => _session.Client;
 		private AdminOrderExec _execSession;
 		private DiscordButtonComponent _beginButton;
 		private DiscordButtonComponent _changeButton;
@@ -41,7 +42,10 @@ namespace Manito.Discord.Orders
 			_changeButton = new(ButtonStyle.Primary, "changeorder", "Сменить заказ", true);
 			_endButton = new(ButtonStyle.Danger, "endworking", "Закончить работу", true);
 			_exitButton = new(ButtonStyle.Danger, "quitworking", "Выйти");
+			_session.OnSessionEnd += OnSessionEndHandle;
 		}
+
+		private Task OnSessionEndHandle(DialogueTabSession<AdminOrderContext> arg1, SessionInnerMessage arg2) => Domain.ExecutionThread.AddNew(new ExecThread.Job(RemoveAndEndShift));
 
 		private async Task TryNotifyAboutShift(UniversalMessageBuilder msg)
 		{
@@ -123,7 +127,7 @@ namespace Manito.Discord.Orders
 				//In case _exitButton is clicked
 			}
 			catch (TaskCanceledException) { }
-			await EndMyself();
+			await _session.EndSession();
 			return new();
 		}
 
@@ -139,10 +143,9 @@ namespace Manito.Discord.Orders
 			_thread = null;
 		}
 
-		private async Task EndMyself()
+		private async Task RemoveAndEndShift()
 		{
 			await EndShift();
-			await _session.EndSession();
 			await _session.RemoveMessage();
 		}
 

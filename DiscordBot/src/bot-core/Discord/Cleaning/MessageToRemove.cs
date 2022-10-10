@@ -4,11 +4,20 @@ namespace Manito.Discord.Cleaning
 {
 	public class MessageToRemove
 	{
-		public MessageToRemove(ulong messageID, ulong channelID, DateTimeOffset expiration)
+		public MessageToRemove(ulong messageID, ulong channelID, DateTimeOffset expiration, int lastStartId)
 		{
 			MessageID = messageID;
 			ChannelID = channelID;
 			Expiration = expiration;
+			LastStartId = lastStartId;
+		}
+
+		public MessageToRemove(MessageToRemove msg)
+		{
+			MessageID = msg.MessageID;
+			ChannelID = msg.ChannelID;
+			LastStartId = msg.LastStartId;
+			Expiration = msg.Expiration;
 		}
 
 		public ulong MessageID {
@@ -24,6 +33,10 @@ namespace Manito.Discord.Cleaning
 		}
 
 		public int TimesFailed {
+			get; set;
+		}
+
+		public int LastStartId {
 			get; set;
 		}
 	}

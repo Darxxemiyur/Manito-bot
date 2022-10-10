@@ -57,17 +57,17 @@ namespace Manito.Discord.ChatNew
 			if (msg.Message.ToLower().Contains("tocomp"))
 			{
 				var intr = (InteractiveInteraction)msg.Generic;
-				_innerSession = new ComponentDialogueSession(Client, new DialogueCompInterIdentifier(Client, intr), intr);
+				_innerSession = new ComponentDialogueSession(Client, new DialogueCompInterIdentifier(Client, intr), intr, IsAutomaticallyDeleted);
 			}
 			if (msg.Message.ToLower().Contains("tomsg1"))
 			{
 				var (msgg, bld, id) = ((DiscordMessage, UniversalMessageBuilder, ulong))msg.Generic;
-				_innerSession = new SessionFromMessage(Client, msgg, bld, id);
+				_innerSession = new SessionFromMessage(Client, msgg, bld, id, IsAutomaticallyDeleted);
 			}
 			if (msg.Message.ToLower().Contains("tomsg2"))
 			{
 				var (chnl, bld, id) = ((DiscordChannel, UniversalMessageBuilder, ulong))msg.Generic;
-				_innerSession = new SessionFromMessage(Client, chnl, bld, id);
+				_innerSession = new SessionFromMessage(Client, chnl, bld, id, IsAutomaticallyDeleted);
 			}
 
 			UnDoSub(session);
@@ -125,16 +125,14 @@ namespace Manito.Discord.ChatNew
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) =>
 			_innerSession.GetReplyInteraction(token);
 
-		public Task RemoveMessage()
-		{
-			return Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0);
-			//return SafeWriter(() => _innerSession.RemoveMessage());
-		}
+		public Task RemoveMessage() => SafeWriter(() => _innerSession.RemoveMessage());
 
 		public Task SendMessage(UniversalMessageBuilder msg) => SafeWriter(() => _innerSession.SendMessage(msg));
 
 		public Task<DiscordMessage> SessionMessage => _innerSession.SessionMessage;
 
 		public Task<DiscordChannel> SessionChannel => _innerSession.SessionChannel;
+
+		public bool IsAutomaticallyDeleted => _innerSession.IsAutomaticallyDeleted;
 	}
 }

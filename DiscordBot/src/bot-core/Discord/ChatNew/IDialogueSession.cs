@@ -26,6 +26,10 @@ namespace Manito.Discord.ChatNew
 			get;
 		}
 
+		bool IsAutomaticallyDeleted {
+			get;
+		}
+
 		/// <summary>
 		/// Send/update session message.
 		/// </summary>

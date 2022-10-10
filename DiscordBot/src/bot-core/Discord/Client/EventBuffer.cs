@@ -47,6 +47,8 @@ namespace Manito.Discord.Client
 			yield return CompInteract.Loop();
 			yield return MsgAddReact.Loop();
 			yield return ContInteract.Loop();
+			yield return MsgDeletion.Loop();
+			yield return OnReady.Loop();
 		}
 
 		public Task EventLoops() => Task.WhenAll(GetLoops());

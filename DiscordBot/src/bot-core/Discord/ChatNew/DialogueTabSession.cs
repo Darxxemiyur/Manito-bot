@@ -47,7 +47,7 @@ namespace Manito.Discord.ChatNew
 
 		private async Task SessionEnd(IDialogueSession x, SessionInnerMessage y)
 		{
-			if (OnStatusChange != null)
+			if (OnSessionEnd != null)
 				await OnSessionEnd(x as DialogueTabSession<T>, y);
 		}
 

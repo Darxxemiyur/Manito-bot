@@ -29,6 +29,10 @@ namespace Manito.Discord.ChatNew
 			get;
 		}
 
+		public bool IsAutomaticallyDeleted {
+			get;
+		}
+
 		private DiscordWebhook _client;
 
 		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;

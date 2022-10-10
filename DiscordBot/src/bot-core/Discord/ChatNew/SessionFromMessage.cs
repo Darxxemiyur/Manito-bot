@@ -1,4 +1,6 @@
-﻿using DisCatSharp.Entities;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
 
 using Manito.Discord.Client;
 
@@ -18,34 +20,54 @@ namespace Manito.Discord.ChatNew
 		private ulong _userId;
 		private UniversalMessageBuilder _builder;
 
-		public SessionFromMessage(MyClientBundle client, DiscordMessage message, UniversalMessageBuilder bld, ulong userId)
+		public bool IsAutomaticallyDeleted {
+			get;
+		}
+
+		public SessionFromMessage(MyClientBundle client, DiscordMessage message, UniversalMessageBuilder bld, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Client = client;
 			Identifier = new DialogueMsgIdentifier(_message = message, _userId = userId);
 			_builder = bld;
 			_channel = message.Channel;
 		}
 
-		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, UniversalMessageBuilder bld, ulong userId)
+		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, UniversalMessageBuilder bld, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Client = client;
 			_channel = channel;
 			_builder = bld;
-			_userId = userId;
 		}
 
-		public SessionFromMessage(MyClientBundle client, DiscordMessage message, ulong userId)
+		public SessionFromMessage(MyClientBundle client, DiscordMessage message, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Client = client;
-			Identifier = new DialogueMsgIdentifier(_message = message, _userId = userId);
+			Identifier = new DialogueMsgIdentifier(_message = message, userId);
 			_channel = message.Channel;
 		}
 
-		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, ulong userId)
+		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Client = client;
+			Identifier = new NoMessageDiagIdentifier(channel.Id, userId);
 			_channel = channel;
+		}
+
+		private SessionFromMessage(ulong userId, MyClientBundle client, bool isAutomaticallyDeleted)
+		{
+			IsAutomaticallyDeleted = isAutomaticallyDeleted;
 			_userId = userId;
+			Client = client;
+			Client.EventsBuffer.MsgDeletion.OnToNextLink += MsgDeletion_OnMessage;
+		}
+
+		~SessionFromMessage()
+		{
+			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
+		}
+
+		private async Task MsgDeletion_OnMessage(DiscordClient arg1, MessageDeleteEventArgs arg2)
+		{
+			if (arg2.Message.Id != Identifier.MessageId)
+				return;
+
+			await Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(EndSession));
 		}
 
 		public UniversalSession ToUniversal() => (UniversalSession)this;
@@ -96,6 +118,7 @@ namespace Manito.Discord.ChatNew
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			await SendMessageLocal(msg);
+			await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 		}
 
 		private async Task SendMessageLocal(UniversalMessageBuilder msg)
@@ -118,13 +141,14 @@ namespace Manito.Discord.ChatNew
 
 			var msg = _builder;
 			await SendMessageLocal(msg.NewWithDisabledComponents());
+			await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 			_builder = msg;
 		}
 
 		public async Task RemoveMessage()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			await _message.DeleteAsync();
+			await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0);
 		}
 
 		public async Task EndSession()

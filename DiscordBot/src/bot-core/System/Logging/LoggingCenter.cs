@@ -54,7 +54,9 @@ namespace Manito.System.Logging
 
 		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
+#if DEBUG
 			await Console.Out.WriteLineAsync("!!!Exception " + (isHandled ? "safely handled" : "not handled") + $"\n{err}\n\n\n");
+#endif
 			await WriteErrorClassedLog(district, $"{err}", isHandled);
 		}
 
