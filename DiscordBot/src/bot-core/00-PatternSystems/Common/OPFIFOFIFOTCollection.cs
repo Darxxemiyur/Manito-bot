@@ -21,31 +21,31 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			_executors = new();
 		}
 
-		private async Task InnerPlaceOrder(T order)
+		private async Task InnerPlaceItem(T order)
 		{
 			if (_executors.Count > 0)
 			{
 				var rem = _executors.Dequeue();
 				if (!await rem.TrySetResultAsync(order))
-					await InnerPlaceOrder(order);
+					await InnerPlaceItem(order);
 			}
 			else
 				_queue.Enqueue(order);
 		}
 
-		public async Task PlaceOrder(T order)
+		public async Task PlaceItem(T order)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
-			await InnerPlaceOrder(order);
+			await InnerPlaceItem(order);
 		}
 
-		public async Task<bool> AnyOrders()
+		public async Task<bool> AnyItems()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return _queue.Any();
 		}
 
-		private async Task<Task<T>> InnerGetOrder(CancellationToken token = default)
+		private async Task<Task<T>> InnerGetItem(CancellationToken token = default)
 		{
 			if (_queue.Count > 0)
 			{
@@ -56,13 +56,13 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 					await Task.FromCanceled(token);
 				}
 				else
-					return item == null ? await InnerGetOrder(token) : Task.FromResult(item);
+					return item == null ? await InnerGetItem(token) : Task.FromResult(item);
 			}
 
-			return Enqueer(token);
+			return Enquer(token);
 		}
 
-		private async Task<T> Enqueer(CancellationToken token)
+		private async Task<T> Enquer(CancellationToken token)
 		{
 			var relay = new MyTaskSource<T>(token);
 			_executors.Enqueue(relay);
@@ -70,12 +70,12 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			return await relay.MyTask;
 		}
 
-		public async Task<Task<T>> GetOrder(CancellationToken token = default)
+		public async Task<Task<T>> GetItem(CancellationToken token = default)
 		{
 			Task<T> orderGet = null;
 			await using (var _ = await _lock.BlockAsyncLock())
 			{
-				orderGet = await InnerGetOrder(token);
+				orderGet = await InnerGetItem(token);
 			}
 
 			return orderGet;

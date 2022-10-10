@@ -30,7 +30,7 @@ namespace Manito.System.Economy
 			_commands = new EconomyCommands(service.Economy, service.MyDiscordClient);
 			(_domain = service).MyDiscordClient.AppCommands.Add("Economy", _commands.GetCommands());
 			_queue = new();
-			eventBuffer.Interact.OnMessage += _queue.Handle;
+			eventBuffer.Interact.OnToNextLink += _queue.Handle;
 		}
 
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

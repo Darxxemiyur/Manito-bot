@@ -25,19 +25,9 @@ namespace Manito.Discord.Cleaning
 			_dbFactory = dbFactory;
 		}
 
-		public Task RemoveMessage(DiscordMessage message, DateTimeOffset time) => RemoveMessage(message.ChannelId, message.Id, time);
+		public Task RemoveMessage(ulong channelId, ulong messageId) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow);
 
 		public Task RemoveMessage(DiscordMessage message) => RemoveMessage(message.ChannelId, message.Id, DateTimeOffset.UtcNow);
-
-		public async Task RemoveMessage(ulong channelId, ulong messageId, DateTimeOffset time)
-		{
-			await using var _ = await _lock.BlockAsyncLock();
-			await using var db = await _dbFactory.CreateMyDbContextAsync();
-			await db.MsgsToRemove.AddAsync(new MessageToRemove(messageId, channelId, time));
-			await db.SaveChangesAsync();
-		}
-
-		public Task RemoveMessage(ulong channelId, ulong messageId) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow);
 
 		public Task RemoveMessage(IEnumerable<DiscordMessage> messages) => RemoveMessage(messages.Select(x => (x, DateTimeOffset.UtcNow)));
 
@@ -45,11 +35,48 @@ namespace Manito.Discord.Cleaning
 
 		public Task RemoveMessage(IDictionary<ulong, ulong> messages) => RemoveMessage(messages.ToDictionary(x => x.Key, x => (x.Value, DateTimeOffset.UtcNow)));
 
+		public Task RemoveMessage(DiscordMessage message, TimeSpan timeout) => RemoveMessage(message.ChannelId, message.Id, timeout);
+
+		public Task RemoveMessage(IEnumerable<(DiscordMessage, TimeSpan)> messages) => RemoveMessage(messages.ToDictionary(x => x.Item1.ChannelId, x => (x.Item1.Id, x.Item2)));
+
+		public Task RemoveMessage(IDictionary<ulong, (ulong, TimeSpan)> messages) => RemoveMessage(messages.ToDictionary(x => x.Key, x => (x.Value.Item1, DateTimeOffset.UtcNow + x.Value.Item2)));
+
+		public Task RemoveMessage(ulong channelId, ulong messageId, TimeSpan timeout) => RemoveMessage(channelId, messageId, DateTimeOffset.UtcNow + timeout);
+
+		public Task RemoveMessage(DiscordMessage message, DateTimeOffset time) => RemoveMessage(message.ChannelId, message.Id, time);
+
+		public async Task RemoveMessage(ulong channelId, ulong messageId, DateTimeOffset time)
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			await using var db = await _dbFactory.CreateMyDbContextAsync();
+			await CreateOrUpdate(channelId, messageId, time, db);
+			await db.SaveChangesAsync();
+		}
+
+		private static async Task CreateOrUpdate(ulong channelId, ulong messageId, DateTimeOffset time, ICleaningDb db)
+		{
+			if (await db.MsgsToRemove.AnyAsync(x => x.MessageID == messageId))
+			{
+				await foreach (var msg in db.MsgsToRemove.Where(x => x.MessageID == messageId).AsAsyncEnumerable())
+				{
+					msg.Expiration = time;
+					db.MsgsToRemove.Update(msg);
+				}
+			}
+			else
+			{
+				await db.MsgsToRemove.AddAsync(new MessageToRemove(messageId, channelId, time));
+			}
+		}
+
 		public async Task RemoveMessage(IDictionary<ulong, (ulong, DateTimeOffset)> messages)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			await using var db = await _dbFactory.CreateMyDbContextAsync();
-			await db.MsgsToRemove.AddRangeAsync(messages.Select(x => new MessageToRemove(x.Value.Item1, x.Key, x.Value.Item2)));
+			foreach (var msg in messages)
+				await CreateOrUpdate(msg.Key, msg.Value.Item1, msg.Value.Item2, db);
+
+			await db.MsgsToRemove.AddRangeAsync();
 			await db.SaveChangesAsync();
 		}
 

@@ -29,7 +29,7 @@ namespace Manito.System.Economy
 			service.MyDiscordClient.AppCommands.Add("Debug", _commands.GetCommands());
 			_queue = new();
 			_service = service;
-			eventBuffer.Interact.OnMessage += _queue.Handle;
+			eventBuffer.Interact.OnToNextLink += _queue.Handle;
 		}
 
 		public async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)

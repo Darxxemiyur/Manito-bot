@@ -37,9 +37,9 @@ namespace Manito.Discord.Orders
 
 			_admins.RemoveAll(x => x == admin);
 
-			while (!AnyAdminOnline && await _pool.AnyOrders())
+			while (!AnyAdminOnline && await _pool.AnyItems())
 			{
-				var order = await await _pool.GetOrder();
+				var order = await await _pool.GetItem();
 				await order.CancelOrder("Последний администратор ушёл с поста. Средства возвращены.");
 			}
 		}
@@ -55,7 +55,7 @@ namespace Manito.Discord.Orders
 			await using var _ = await _lock.BlockAsyncLock();
 			if (order != null)
 				if (AnyAdminOnline)
-					await _pool.PlaceOrder(order);
+					await _pool.PlaceItem(order);
 				else
 					await order.CancelOrder("Администраторов в сети нет.");
 
@@ -67,7 +67,7 @@ namespace Manito.Discord.Orders
 			var order = Task.FromResult<Order>(null);
 			{
 				await using var _ = await _lock.BlockAsyncLock();
-				order = await _pool.GetOrder(token);
+				order = await _pool.GetItem(token);
 			}
 			return (await order).OrderCancelledTask.IsCompleted ? await GetOrder(token) : await order;
 		}

@@ -10,24 +10,23 @@ namespace Manito.Discord.Client
 {
 	public class EventBuffer
 	{
-		public SingleEventBuffer<MessageCreateEventArgs> Message;
-		public SingleEventBuffer<InteractionCreateEventArgs> Interact;
-		public SingleEventBuffer<ComponentInteractionCreateEventArgs> CompInteract;
-		public SingleEventBuffer<ContextMenuInteractionCreateEventArgs> ContInteract;
-		public SingleEventBuffer<MessageReactionAddEventArgs> MsgAddReact;
+		public readonly SingleEventBuffer<MessageCreateEventArgs> Message;
+		public readonly SingleEventBuffer<InteractionCreateEventArgs> Interact;
+		public readonly SingleEventBuffer<ComponentInteractionCreateEventArgs> CompInteract;
+		public readonly SingleEventBuffer<ContextMenuInteractionCreateEventArgs> ContInteract;
+		public readonly SingleEventBuffer<MessageReactionAddEventArgs> MsgAddReact;
+		public readonly SingleEventBuffer<MessageDeleteEventArgs> MsgDeletion;
+		public readonly SingleEventBuffer<ReadyEventArgs> OnReady;
 
 		public EventBuffer(DiscordClient client)
 		{
-			Message = new(x => client.MessageCreated += x,
-			 x => client.MessageCreated -= x);
-			Interact = new(x => client.InteractionCreated += x,
-			 x => client.InteractionCreated -= x);
-			CompInteract = new(x => client.ComponentInteractionCreated += x,
-			 x => client.ComponentInteractionCreated -= x);
-			MsgAddReact = new(x => client.MessageReactionAdded += x,
-			 x => client.MessageReactionAdded -= x);
-			ContInteract = new(x => client.ContextMenuInteractionCreated += x,
-			 x => client.ContextMenuInteractionCreated -= x);
+			Message = new(x => client.MessageCreated += x, x => client.MessageCreated -= x);
+			Interact = new(x => client.InteractionCreated += x, x => client.InteractionCreated -= x);
+			CompInteract = new(x => client.ComponentInteractionCreated += x, x => client.ComponentInteractionCreated -= x);
+			MsgAddReact = new(x => client.MessageReactionAdded += x, x => client.MessageReactionAdded -= x);
+			ContInteract = new(x => client.ContextMenuInteractionCreated += x, x => client.ContextMenuInteractionCreated -= x);
+			MsgDeletion = new(x => client.MessageDeleted += x, x => client.MessageDeleted -= x);
+			OnReady = new(x => client.Ready += x, x => client.Ready -= x);
 		}
 
 		public EventBuffer(EventInline client)
@@ -37,6 +36,8 @@ namespace Manito.Discord.Client
 			CompInteract = new(client.CompInteractBuffer);
 			MsgAddReact = new(client.ReactAddBuffer);
 			ContInteract = new(client.ContInteractBuffer);
+			MsgDeletion = new(client.MessageDeleteBuffer);
+			OnReady = new(client.OnReady);
 		}
 
 		private IEnumerable<Task> GetLoops()
@@ -51,12 +52,12 @@ namespace Manito.Discord.Client
 		public Task EventLoops() => Task.WhenAll(GetLoops());
 	}
 
-	public class SingleEventBuffer<TEvent> where TEvent : DiscordEventArgs
+	public class SingleEventBuffer<TEvent> : IEventChainPasser<TEvent> where TEvent : DiscordEventArgs
 	{
 		private DiscordEventProxy<TEvent> _eventBuffer;
 		private Action<AsyncEventHandler<DiscordClient, TEvent>> _unlinker;
 
-		public event Func<DiscordClient, TEvent, Task> OnMessage;
+		public event AsyncEventHandler<DiscordClient, TEvent> OnToNextLink;
 
 		private void CreateEventBuffer()
 		{
@@ -71,10 +72,10 @@ namespace Manito.Discord.Client
 			_unlinker = unlinker;
 		}
 
-		public SingleEventBuffer(PerEventInline<TEvent> linker)
+		public SingleEventBuffer(IEventChainPasser<TEvent> linker)
 		{
 			CreateEventBuffer();
-			linker.OnFail += _eventBuffer.Handle;
+			linker.OnToNextLink += _eventBuffer.Handle;
 		}
 
 		~SingleEventBuffer()
@@ -87,8 +88,8 @@ namespace Manito.Discord.Client
 			while (true)
 			{
 				var data = await _eventBuffer.GetData();
-				if (OnMessage != null)
-					await OnMessage(data.Item1, data.Item2);
+				if (OnToNextLink != null)
+					await OnToNextLink(data.Item1, data.Item2);
 			}
 		}
 	}

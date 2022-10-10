@@ -23,8 +23,8 @@ namespace Manito.Discord.PermanentMessage
 		{
 			(_domain, _queue, _commandList) = (domain, new(), GetCommands().ToList());
 			domain.MyDiscordClient.AppCommands.Add("MsgControll", _commandList);
-			buffer.Interact.OnMessage += FilterMessage;
-			buffer.ContInteract.OnMessage += FilterMessage;
+			buffer.Interact.OnToNextLink += FilterMessage;
+			buffer.ContInteract.OnToNextLink += FilterMessage;
 		}
 
 		private const string Locale = "ru";

@@ -34,7 +34,7 @@ namespace Manito.Discord.Shop
 			_commandList = GetCommands().ToList();
 			service.MyDiscordClient.AppCommands.Add("Shop", _commandList);
 			_queue = new();
-			eventBuffer.Interact.OnMessage += FilterMessage;
+			eventBuffer.Interact.OnToNextLink += FilterMessage;
 		}
 
 		private IEnumerable<DiscordApplicationCommand> GetCommands()

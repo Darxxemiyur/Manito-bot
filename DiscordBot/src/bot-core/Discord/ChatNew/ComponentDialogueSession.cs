@@ -1,5 +1,7 @@
-﻿using DisCatSharp.Entities;
+﻿using DisCatSharp;
+using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.EventArgs;
 
 using Manito.Discord.Client;
 
@@ -58,6 +60,7 @@ namespace Manito.Discord.ChatNew
 			try
 			{
 				await SendMessageLocal(message);
+				await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, TimeSpan.FromDays(7));
 			}
 			catch (Exception e)
 			{
@@ -141,6 +144,7 @@ namespace Manito.Discord.ChatNew
 					await CancelClickability();
 				else
 					await RespondToAnInteraction();
+				await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, TimeSpan.FromDays(7));
 			}
 			catch (Exception e)
 			{
@@ -205,23 +209,41 @@ namespace Manito.Discord.ChatNew
 
 		public Task<DiscordChannel> SessionChannel => Task.Run(async () => await Client.Client.GetChannelAsync((await SessionMessage).ChannelId));
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive)
+		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive) : this(client)
 		{
-			(Client, Interactive, Identifier) = (client, interactive, id);
+			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive)
+		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive) : this(client)
 		{
-			(Client, Interactive, Identifier) = (client, interactive, id);
+			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
 		}
 
-		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction)
+		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction) : this(client)
 		{
-			Client = client;
 			Identifier = new DialogueCommandIdentifier(Interactive = new(interaction));
 			NextType = InteractionResponseType.ChannelMessageWithSource;
+		}
+
+		private ComponentDialogueSession(MyClientBundle client)
+		{
+			Client = client;
+			Client.EventsBuffer.MsgDeletion.OnToNextLink += this.MsgDeletion_OnMessage;
+		}
+
+		~ComponentDialogueSession()
+		{
+			Client.EventsBuffer.MsgDeletion.OnToNextLink -= this.MsgDeletion_OnMessage;
+		}
+
+		private async Task MsgDeletion_OnMessage(DiscordClient arg1, MessageDeleteEventArgs arg2)
+		{
+			if (arg2.Message.Id != Identifier.MessageId)
+				return;
+
+			await Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(EndSession));
 		}
 
 		public static implicit operator UniversalSession(ComponentDialogueSession msg) => new(msg);

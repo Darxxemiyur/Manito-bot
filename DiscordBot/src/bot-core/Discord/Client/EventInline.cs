@@ -18,25 +18,16 @@ namespace Manito.Discord.Client
 	/// </summary>
 	public class EventInline
 	{
-		public PerEventInline<MessageCreateEventArgs> MessageBuffer {
-			get;
-		}
+		public readonly PerEventInline<MessageCreateEventArgs> MessageBuffer;
 
-		public PerEventInline<InteractionCreateEventArgs> InteractionBuffer {
-			get;
-		}
+		public readonly PerEventInline<InteractionCreateEventArgs> InteractionBuffer;
 
-		public PerEventInline<ComponentInteractionCreateEventArgs> CompInteractBuffer {
-			get;
-		}
+		public readonly PerEventInline<ComponentInteractionCreateEventArgs> CompInteractBuffer;
 
-		public PerEventInline<MessageReactionAddEventArgs> ReactAddBuffer {
-			get;
-		}
-
-		public PerEventInline<ContextMenuInteractionCreateEventArgs> ContInteractBuffer {
-			get;
-		}
+		public readonly PerEventInline<MessageReactionAddEventArgs> ReactAddBuffer;
+		public readonly PerEventInline<ContextMenuInteractionCreateEventArgs> ContInteractBuffer;
+		public readonly PerEventInline<MessageDeleteEventArgs> MessageDeleteBuffer;
+		public readonly PerEventInline<ReadyEventArgs> OnReady;
 
 		private EventBuffer _sourceEventBuffer;
 
@@ -48,6 +39,8 @@ namespace Manito.Discord.Client
 			CompInteractBuffer = new(sourceEventBuffer.CompInteract);
 			ReactAddBuffer = new(sourceEventBuffer.MsgAddReact);
 			ContInteractBuffer = new(sourceEventBuffer.ContInteract);
+			MessageDeleteBuffer = new(sourceEventBuffer.MsgDeletion);
+			OnReady = new(sourceEventBuffer.OnReady);
 		}
 
 		public Task Run() => _sourceEventBuffer.EventLoops();
@@ -58,20 +51,20 @@ namespace Manito.Discord.Client
 	/// to base listeners.
 	/// </summary>
 	/// <typeparam name="TEvent"></typeparam>
-	public class PerEventInline<TEvent> where TEvent : DiscordEventArgs
+	public class PerEventInline<TEvent> : IEventChainPasser<TEvent> where TEvent : DiscordEventArgs
 	{
 		public static int DefaultOrder = 10;
 		private Dictionary<int, List<Predictator<TEvent>>> _predictators;
 		private AsyncLocker _lock;
 		public string TypeName => GetType().FullName;
 
-		public event AsyncEventHandler<DiscordClient, TEvent> OnFail;
+		public event AsyncEventHandler<DiscordClient, TEvent> OnToNextLink;
 
-		public PerEventInline(SingleEventBuffer<TEvent> buf)
+		public PerEventInline(IEventChainPasser<TEvent> buf)
 		{
 			_lock = new();
 			_predictators = new();
-			buf.OnMessage += Check;
+			buf.OnToNextLink += Check;
 		}
 
 		public async Task Add(int order, Predictator<TEvent> predictator)
@@ -132,8 +125,8 @@ namespace Manito.Discord.Client
 			_ = itmsToDlt.Where(x => _predictators[x.Item1].Remove(x.Item2)
 			 && _predictators[x.Item1].Count == 0 && _predictators.Remove(x.Item1)).ToArray();
 
-			if (!toRun.Any() && OnFail != null)
-				await OnFail(client, args);
+			if (!toRun.Any() && OnToNextLink != null)
+				await OnToNextLink(client, args);
 
 			return !toRun.Any();
 		}

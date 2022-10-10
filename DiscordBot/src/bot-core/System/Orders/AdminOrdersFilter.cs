@@ -41,7 +41,7 @@ namespace Manito.Discord.Orders
 			_commandList = GetCommands().ToList();
 			_queue = new();
 			service.MyDiscordClient.AppCommands.Add("AdmOrdFlt", _commandList);
-			eventBuffer.Interact.OnMessage += FilterMessage;
+			eventBuffer.Interact.OnToNextLink += FilterMessage;
 		}
 
 		private IEnumerable<DiscordApplicationCommand> GetCommands()
