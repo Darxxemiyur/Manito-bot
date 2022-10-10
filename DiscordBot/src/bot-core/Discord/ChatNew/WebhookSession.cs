@@ -39,11 +39,8 @@ namespace Manito.Discord.ChatNew
 
 		public event Func<IDialogueSession, Task<bool>> OnRemove;
 
-		public async Task SendMessage(UniversalMessageBuilder msg)
-		{
-			//_client = Client.Client.Create
-			throw new NotImplementedException();
-		}
+		public Task SendMessage(UniversalMessageBuilder msg) => throw new NotImplementedException();
+
 
 		public Task DoLaterReply() => throw new NotImplementedException();
 
