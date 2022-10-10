@@ -33,6 +33,7 @@ namespace Manito.Discord.ChatNew
 
 		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, UniversalMessageBuilder bld, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
+			Identifier = new NoMessageDiagIdentifier(channel.Id, userId);
 			_channel = channel;
 			_builder = bld;
 		}
@@ -88,9 +89,6 @@ namespace Manito.Discord.ChatNew
 
 		public async Task<DiscordMessage> GetMessageInteraction(CancellationToken token = default)
 		{
-			if (Identifier == null)
-				throw new NotSupportedException();
-
 			var msg = await Client.ActivityTools.WaitForMessage(x => Identifier.DoesBelongToUs(x.Message));
 
 			return msg.Message;
@@ -98,8 +96,6 @@ namespace Manito.Discord.ChatNew
 
 		public async Task<InteractiveInteraction> GetComponentInteraction(CancellationToken token = default)
 		{
-			if (Identifier == null)
-				throw new NotSupportedException();
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
 			await OnStatusChange(this, new(new InteractiveInteraction(intr.Interaction, _message), "ConvertMeToComp"));

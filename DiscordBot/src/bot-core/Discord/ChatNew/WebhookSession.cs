@@ -41,7 +41,6 @@ namespace Manito.Discord.ChatNew
 
 		public Task SendMessage(UniversalMessageBuilder msg) => throw new NotImplementedException();
 
-
 		public Task DoLaterReply() => throw new NotImplementedException();
 
 		public Task EndSession() => throw new NotImplementedException();
