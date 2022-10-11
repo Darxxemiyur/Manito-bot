@@ -13,8 +13,6 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-using JsonException = System.Text.Json.JsonException;
-
 namespace Manito.System.Logging
 {
 	public class LoggingCenter : IModule
@@ -30,64 +28,72 @@ namespace Manito.System.Logging
 			var dc = client.Client;
 			_relay = new();
 			_queue = new();
+
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
 
 		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => _relay.Handle(("DiscordBotLog", e.Json))));
-
-		private async Task<(bool, JsonDocument)> TryParseAsync(string log)
-		{
-			try
-			{
-				var stream = new MemoryStream();
-				var writer = new StreamWriter(stream);
-				writer.Write(log);
-				writer.Flush();
-				stream.Position = 0;
-				return (true, await JsonDocument.ParseAsync(stream));
-			}
-			catch (Exception e) when (e is ArgumentException or JsonException)
-			{
-				return (false, null);
-			}
-		}
 
 		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
 #if DEBUG
 			await Console.Out.WriteLineAsync("!!!Exception " + (isHandled ? "safely handled" : "not handled") + $"\n{err}\n\n\n");
 #endif
-			await WriteErrorClassedLog(district, $"{err}", isHandled);
-		}
-
-		public async Task WriteErrorClassedLog(string district, string log, bool isHandled) => await _relay.Handle((district, JsonConvert.SerializeObject(new
-		{
-			type = "error",
-			dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
-			isHandled,
-			data = await MakeJsonLog(log)
-		})));
-
-		public Task WriteJsonLog(string district, JsonDocument log) => InnerWriteLogToDB(district, log);
-
-		private async Task<JsonDocument> MakeJsonLog(string log)
-		{
-			var (res, jlog) = await TryParseAsync(log);
-			if (!res)
+			await WriteClassedLog(district, new
 			{
-				var convertedLog = JsonConvert.SerializeObject(new
+				type = "error",
+				isHandled,
+				data = new
 				{
-					type = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
-					data = log
-				});
-				return await MakeJsonLog(convertedLog);
-			}
-			return jlog;
+					exception = err,
+					digested_log = err.ToString()
+				}
+			});
 		}
+
+		public async Task WriteClassedLog(string district, object log) => await _relay.Handle((district, await ConvertTo(new
+		{
+			type = "classedlog",
+			dataType = "ManuallyConvertedDueToNotBeingJsonInTheFirstPlace",
+			data = await GetFromJson(log)
+		})));
 
 		private Task InnerWriteLogToDB(string district, JsonDocument jlog) => _queue.Place(new LogLine("Discord", district, jlog));
 
-		public async Task WriteLog(string district, string log) => await InnerWriteLogToDB(district, await MakeJsonLog(log));
+		public async Task WriteLog(string district, object log) => await InnerWriteLogToDB(district, await ParseJsonDocument(log));
+
+		private async Task<object> GetFromJson(object input)
+		{
+			if (input is not string json)
+				return input;
+
+			return await ConvertFrom(json) ?? input;
+		}
+
+		private async Task<string> GetToJson(object input)
+		{
+			if (input is not string json)
+				return await ConvertTo(input);
+
+			var obj = await ConvertFrom(json);
+			return obj != null ? await GetToJson(obj) : json;
+		}
+
+		private Task<string> ConvertTo(object itm) => Task.Run(() => JsonConvert.SerializeObject(itm));
+
+		private Task<object> ConvertFrom(string json) => Task.Run(() => JsonConvert.DeserializeObject(json));
+
+		private async Task<JsonDocument> ParseJsonDocument(object jsono)
+		{
+			var stream = new MemoryStream();
+			var writer = new StreamWriter(stream);
+			var json = await GetToJson(jsono);
+			Console.WriteLine(json);
+			writer.Write(json);
+			writer.Flush();
+			stream.Position = 0;
+			return await JsonDocument.ParseAsync(stream);
+		}
 
 		public Task RunModule() => Task.WhenAll(DiscordEventLogging(), RunDbLogging());
 

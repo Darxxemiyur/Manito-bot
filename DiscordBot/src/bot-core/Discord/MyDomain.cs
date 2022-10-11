@@ -85,8 +85,8 @@ namespace Manito.Discord
 		private IEnumerable<Task> GetTasks()
 		{
 			yield return _db.RunModule();
+			yield return _myDiscordClient.StartLongTerm();
 			yield return _executionThread.RunModule();
-			yield return _executionThread.AddNew(new ExecThread.Job(_myDiscordClient.StartLongTerm));
 			yield return _executionThread.AddNew(new ExecThread.Job(_msgRemover.RunModule));
 			yield return _executionThread.AddNew(new ExecThread.Job(_filters.RunModule));
 			yield return _executionThread.AddNew(new ExecThread.Job(_economy.RunModule));

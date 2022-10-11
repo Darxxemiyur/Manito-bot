@@ -293,7 +293,7 @@ namespace Manito.Discord.PermanentMessage
 					new QueryablePageReturner<MessageWall>(new MyQuerrier(_session.Context.Factory)));
 			}
 
-			public IQueryable<MessageWall> Querryer()
+			public IQueryable<MessageWall> Querryer(Func<IQueryable<MessageWall>, IQueryable<MessageWall>> decorator = default)
 			{
 				using var db = _session.Context.Factory.CreateMyDbContext();
 
