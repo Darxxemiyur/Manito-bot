@@ -97,7 +97,7 @@ namespace Manito.Discord.PermanentMessage
 		/// <summary>
 		/// List of post update requests containing translator ID and a callback that resolves after update;
 		/// </summary>
-		private readonly FIFOACollection<(long, MsgContext, MyTaskSource<int?>)> _postMessageUpdateQueue;
+		private readonly FIFOFBACollection<(long, MsgContext, MyTaskSource<int?>)> _postMessageUpdateQueue;
 
 		public async Task StartSession(DiscordInteraction args)
 		{

@@ -13,7 +13,7 @@ namespace Manito.Discord.Orders
 
 		public bool AnyAdminOnline => AdminsOnline > 0;
 		private readonly AsyncLocker _lock;
-		private readonly OPFIFOFIFOTCollection<Order> _pool;
+		private readonly FIFOPFIFOTCollection<Order> _pool;
 		private readonly List<AdminOrderExec> _admins;
 
 		public AdminOrderPool()

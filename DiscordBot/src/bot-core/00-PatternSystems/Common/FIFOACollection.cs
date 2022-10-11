@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	/// <summary>
-	/// First in First out fetch blocking Async Collection FIFOACollection
+	/// FIFO Fetch Blocking Async Collection | FIFOFBACollection
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class FIFOACollection<T> : IDisposable
+	public class FIFOFBACollection<T> : IDisposable
 	{
-		public FIFOACollection()
+		public FIFOFBACollection()
 		{
 			_sync = new();
 			_chain = new();
@@ -94,7 +94,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			GC.SuppressFinalize(this);
 		}
 
-		~FIFOACollection()
+		~FIFOFBACollection()
 		{
 			// Do not re-create Dispose clean-up code here. Calling Dispose(false) is optimal in
 			// terms of readability and maintainability.
@@ -113,7 +113,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			_facade = new();
 		}
 
-		private FIFOACollection<bool> _facade;
+		private FIFOFBACollection<bool> _facade;
 
 		public Task<bool> HasAny() => _facade.HasAny();
 

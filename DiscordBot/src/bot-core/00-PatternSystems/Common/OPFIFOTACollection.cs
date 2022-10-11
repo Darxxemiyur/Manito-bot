@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace Manito._00_PatternSystems.Common
 {
 	/// <summary>
-	/// Ordered place FIFO, Take all, non-blocking async collection.
+	/// FIFO place, Take all, non-blocking async collection.
 	/// </summary>
-	public class OPFIFOTACollection<T>
+	public class FIFOPTACollection<T>
 	{
 		private AsyncLocker _lock;
 		private Queue<T> _queue;
 		private MyTaskSource _cranck;
 
-		public OPFIFOTACollection()
+		public FIFOPTACollection()
 		{
 			_lock = new();
 			_cranck = new();
@@ -26,7 +26,7 @@ namespace Manito._00_PatternSystems.Common
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			_queue.Enqueue(item);
-			_cranck.TrySetResult();
+			await _cranck.TrySetResultAsync();
 		}
 
 		public async Task Place(IEnumerable<T> items)
@@ -34,7 +34,7 @@ namespace Manito._00_PatternSystems.Common
 			await using var _ = await _lock.BlockAsyncLock();
 			foreach (var item in items)
 				_queue.Enqueue(item);
-			_cranck.TrySetResult();
+			await _cranck.TrySetResultAsync();
 		}
 
 		public async Task UntilPlaced(CancellationToken token = default)

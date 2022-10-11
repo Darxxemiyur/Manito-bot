@@ -46,7 +46,7 @@ namespace Manito.Discord.Welcommer
 		public static string MCh => $"Для вашего удобства рекомендуется ознакомиться с:\n{M1Ch}\n{M2Ch}\n{M3Ch}";
 		public static string WelcomeMessage => "<@{0}>\nДобро пожаловать на наш {1} проект!\n" + MCh;
 		private MyClientBundle _client;
-		private FIFOACollection<DiscordMember> _toAddQueue;
+		private FIFOFBACollection<DiscordMember> _toAddQueue;
 
 		public WelcomerFilter(MyClientBundle client)
 		{

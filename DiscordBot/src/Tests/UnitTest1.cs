@@ -72,17 +72,17 @@ namespace Tests
 		[TestMethod("TaskTest")]
 		public async Task TestMethod2()
 		{
-			FIFOACollection<int> proxy = new();
+			FIFOFBACollection<int> proxy = new();
 
 			await Task.WhenAll(Gen(proxy), Read(proxy));
 		}
 
-		private async Task Gen(FIFOACollection<int> proxy)
+		private async Task Gen(FIFOFBACollection<int> proxy)
 		{
 			await Task.WhenAll(Enumerable.Range(1, 500).Select(x => proxy.Handle(x)));
 		}
 
-		private async Task Read(FIFOACollection<int> proxy)
+		private async Task Read(FIFOFBACollection<int> proxy)
 		{
 			while (await proxy.HasAny())
 			{

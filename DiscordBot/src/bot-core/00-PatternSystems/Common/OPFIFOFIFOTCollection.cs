@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	/// <summary>
-	/// Ordered place FIFO, FIFO take, non-blocking async collection.
+	/// FIFO place, FIFO take, non-blocking async collection.
 	/// </summary>
-	public class OPFIFOFIFOTCollection<T>
+	public class FIFOPFIFOTCollection<T>
 	{
 		private readonly Queue<T> _queue;
 		private readonly Queue<MyTaskSource<T>> _executors;
 		private readonly AsyncLocker _lock;
 
-		public OPFIFOFIFOTCollection()
+		public FIFOPFIFOTCollection()
 		{
 			_lock = new();
 			_queue = new();

@@ -19,10 +19,10 @@ namespace Manito.System.Logging
 {
 	public class LoggingCenter : IModule
 	{
-		private OPFIFOTACollection<LogLine> _queue;
+		private FIFOPTACollection<LogLine> _queue;
 		private readonly MyClientBundle _client;
 		private readonly ILoggingDBFactory _factory;
-		private readonly FIFOACollection<(string, string)> _relay;
+		private readonly FIFOFBACollection<(string, string)> _relay;
 
 		public LoggingCenter(MyClientBundle client, ILoggingDBFactory factory)
 		{

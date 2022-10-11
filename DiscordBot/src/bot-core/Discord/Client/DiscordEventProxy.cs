@@ -10,7 +10,7 @@ namespace Manito.Discord
 {
 	public class DiscordEventProxy<T> : IDisposable
 	{
-		private FIFOACollection<(DiscordClient, T)> _facade;
+		private FIFOFBACollection<(DiscordClient, T)> _facade;
 
 		public DiscordEventProxy() => _facade = new();
 

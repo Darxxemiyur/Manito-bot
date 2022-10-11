@@ -16,7 +16,7 @@ namespace Manito.System.Economy
 #else
 		private ulong logid = 1027659223070425229;
 #endif
-		private FIFOACollection<string> _logQueue = new();
+		private FIFOFBACollection<string> _logQueue = new();
 		private MyDomain _service;
 
 		public EconomyLogging(MyDomain service)
