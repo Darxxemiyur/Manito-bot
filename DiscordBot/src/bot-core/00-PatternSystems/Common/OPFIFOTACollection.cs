@@ -1,10 +1,8 @@
-﻿using Name.Bayfaderix.Darxxemiyur.Common;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Manito._00_PatternSystems.Common
+namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	/// <summary>
 	/// FIFO place, Take all, non-blocking async collection.

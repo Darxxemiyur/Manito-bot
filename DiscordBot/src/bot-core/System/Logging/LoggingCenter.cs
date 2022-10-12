@@ -1,7 +1,6 @@
 ﻿using DisCatSharp;
 using DisCatSharp.EventArgs;
 
-using Manito._00_PatternSystems.Common;
 using Manito.Discord.Client;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
@@ -20,7 +19,7 @@ namespace Manito.System.Logging
 		private FIFOPTACollection<LogLine> _queue;
 		private readonly MyClientBundle _client;
 		private readonly ILoggingDBFactory _factory;
-		private readonly FIFOFBACollection<(string, string)> _relay;
+		private readonly FIFOFBACollection<(string, object)> _relay;
 
 		public LoggingCenter(MyClientBundle client, ILoggingDBFactory factory)
 		{
@@ -32,7 +31,7 @@ namespace Manito.System.Logging
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
 
-		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => _relay.Handle(("DiscordBotLog", e.Json))));
+		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => WriteClassedLog("DiscordBotLog", e.Json)));
 
 		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
@@ -87,9 +86,7 @@ namespace Manito.System.Logging
 		{
 			var stream = new MemoryStream();
 			var writer = new StreamWriter(stream);
-			var json = await GetToJson(jsono);
-			Console.WriteLine(json);
-			writer.Write(json);
+			writer.Write(await GetToJson(jsono));
 			writer.Flush();
 			stream.Position = 0;
 			return await JsonDocument.ParseAsync(stream);
