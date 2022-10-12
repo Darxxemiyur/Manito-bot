@@ -34,14 +34,14 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			if (_generator.MyTask.IsCanceled)
 				throw new TaskCanceledException();
 
-			_generator.TrySetResult(stuff);
+			await _generator.TrySetResultAsync(stuff);
 			_chain.Enqueue((_generator = new()).MyTask);
 		}
 
 		public async Task Cancel()
 		{
 			await using var _ = await _sync.BlockAsyncLock();
-			_generator.TrySetCanceled();
+			await _generator.TrySetCanceledAsync();
 		}
 
 		public async Task<T> GetData(CancellationToken token = default)
@@ -74,32 +74,20 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			{
 				if (disposing)
 				{
-					// TODO: dispose managed state (managed objects)
+					_sync.Dispose();
 				}
-			   ((IDisposable)_sync).Dispose();
-				// TODO: free unmanaged resources (unmanaged objects) and override finalizer
-				// TODO: set large fields to null
+
 				disposedValue = true;
 			}
 		}
 
-		// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged
-		// resources ~TaskEventProxy() { // Do not change this code. Put cleanup code in
-		// 'Dispose(bool disposing)' method Dispose(disposing: false); }
-
 		public void Dispose()
 		{
-			// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		~FIFOFBACollection()
-		{
-			// Do not re-create Dispose clean-up code here. Calling Dispose(false) is optimal in
-			// terms of readability and maintainability.
-			this.Dispose(false);
-		}
+		~FIFOFBACollection() => Dispose(false);
 	}
 
 	/// <summary>
@@ -131,31 +119,19 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			{
 				if (disposing)
 				{
-					// TODO: dispose managed state (managed objects)
+					((IDisposable)_facade).Dispose();
 				}
-			   ((IDisposable)_facade).Dispose();
-				// TODO: free unmanaged resources (unmanaged objects) and override finalizer
-				// TODO: set large fields to null
+
 				disposedValue = true;
 			}
 		}
 
-		// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged
-		// resources ~TaskEventProxy() { // Do not change this code. Put cleanup code in
-		// 'Dispose(bool disposing)' method Dispose(disposing: false); }
-
 		public void Dispose()
 		{
-			// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		~FIFOACollection()
-		{
-			// Do not re-create Dispose clean-up code here. Calling Dispose(false) is optimal in
-			// terms of readability and maintainability.
-			this.Dispose(false);
-		}
+		~FIFOACollection() => Dispose(false);
 	}
 }

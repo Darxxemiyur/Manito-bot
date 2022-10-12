@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -16,8 +17,9 @@ namespace Manito.System.Logging
 {
 	public class LoggingCenter : IModule
 	{
-		private FIFOPTACollection<LogLine> _queue;
+		private readonly FIFOPTACollection<LogLine> _queue;
 		private readonly MyClientBundle _client;
+		private readonly AsyncLocker _lock;
 		private readonly ILoggingDBFactory _factory;
 		private readonly FIFOFBACollection<(string, object)> _relay;
 
@@ -27,11 +29,19 @@ namespace Manito.System.Logging
 			var dc = client.Client;
 			_relay = new();
 			_queue = new();
+			_lock = new();
 
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
 
-		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => WriteClassedLog("DiscordBotLog", e.Json)));
+		~LoggingCenter()
+		{
+			_client.Client.PayloadReceived -= Dc_PayloadReceived;
+		}
+
+		private Task Dc_PayloadReceived(DiscordClient sender, string e) => _client.Domain.ExecutionThread.AddNew(new ExecThread.Job(() => WriteClassedLog("DiscordBotLog", e)));
+
+		private Task Dc_PayloadReceived(DiscordClient sender, PayloadReceivedEventArgs e) => Dc_PayloadReceived(sender, e.Json);
 
 		public async Task WriteErrorClassedLog(string district, Exception err, bool isHandled)
 		{
@@ -61,26 +71,31 @@ namespace Manito.System.Logging
 
 		public async Task WriteLog(string district, object log) => await InnerWriteLogToDB(district, await ParseJsonDocument(log));
 
-		private async Task<object> GetFromJson(object input)
+		private static async Task<object> GetFromJson(object input) => input is not string json ? input : await ConvertFrom(json) ?? new
 		{
-			if (input is not string json)
-				return input;
+			type = "ConvertedToJson",
+			data = json
+		};
 
-			return await ConvertFrom(json) ?? input;
-		}
+		private async Task<string> GetToJson(object input) => await ConvertTo(await GetFromJson(input));
 
-		private async Task<string> GetToJson(object input)
+		private static JsonSerializerSettings Settings = new JsonSerializerSettings {
+			MaxDepth = null
+		};
+
+		private static Task<string> ConvertTo(object itm) => Task.Run(() => JsonConvert.SerializeObject(itm, Settings));
+
+		private static async Task<object> ConvertFrom(string json)
 		{
-			if (input is not string json)
-				return await ConvertTo(input);
-
-			var obj = await ConvertFrom(json);
-			return obj != null ? await GetToJson(obj) : json;
+			try
+			{
+				return await Task.Run(() => JsonConvert.DeserializeObject(json, Settings));
+			}
+			catch
+			{
+				return null;
+			}
 		}
-
-		private Task<string> ConvertTo(object itm) => Task.Run(() => JsonConvert.SerializeObject(itm));
-
-		private Task<object> ConvertFrom(string json) => Task.Run(() => JsonConvert.DeserializeObject(json));
 
 		private async Task<JsonDocument> ParseJsonDocument(object jsono)
 		{
@@ -112,14 +127,32 @@ namespace Manito.System.Logging
 					await _queue.UntilPlaced();
 					await using var db = await _factory.CreateLoggingDBContextAsync();
 
-					var range = await _queue.GetAll();
-					await db.LogLines.AddRangeAsync(range);
-					await db.SaveChangesAsync();
+					var job = new ExecThread.Job(async () => {
+						var range = await _queue.GetAll();
+						try
+						{
+							await db.LogLines.AddRangeAsync(range);
+							await db.SaveChangesAsync();
+							await Task.Delay(TimeSpan.FromSeconds(1));
+						}
+						catch
+						{
+							await _queue.Place(range.Select(x => new LogLine(x)));
+							throw;
+						}
+						finally
+						{
+							await Task.Run(() => {
+								foreach (var item in range)
+									item.Dispose();
+							});
+						}
+					});
+					await _client.Domain.ExecutionThread.AddNew(job);
 
-					foreach (var item in range)
-						item.Dispose();
+					await job.Result;
 				}
-				catch { await Task.Delay(TimeSpan.FromSeconds(60)); }
+				catch { await Task.Delay(TimeSpan.FromMinutes(2)); }
 			}
 		}
 	}

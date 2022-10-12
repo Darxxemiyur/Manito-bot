@@ -1,5 +1,6 @@
 using DisCatSharp;
 using DisCatSharp.Entities;
+using DisCatSharp.EventArgs;
 
 using Manito.Discord.Cleaning;
 using Manito.Discord.Config;
@@ -40,10 +41,15 @@ namespace Manito.Discord.Client
 
 			var config = new DiscordConfiguration {
 				Token = rconfig.ClientCfg.ClientKey,
-				Intents = DiscordIntents.All
+				Intents = DiscordIntents.All,
+				ReconnectIndefinitely = true,
+				AutoRefreshChannelCache = true,
+				AutoReconnect = true
 			};
 
 			_client = new DiscordClient(config);
+
+			_client.Zombied += client_Zombied;
 
 			_appCommands = new ApplicationCommands(collection);
 
@@ -54,10 +60,18 @@ namespace Manito.Discord.Client
 			_eventBuffer = new EventBuffer(_eventInliner);
 		}
 
-		public async Task Start()
+		private Task client_Zombied(DiscordClient sender, ZombiedEventArgs e) => _collection.ExecutionThread.AddNew(new ExecThread.Job(async () => {
+			//await sender.ReconnectAsync();
+			await sender.DisconnectAsync();
+			await Start(sender);
+		}));
+
+		public Task Start() => Start(_client);
+
+		private async Task Start(DiscordClient client)
 		{
-			await _client.ConnectAsync();
-			await _client.InitializeAsync();
+			await client.ConnectAsync();
+			await client.InitializeAsync();
 		}
 
 		private IEnumerable<Task> GetRunners()

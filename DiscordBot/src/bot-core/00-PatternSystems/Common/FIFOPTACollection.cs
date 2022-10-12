@@ -9,8 +9,8 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	/// </summary>
 	public class FIFOPTACollection<T>
 	{
-		private AsyncLocker _lock;
-		private Queue<T> _queue;
+		private readonly AsyncLocker _lock;
+		private readonly Queue<T> _queue;
 		private MyTaskSource _cranck;
 
 		public FIFOPTACollection()
@@ -37,7 +37,12 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 		public async Task UntilPlaced(CancellationToken token = default)
 		{
-			var relay = new MyRelayTask(_cranck.MyTask, token);
+			Task task = Task.CompletedTask;
+			{
+				await using var _ = await _lock.BlockAsyncLock();
+				task = _cranck.MyTask;
+			}
+			var relay = new MyRelayTask(task, token);
 
 			await relay.TheTask;
 		}

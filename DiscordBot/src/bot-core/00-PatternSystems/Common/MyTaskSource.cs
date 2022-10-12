@@ -6,7 +6,8 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 {
 	public class MyTaskSource : IDisposable
 	{
-		private MyTaskSource<bool> _facade;
+		private readonly MyTaskSource<bool> _facade;
+		private bool disposedValue;
 
 		public MyTaskSource(CancellationToken token = default) => _facade = new(token);
 
@@ -24,7 +25,26 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 
 		public bool TrySetException(Exception exception) => _facade.TrySetException(exception);
 
-		public void Dispose() => ((IDisposable)_facade).Dispose();
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					_facade.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		~MyTaskSource() => Dispose(disposing: false);
+
+		public void Dispose()
+		{
+			Dispose(disposing: true);
+			GC.SuppressFinalize(this);
+		}
 	}
 
 	public class MyTaskSource<T> : IDisposable
@@ -33,7 +53,6 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		private readonly AsyncLocker _lock;
 		private readonly CancellationTokenSource _cancel;
 		private readonly CancellationToken _inner;
-		private readonly CancellationTokenRegistration _reg;
 
 		public MyTaskSource(CancellationToken token = default)
 		{
@@ -44,6 +63,8 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 		}
 
 		private Task<T> _innerTask;
+		private bool disposedValue;
+
 		public Task<T> MyTask => InSecure();
 
 		public static implicit operator Task<T>(MyTaskSource<T> task) => task.MyTask;
@@ -120,11 +141,27 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			return _inner.IsCancellationRequested;
 		}
 
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					_lock.Dispose();
+					_cancel.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
 		public void Dispose()
 		{
-			_lock.Dispose();
-			_reg.Dispose();
-			_cancel.Dispose();
+			// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+			Dispose(disposing: true);
+			GC.SuppressFinalize(this);
 		}
+
+		~MyTaskSource() => Dispose(disposing: false);
 	}
 }

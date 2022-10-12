@@ -13,27 +13,31 @@ namespace Manito.Discord.Client
 	public class ExecThread : IModule
 	{
 		private readonly List<Task<Exception>> _executingTasks;
-		private readonly List<Job> _toExecuteTasks;
-		private readonly AsyncLocker _sync;
-		private Thread _workerThread;
-		private MyTaskSource _relay;
-		private MyTaskSource _onNew;
-		private MyDomain _domain;
+		private readonly FIFOPTACollection<Job> _toExecuteTasks;
+		private readonly Thread _workerThread;
+		private readonly MyTaskSource _relay;
+		private readonly MyDomain _domain;
 
 		public class Job
 		{
 			private readonly MyTaskSource<object> _resulter;
 			public Task<object> DataResult => _resulter.MyTask;
-			public Task Result => _resulter.MyTask;
+			public Task Result => DataResult;
 
 			public enum Type
 			{
 				Pooled,
-				Threaded,
+				UniqueThreaded,
+				SubThreaded,
 				Inline,
 			}
 
-			public Type JobType => Type.Inline;
+#if DEBUG
+			public readonly Type JobType = Type.Pooled;
+#else
+			public readonly Type JobType = Type.Inline;
+#endif
+
 			private readonly Func<CancellationToken, Task<object>> _invoke;
 			private readonly CancellationToken _token;
 
@@ -90,11 +94,9 @@ namespace Manito.Discord.Client
 
 		public ExecThread(MyDomain domain)
 		{
-			_sync = new();
 			_executingTasks = new();
 			_toExecuteTasks = new();
 			_workerThread = new(() => AsyncContext.Run(MyWorker));
-			_onNew = new();
 			_relay = new();
 			_domain = domain;
 		}
@@ -123,10 +125,7 @@ namespace Manito.Discord.Client
 		/// <returns></returns>
 		public async Task<IEnumerable<Job>> AddNew(IEnumerable<Job> runners)
 		{
-			using var g = await _sync.BlockAsyncLock();
-
-			_toExecuteTasks.AddRange(runners);
-			await _onNew.TrySetResultAsync();
+			await _toExecuteTasks.Place(runners);
 
 			return runners;
 		}
@@ -140,7 +139,7 @@ namespace Manito.Discord.Client
 					await Task.Run(job.Launch);
 
 				//Explicit external thread for each task.
-				if (job.JobType == Job.Type.Threaded)
+				if (job.JobType == Job.Type.UniqueThreaded)
 				{
 					var relay = new MyTaskSource();
 					new Thread(() => AsyncContext.Run(async () => {
@@ -174,26 +173,22 @@ namespace Manito.Discord.Client
 			{
 				while (true)
 				{
-					{
-						// Handle the add queue
-						await using var _ = await _sync.BlockAsyncLock();
-						_executingTasks.AddRange(_toExecuteTasks.Select(SafeHandler));
-						_toExecuteTasks.Clear();
-					}
 					//Wait for any task to complete in the list;
-					var completedTask = await Task.WhenAny(_executingTasks.Append(_onNew.MyTask).ToArray()) as Task<Exception>;
+					var completedTask = await Task.WhenAny(_executingTasks.Append(_toExecuteTasks.UntilPlaced()).ToArray()) as Task<Exception>;
 					if (completedTask != null)
 					{
 						//Handle the removal of completed tasks yielded from awaiting for any
-						await using var _ = await _sync.BlockAsyncLock();
 						var result = await completedTask;
 						//Forward all exceptions to the stderr-ish
 						if (result != null)
-							await _domain.Logging.WriteErrorClassedLog(GetType().Name, result, false);
+							await AddNew(new Job(() => _domain.Logging.WriteErrorClassedLog(GetType().Name, result, false)));
 
 						//Returns false if it tries to remove 'timeout' task, and true if succeeds
 						_executingTasks.Remove(completedTask);
-						_onNew = new();
+					}
+					else
+					{
+						_executingTasks.AddRange((await _toExecuteTasks.GetAll()).Select(SafeHandler));
 					}
 				}
 			}

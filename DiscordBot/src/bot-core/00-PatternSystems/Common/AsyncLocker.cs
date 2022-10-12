@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Name.Bayfaderix.Darxxemiyur.Common
 {
-	//TODO: Make locker wait to be disposed, until all awaiters go out.
 	public sealed class AsyncLocker : IDisposable
 	{
 		private readonly SemaphoreSlim _lock;
