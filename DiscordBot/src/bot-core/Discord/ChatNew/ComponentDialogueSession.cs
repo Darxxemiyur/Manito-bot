@@ -68,7 +68,7 @@ namespace Manito.Discord.ChatNew
 				if (IsAutomaticallyDeleted)
 					await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				await FallBackToMessageSession();
 				throw;
@@ -203,7 +203,7 @@ namespace Manito.Discord.ChatNew
 
 		public Task<DiscordMessage> GetReplyInteraction(CancellationToken token = default) => throw new NotImplementedException();
 
-		public UniversalSession ToUniversal() => (UniversalSession)this;
+		public UniversalSession ToUniversal() => new(this);
 
 		public Task<DiscordMessage> SessionMessage => Interactive.Interaction.GetOriginalResponseAsync();
 

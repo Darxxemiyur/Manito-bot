@@ -33,7 +33,7 @@ namespace Manito.Discord.Client
 			}
 
 #if DEBUG
-			public readonly Type JobType = Type.Pooled;
+			public readonly Type JobType = Type.Inline;
 #else
 			public readonly Type JobType = Type.Inline;
 #endif

@@ -4,6 +4,7 @@ using DisCatSharp.Enums;
 using Manito.Discord;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
+using Manito.System.Economy.BBB;
 
 using System;
 using System.Collections.Generic;
@@ -71,6 +72,9 @@ namespace Manito.System.Economy
 			 nameLocalizations: GetLoc("сбросить_бд"),
 			 descriptionLocalizations: GetLoc("Сбросить базу данных")),
 			 ResetDatabase);
+			yield return (new DiscordApplicationCommandOption("popu_db", "Populate database",
+			 ApplicationCommandOptionType.SubCommand),
+			 PopulateDatabase);
 			yield return (new DiscordApplicationCommandOption("check_wm", "Check welcomming message",
 			 ApplicationCommandOptionType.SubCommand,
 			 nameLocalizations: GetLoc("проверить_пс"),
@@ -82,7 +86,14 @@ namespace Manito.System.Economy
 			 descriptionLocalizations: GetLoc("Проверить диалоговую систему")),
 			 CheckDialogue);
 		}
+		private async Task PopulateDatabase(DiscordInteraction args)
+		{
+			var session = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
 
+			await using var fdb = await _bot.DbFactory.CreateMyDbContextAsync();
+
+
+		}
 		private async Task MarkToDelete(DiscordInteraction args)
 		{
 			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
@@ -147,7 +158,7 @@ namespace Manito.System.Economy
 		{
 			await args.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
-			using var fdb = await _bot.DbFactory.CreateMyDbContextAsync();
+			await using var fdb = await _bot.DbFactory.CreateMyDbContextAsync();
 			var db = fdb.ImplementedContext.Database;
 
 			await db.EnsureDeletedAsync();

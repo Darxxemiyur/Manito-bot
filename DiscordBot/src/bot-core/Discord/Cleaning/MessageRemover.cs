@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using static Manito.Discord.Client.ExecThread;
+
 namespace Manito.Discord.Cleaning
 {
 	public class MessageRemover : IModule
@@ -63,7 +65,7 @@ namespace Manito.Discord.Cleaning
 			await db.SaveChangesAsync();
 		}
 
-		private async Task CreateOrUpdate(ulong channelId, ulong messageId, DateTimeOffset time, ICleaningDb db, bool isOnNext = false) => await CreateOrUpdate(new MessageToRemove(messageId, channelId, time, await LSI.MyTask), db, isOnNext);
+		private Task CreateOrUpdate(ulong channelId, ulong messageId, DateTimeOffset time, ICleaningDb db, bool isOnNext = false) => CreateOrUpdate(new MessageToRemove(messageId, channelId, time, 0), db, isOnNext);
 
 		private async Task CreateOrUpdate(MessageToRemove msg, ICleaningDb db, bool isOnNext) => await CreateOrUpdate(new MessageToRemove(msg) { LastStartId = await LSI.MyTask + (isOnNext ? 1 : 0) }, db);
 
@@ -108,7 +110,7 @@ namespace Manito.Discord.Cleaning
 
 					if (!LSI.MyTask.IsCompleted)
 					{
-						var sorted = await db.MsgsToRemove.OrderByDescending(x => x.LastStartId).Take(1).FirstAsync();
+						var sorted = await db.MsgsToRemove.OrderByDescending(x => x.LastStartId).Take(1).FirstOrDefaultAsync();
 
 						await LSI.TrySetResultAsync(sorted?.LastStartId ?? 0);
 					}
@@ -138,7 +140,10 @@ namespace Manito.Discord.Cleaning
 
 					await db.SaveChangesAsync();
 				}
-				catch { }
+				catch (Exception e)
+				{
+					await _domain.Logging.WriteErrorClassedLog(GetType().Name, e, false);
+				}
 				await Task.Delay(TimeSpan.FromMilliseconds(Math.Max(1, (delayStart + span - DateTimeOffset.UtcNow).TotalMilliseconds)));
 			}
 		}

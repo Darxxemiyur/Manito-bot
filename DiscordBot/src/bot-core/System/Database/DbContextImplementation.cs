@@ -2,6 +2,7 @@ using Manito.Discord.Cleaning;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
+using Manito.System.Economy.BBB;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,10 @@ namespace Manito.Discord.Database
 			get; set;
 		}
 
+		/*public DbSet<ItemBase> InventoryItems {
+			get; set;
+		}*/
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<MessageWallTranslator>().HasKey(x => x.ID);
@@ -66,6 +71,12 @@ namespace Manito.Discord.Database
 			modelBuilder.Entity<MessageToRemove>(x => x.HasKey(x => x.MessageID));
 
 			modelBuilder.Entity<ShopItem>().HasNoKey();
+
+			/*modelBuilder.Entity<ItemMisc>().Property(x => x.Properties).HasColumnType("jsonb").HasColumnName("Properties");
+			modelBuilder.Entity<ItemEgg>().Property(x => x.Properties).HasColumnType("jsonb").HasColumnName("Properties");
+			modelBuilder.Entity<ItemFood>().Property(x => x.Properties).HasColumnType("jsonb").HasColumnName("Properties");
+			modelBuilder.Entity<ItemBase>().Property(x => x.Id).UseIdentityByDefaultColumn();
+			modelBuilder.Entity<ItemBase>().HasKey(x => x.Id);*/
 
 			modelBuilder.Entity<LogLine>(x => {
 				x.HasKey(x => x.ID);

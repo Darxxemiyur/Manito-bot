@@ -2,6 +2,7 @@ using Manito.Discord.Cleaning;
 using Manito.Discord.PermanentMessage;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
+using Manito.System.Economy.BBB;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ namespace Manito.Discord.Database
 		public DbSet<PlayerEconomyWork> PlayerWorks => ImplementedContext.PlayerWorks;
 
 		public DbSet<MessageToRemove> MsgsToRemove => ImplementedContext.MessagesToRemove;
+
+		//public DbSet<ItemBase> InventoryItems => ImplementedContext.InventoryItems;
 
 		public int SaveChanges() => ImplementedContext.SaveChanges();
 

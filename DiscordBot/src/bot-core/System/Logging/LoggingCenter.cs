@@ -125,12 +125,12 @@ namespace Manito.System.Logging
 				try
 				{
 					await _queue.UntilPlaced();
-					await using var db = await _factory.CreateLoggingDBContextAsync();
 
 					var job = new ExecThread.Job(async () => {
 						var range = await _queue.GetAll();
 						try
 						{
+							await using var db = await _factory.CreateLoggingDBContextAsync();
 							await db.LogLines.AddRangeAsync(range);
 							await db.SaveChangesAsync();
 							await Task.Delay(TimeSpan.FromSeconds(1));
