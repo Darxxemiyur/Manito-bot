@@ -79,7 +79,7 @@ namespace Manito.Discord.PermanentMessage
 			for (var i = 0; i < length; i++)
 			{
 				var slv = oldDict.ElementAtOrDefault(i);
-				var tgt = mwDict.ElementAtOrDefault(i)?.WallLine?.DoAtMax(MaxCharsPerLine) ?? "";
+				var tgt = mwDict.ElementAtOrDefault(i)?.WallLine?.DoStartAtMax(MaxCharsPerLine) ?? "";
 
 				DiscordMessage msg = null;
 				string content = null;

@@ -1,5 +1,6 @@
 using Manito.Discord.Cleaning;
 using Manito.Discord.PermanentMessage;
+using Manito.Discord.Rules;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
 using Manito.System.Economy.BBB;
@@ -46,6 +47,9 @@ namespace Manito.Discord.Database
 		public DbSet<MessageToRemove> MessagesToRemove {
 			get; set;
 		}
+		public DbSet<RulesPoint> Rules {
+			get; set;
+		}
 
 		/*public DbSet<ItemBase> InventoryItems {
 			get; set;
@@ -70,6 +74,7 @@ namespace Manito.Discord.Database
 
 			modelBuilder.Entity<MessageToRemove>(x => x.HasKey(x => x.MessageID));
 
+			modelBuilder.Entity<RulesPoint>(x => x.HasKey(x => x.RuleId));
 			modelBuilder.Entity<ShopItem>().HasNoKey();
 
 			/*modelBuilder.Entity<ItemMisc>().Property(x => x.Properties).HasColumnType("jsonb").HasColumnName("Properties");

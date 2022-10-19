@@ -31,7 +31,7 @@ namespace Manito.Discord.ChatNew
 		public new event Func<DialogueTabSession<T>, Task<bool>> OnRemove;
 
 		public DialogueTabSession(DialogueTabSessionTab<T> tab, InteractiveInteraction start, T context)
-			: base(new ComponentDialogueSession(tab.Client, new DialogueCommandIdentifier(start), start))
+			: base(new ComponentDialogueSession(tab.Client, new DialogueCommandState(start), start))
 		{
 			(Tab, Context) = (tab, context);
 			base.OnStatusChange += StatusChange;

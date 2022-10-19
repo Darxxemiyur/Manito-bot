@@ -1,4 +1,9 @@
-﻿using Name.Bayfaderix.Darxxemiyur.Common;
+﻿using Manito.Discord.PatternSystems.Common;
+using Manito.Discord.Rules.GUI;
+
+using MongoDB.Driver.Linq;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System.Diagnostics;
 
@@ -16,6 +21,20 @@ namespace Tests
 
 			await source.MyTask;
 			Console.WriteLine(1000);
+		}
+		[TestMethod("LineFillCheck")]
+		public async Task Method3F()
+		{
+			var items = Enumerable.Range(1, 54).Select(x => (ItemFrameBase)new ItemFrame<string>($"name1{x}", EditorType.String, null));
+			var redactor = new ItemRedactor(null, items.ToList());
+
+		}
+		[TestMethod("LineCheck")]
+		public async Task Method3N()
+		{
+			var items = Enumerable.Range(1, 54).Select(x => (ItemFrameBase)new ItemFrame<string>($"name1{x}", EditorType.String, null));
+			var redactor = new ItemRedactor(null, items.ToList());
+
 		}
 
 		[TestMethod("ErrorCheck2")]

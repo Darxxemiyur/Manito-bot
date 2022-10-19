@@ -14,6 +14,7 @@ using Name.Bayfaderix.Darxxemiyur.Node.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.PermanentMessage
@@ -33,7 +34,7 @@ namespace Manito.Discord.PermanentMessage
 
 			private string GetMyThing(string str) => $"Транслятор {str} ID:<#{_wallLine.ChannelId}>";
 
-			public string GetButtonName() => GetMyThing(_wallLine.MessageWall?.WallName.DoAtMax(80 - GetMyThing("").Length));
+			public string GetButtonName() => GetMyThing(_wallLine.MessageWall?.WallName.DoStartAtMax(80 - GetMyThing("").Length));
 
 			public MessageWallTranslator GetCarriedItem() => _wallLine;
 
@@ -237,8 +238,8 @@ namespace Manito.Discord.PermanentMessage
 
 			private async Task<NextNetworkInstruction> OpenWall(NetworkInstructionArgument args)
 			{
-				var wall = await _wallSelector.Decorator(_wallSelector.Querryer()
-					.Where(x => x == _translator.MessageWall)).FirstAsync();
+				await using var db = await _session.Context.Factory.CreateMyDbContextAsync();
+				var wall = db.MessageWalls.First(x => x.ID == _translator.MessageWall.ID);
 
 				return _wallEditor.GetStartingInstruction(wall);
 			}
@@ -263,52 +264,17 @@ namespace Manito.Discord.PermanentMessage
 		public class Selector : INodeNetwork
 		{
 			private DialogueTabSession<MsgContext> _session;
-			private InteractiveSelectMenu<MessageWallTranslator> _selectMenu;
+			private StandaloneInteractiveSelectMenu<MessageWallTranslator> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 			public DiscordButtonComponent MkNewButton;
 			public DiscordButtonComponent EditButton;
 			private readonly MessageWall _wall;
 
-			private class MyQuerrier : IQuerrier<MessageWallTranslator>
-			{
-				private IPermMessageDbFactory _factory;
-
-				public MyQuerrier(IPermMessageDbFactory factory)
-				{
-					_factory = factory;
-				}
-
-				public IItemDescriptor<MessageWallTranslator> Convert(MessageWallTranslator item) =>
-					new Descriptor(item);
-
-				public int GetPages(int perPage)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					return (int)Math.Ceiling((double)GetTotalCount() / perPage);
-				}
-
-				public IEnumerable<MessageWallTranslator> GetSection(int skip, int take)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					var input = db.MessageWallTranslators.OrderBy(x => x.ID).Skip(skip).Take(take);
-					return input.Include(x => x.MessageWall).ToArray();
-				}
-
-				public int GetTotalCount()
-				{
-					using var db = _factory.CreateMyDbContext();
-					return db.MessageWallTranslators.OrderBy(x => x.ID).Count();
-				}
-			}
-
 			public Selector(DialogueTabSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
-				_selectMenu = new InteractiveSelectMenu<MessageWallTranslator>(_session,
-					new QueryablePageReturner<MessageWallTranslator>(new MyQuerrier(_session.Context.Factory)));
+				_selectMenu = new StandaloneInteractiveSelectMenu<MessageWallTranslator>(_session, new CompactQuerryReturner<IPermMessageDbFactory, IPermMessageDb, MessageWallTranslator>(session.Context.Factory, x => x.CreateMyDbContextAsync(), async x => x.MessageWallTranslators, async x => new Descriptor(x)));
 				EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
 				MkNewButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
 			}

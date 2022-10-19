@@ -36,7 +36,7 @@ namespace Manito.Discord.PermanentMessage
 
 				emb.WithAuthor("Стена сообщения");
 
-				var msg = _line.Message?.Replace("`", "\\`")?.DoAtMax(4090 - 9) ?? "Пусто";
+				var msg = _line.Message?.Replace("`", "\\`")?.DoStartAtMax(4090 - 9) ?? "Пусто";
 				emb.WithDescription($"```{msg}```");
 
 				emb.AddField("Что сделать?", "** **");
@@ -107,7 +107,7 @@ namespace Manito.Discord.PermanentMessage
 			{
 				var wallName = $"{_wallLine.Message ?? ""}".Trim();
 
-				return wallName.DoAtMax(80).Trim();
+				return wallName.DoStartAtMax(80).Trim();
 			}
 
 			public ImportedMessage GetCarriedItem() => _wallLine;
@@ -137,7 +137,7 @@ namespace Manito.Discord.PermanentMessage
 			}
 		}
 
-		private InteractiveSelectMenu<ImportedMessage> _selectMenu;
+		private StandaloneInteractiveSelectMenu<ImportedMessage> _selectMenu;
 
 		private DialogueTabSession<MsgContext> _session;
 		private Editor _editor;
@@ -146,7 +146,7 @@ namespace Manito.Discord.PermanentMessage
 		{
 			_editor = new(session, new(Choose));
 			_session = session;
-			_selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
+			_selectMenu = new StandaloneInteractiveSelectMenu<ImportedMessage>(_session,
 				new EnumerablePageReturner<ImportedMessage>(
 					_session.Context.Domain.MsgWallCtr.ImportedMessages, (x) => new Descriptor(x)));
 		}

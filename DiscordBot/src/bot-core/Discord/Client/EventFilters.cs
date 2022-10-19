@@ -1,6 +1,7 @@
 using Manito.Discord.Inventory;
 using Manito.Discord.Orders;
 using Manito.Discord.PermanentMessage;
+using Manito.Discord.Rules;
 using Manito.Discord.Shop;
 using Manito.Discord.Welcommer;
 using Manito.System.Economy;
@@ -25,6 +26,7 @@ namespace Manito.Discord.Client
 		private MsgWallFilter _msgWallFilter;
 		private WelcomerFilter _welcomer;
 		private AdminOrdersFilter _adminOrder;
+		private RulesFilter _rulesFilter;
 		private UserAssociationFilter _associationFilter;
 		public AdminOrdersFilter AdminOrder => _adminOrder;
 		public WelcomerFilter Welcomer => _welcomer;
@@ -51,6 +53,7 @@ namespace Manito.Discord.Client
 			_debugFilter = new DebugFilter(_service, _eventBuffer);
 			_adminOrder = new(_service, _eventBuffer);
 			_associationFilter = new(_service, _eventBuffer);
+			_rulesFilter = new(_service, _eventBuffer);
 		}
 
 		public async Task PostInitialize()
@@ -67,6 +70,7 @@ namespace Manito.Discord.Client
 			yield return _welcomer.RunModule();
 			yield return _adminOrder.RunModule();
 			yield return _associationFilter.RunModule();
+			yield return _rulesFilter.RunModule();
 		}
 
 		public Task RunModule() => Task.WhenAll(GetRuns());

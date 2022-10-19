@@ -2,6 +2,7 @@ using Manito.Discord.Cleaning;
 using Manito.Discord.Client;
 using Manito.Discord.Config;
 using Manito.Discord.PermanentMessage;
+using Manito.Discord.Rules;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
 using Manito.System.Logging;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Database
 {
-	public class MyDbFactory : IShopDbFactory, ICleaningDbFactory, IEconomyDbFactory, IPermMessageDbFactory, ILoggingDBFactory, IMyDbFactory, IModule
+	public class MyDbFactory : IShopDbFactory, ICleaningDbFactory, IEconomyDbFactory, IRulesDbFactory, IPermMessageDbFactory, ILoggingDBFactory, IMyDbFactory, IModule
 	{
 		private class DTDCF : IDbContextFactory<DbContextImplementation>, IDesignTimeDbContextFactory<DbContextImplementation>
 		{
@@ -45,11 +46,15 @@ namespace Manito.Discord.Database
 		public IDesignTimeDbContextFactory<DbContextImplementation> OriginalFactory {
 			get; private set;
 		}
+		public MyDomain Domain {
+			get;
+		}
 
 		private AsyncLocker _lock;
 
 		public MyDbFactory(MyDomain domain, DatabaseConfig dbConfig)
 		{
+			Domain = domain;
 			OriginalFactory = new DTDCF(dbConfig);
 			_lock = new();
 		}
@@ -109,6 +114,11 @@ namespace Manito.Discord.Database
 			 CreateMyDbContext();
 
 		async Task<ICleaningDb> ICleaningDbFactory.CreateMyDbContextAsync() =>
+			 await CreateMyDbContextAsync();
+		IRulesDb IRulesDbFactory.CreateMyDbContext() =>
+			 CreateMyDbContext();
+
+		async Task<IRulesDb> IRulesDbFactory.CreateMyDbContextAsync() =>
 			 await CreateMyDbContextAsync();
 	}
 }

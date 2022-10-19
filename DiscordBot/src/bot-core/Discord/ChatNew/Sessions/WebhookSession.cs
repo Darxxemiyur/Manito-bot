@@ -54,5 +54,9 @@ namespace Manito.Discord.ChatNew
 		public Task RemoveMessage() => throw new NotImplementedException();
 
 		public UniversalSession ToUniversal() => throw new NotImplementedException();
+		public Task<UniversalSession> PopNewLine() => throw new NotImplementedException();
+		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => throw new NotImplementedException();
+		public Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr) => throw new NotImplementedException();
+		public Task<UniversalSession> PopNewLine(DiscordUser msg) => throw new NotImplementedException();
 	}
 }

@@ -63,7 +63,22 @@ namespace Manito.Discord.ChatNew
 			await using var _ = await _lock.BlockAsyncLock();
 			try
 			{
-				await SendMessageLocal(message);
+				try
+				{
+					await SendMessageLocal(message);
+				}
+				catch (Exception e) when (NextType != InteractionResponseType.Pong)
+				{
+					NextType = InteractionResponseType.Pong;
+					try
+					{
+						await SendMessageLocal(message);
+					}
+					catch (Exception ee)
+					{
+						throw new AggregateException(e, ee);
+					}
+				}
 
 				if (IsAutomaticallyDeleted)
 					await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
@@ -100,7 +115,7 @@ namespace Manito.Discord.ChatNew
 		private async Task MarkTheMessage(DiscordMessage msg = default)
 		{
 			_msg = msg ?? await SessionMessage;
-			Identifier = new DialogueCompInterIdentifier(Client, new(Interactive.Interaction, _msg));
+			Identifier = new ComponentInteractionState(Client, new(Interactive.Interaction, _msg));
 		}
 
 		private async Task CancelClickability()
@@ -177,7 +192,7 @@ namespace Manito.Discord.ChatNew
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
 			await using var _ = await _lock.BlockAsyncLock();
-			Identifier = new DialogueCompInterIdentifier(Client, Interactive = intr);
+			Identifier = new ComponentInteractionState(Client, Interactive = intr);
 			NextType = InteractionResponseType.UpdateMessage;
 
 			return intr;
@@ -209,13 +224,14 @@ namespace Manito.Discord.ChatNew
 
 		public Task<DiscordChannel> SessionChannel => Task.Run(async () => await Client.Client.GetChannelAsync((await SessionMessage).ChannelId));
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCompInterIdentifier id, InteractiveInteraction interactive, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
+		public ComponentDialogueSession(MyClientBundle client, ComponentInteractionState id, InteractiveInteraction interactive, UniversalMessageBuilder bld, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
 			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
+			_innerMsgBuilder = bld;
 		}
 
-		public ComponentDialogueSession(MyClientBundle client, DialogueCommandIdentifier id, InteractiveInteraction interactive, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
+		public ComponentDialogueSession(MyClientBundle client, DialogueCommandState id, InteractiveInteraction interactive, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
 			(Interactive, Identifier) = (interactive, id);
 			NextType = id.MessageId.HasValue ? InteractionResponseType.UpdateMessage : InteractionResponseType.ChannelMessageWithSource;
@@ -223,7 +239,7 @@ namespace Manito.Discord.ChatNew
 
 		public ComponentDialogueSession(MyClientBundle client, DiscordInteraction interaction, bool isAutomaticallyDeleted = true) : this(client, isAutomaticallyDeleted)
 		{
-			Identifier = new DialogueCommandIdentifier(Interactive = new(interaction));
+			Identifier = new DialogueCommandState(Interactive = new(interaction));
 			NextType = InteractionResponseType.ChannelMessageWithSource;
 		}
 
@@ -245,6 +261,23 @@ namespace Manito.Discord.ChatNew
 				return;
 
 			await Client.Domain.ExecutionThread.AddNew(new ExecThread.Job(EndSession));
+		}
+
+		public async Task<UniversalSession> PopNewLine()
+		{
+
+
+			return await PopNewLine(await SessionChannel, await Client.Client.GetUserAsync(Identifier.UserId ?? 0));
+		}
+		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => PopNewLine(msg.Channel, msg.Author);
+		public async Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr)
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			return new SessionFromMessage(Client, msg, _innerMsgBuilder, usr.Id).ToUniversal();
+		}
+		public async Task<UniversalSession> PopNewLine(DiscordUser msg)
+		{
+			return await PopNewLine(await (await msg.ConvertToMember(Client.Client.Guilds.FirstOrDefault(x => x.Value.Members.FirstOrDefault(y => y.Key == msg.Id).Value != null).Value)).CreateDmChannelAsync(), msg);
 		}
 
 		public static implicit operator UniversalSession(ComponentDialogueSession msg) => new(msg);

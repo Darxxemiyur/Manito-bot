@@ -1,74 +1,17 @@
 ﻿using DisCatSharp.Entities;
-
 using Manito.Discord.Client;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
 {
-	public interface IDialogueSession
+	public interface IReplyAwaitable
 	{
-		/// <summary>
-		/// My own discord client wrapper.
-		/// </summary>
-		MyClientBundle Client {
-			get;
-		}
-
-		/// <summary>
-		/// Identifier of message to pull events for.
-		/// </summary>
-		ISessionState Identifier {
-			get;
-		}
-
-		bool IsAutomaticallyDeleted {
-			get;
-		}
-
-		/// <summary>
-		/// Send/update session message.
-		/// </summary>
-		/// <param name="msg">The new message.</param>
-		/// <returns></returns>
-		Task SendMessage(UniversalMessageBuilder msg);
-
-		/// <summary>
-		/// Respond to an interaction to reply later.
-		/// </summary>
-		/// <returns></returns>
-		Task DoLaterReply();
-
-		/// <summary>
-		/// Delete message.
-		/// </summary>
-		/// <returns></returns>
-		Task RemoveMessage();
-
-		/// <summary>
-		/// Ends session.
-		/// </summary>
-		/// <returns></returns>
-		Task EndSession();
-
-		/// <summary>
-		/// Gets message of the session.
-		/// </summary>
-		Task<DiscordMessage> SessionMessage {
-			get;
-		}
-
-		/// <summary>
-		/// Gets message of the session.
-		/// </summary>
-		Task<DiscordChannel> SessionChannel {
-			get;
-		}
-
 		/// <summary>
 		/// Gets message from user that is acceptable to SessionIdentifier.
 		/// </summary>
@@ -97,8 +40,9 @@ namespace Manito.Discord.ChatNew
 		/// <returns></returns>
 		public async Task<GeneralInteraction> GetInteraction(InteractionTypes types, CancellationToken token = default)
 		{
-			CancellationTokenSource cancellation = new();
-			token.Register(() => cancellation.Cancel());
+			CancellationTokenSource my = new();
+			var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, my.Token);
+
 
 			var tasks = new List<(InteractionTypes, Task)>();
 
@@ -113,11 +57,11 @@ namespace Manito.Discord.ChatNew
 
 			var first = await Task.WhenAny(tasks.Select(x => x.Item2));
 
-			if (token.IsCancellationRequested)
+			if (cancellation.IsCancellationRequested)
 				return new GeneralInteraction(InteractionTypes.Cancelled);
 
 			if (cancellation.Token.CanBeCanceled)
-				cancellation.Cancel();
+				my.Cancel();
 
 			var couple = tasks.First(x => x.Item2 == first);
 
@@ -125,22 +69,5 @@ namespace Manito.Discord.ChatNew
 				couple.Item2 is Task<InteractiveInteraction> i ? await i : null,
 				couple.Item2 is Task<DiscordMessage> m ? await m : null);
 		}
-
-		/// <summary>
-		/// Used to inform subscribers about session status change.
-		/// </summary>
-		public event Func<IDialogueSession, SessionInnerMessage, Task> OnStatusChange;
-
-		/// <summary>
-		/// Used to inform subscribers about session end.
-		/// </summary>
-		public event Func<IDialogueSession, SessionInnerMessage, Task> OnSessionEnd;
-
-		/// <summary>
-		/// Used to inform subscribers about session removal.
-		/// </summary>
-		public event Func<IDialogueSession, Task<bool>> OnRemove;
-
-		UniversalSession ToUniversal();
 	}
 }

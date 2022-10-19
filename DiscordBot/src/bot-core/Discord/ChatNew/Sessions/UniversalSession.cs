@@ -56,8 +56,8 @@ namespace Manito.Discord.ChatNew
 
 			if (msg.Message.ToLower().Contains("tocomp"))
 			{
-				var intr = (InteractiveInteraction)msg.Generic;
-				_innerSession = new ComponentDialogueSession(Client, new DialogueCompInterIdentifier(Client, intr), intr, IsAutomaticallyDeleted);
+				var (intr, bld) = ((InteractiveInteraction, UniversalMessageBuilder))msg.Generic;
+				_innerSession = new ComponentDialogueSession(Client, new ComponentInteractionState(Client, intr), intr, bld, IsAutomaticallyDeleted);
 			}
 			if (msg.Message.ToLower().Contains("tomsg1"))
 			{
@@ -128,6 +128,10 @@ namespace Manito.Discord.ChatNew
 		public Task RemoveMessage() => SafeWriter(() => _innerSession.RemoveMessage());
 
 		public Task SendMessage(UniversalMessageBuilder msg) => SafeWriter(() => _innerSession.SendMessage(msg));
+		public Task<UniversalSession> PopNewLine() => _innerSession.PopNewLine();
+		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => _innerSession.PopNewLine(msg);
+		public Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr) => _innerSession.PopNewLine(msg, usr);
+		public Task<UniversalSession> PopNewLine(DiscordUser msg) => _innerSession.PopNewLine(msg);
 
 		public Task<DiscordMessage> SessionMessage => _innerSession.SessionMessage;
 

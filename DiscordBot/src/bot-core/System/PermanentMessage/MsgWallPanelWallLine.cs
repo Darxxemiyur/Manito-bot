@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using static Manito.Discord.PermanentMessage.MsgWallPanelWallLineImport;
+
 namespace Manito.Discord.PermanentMessage
 {
 	public class MsgWallPanelWallLine : INodeNetwork
@@ -48,7 +50,7 @@ namespace Manito.Discord.PermanentMessage
 
 				emb.WithAuthor("Стена сообщения");
 
-				var msg = _line?.WallLine?.Replace("`", "\\`")?.DoAtMax(4090 - 9) ?? "Пусто";
+				var msg = _line?.WallLine?.Replace("`", "\\`")?.DoStartAtMax(4090 - 9) ?? "Пусто";
 				emb.WithDescription($"```{msg}```");
 
 				emb.AddField("Что сделать?", "** **");
@@ -82,10 +84,7 @@ namespace Manito.Discord.PermanentMessage
 
 			private async Task<NextNetworkInstruction> ImportMessage(NetworkInstructionArgument arg)
 			{
-				var selectMenu = new InteractiveSelectMenu<ImportedMessage>(_session,
-					new EnumerablePageReturner<ImportedMessage>(
-					_session.Context.Domain.MsgWallCtr.ImportedMessages,
-					(x) => new MsgWallPanelWallLineImport.Descriptor(x)));
+				var selectMenu = new StandaloneInteractiveSelectMenu<ImportedMessage>(_session, new EnumerablePageReturner<ImportedMessage>(_session.Context.Domain.MsgWallCtr.ImportedMessages, (x) => new Descriptor(x)));
 
 				var line = (await selectMenu.EvaluateItem())?.GetCarriedItem();
 
@@ -195,8 +194,8 @@ namespace Manito.Discord.PermanentMessage
 
 			private async Task<NextNetworkInstruction> OpenWall(NetworkInstructionArgument args)
 			{
-				var wall = await _wallSelector.Decorator(_wallSelector.Querryer()
-					.Where(x => x == _line.MessageWall)).FirstAsync();
+				await using var db = await _session.Context.Factory.CreateMyDbContextAsync();
+				var wall = db.MessageWalls.First(x => x.ID == _line.MessageWall.ID);
 
 				return _wallEditor.GetStartingInstruction(wall);
 			}
@@ -267,55 +266,17 @@ namespace Manito.Discord.PermanentMessage
 			}
 
 			private DialogueTabSession<MsgContext> _session;
-			private InteractiveSelectMenu<MessageWallLine> _selectMenu;
+			private StandaloneInteractiveSelectMenu<MessageWallLine> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 			public DiscordButtonComponent MkNewButton;
 			public DiscordButtonComponent EditButton;
 			private readonly MessageWall _wall;
 
-			private class MyQuerrier : IQuerrier<MessageWallLine>
-			{
-				private IPermMessageDbFactory _factory;
-				private Func<MessageWall> _getWall;
-
-				public MyQuerrier(IPermMessageDbFactory factory, Func<MessageWall> getWall)
-				{
-					_factory = factory;
-					_getWall = getWall;
-				}
-
-				public IItemDescriptor<MessageWallLine> Convert(MessageWallLine item) => new Descriptor(item);
-
-				public Int32 GetPages(Int32 perPage)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					return (int)Math.Ceiling((double)GetTotalCount() / perPage);
-				}
-
-				public IEnumerable<MessageWallLine> GetSection(Int32 skip, Int32 take)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					var input = db.MessageWallLines.Where(x => x.MessageWall == _getWall())
-						.OrderBy(x => x.ID).Skip(skip).Take(take);
-					return input.Include(x => x.MessageWall).ToArray();
-				}
-
-				public Int32 GetTotalCount()
-				{
-					using var db = _factory.CreateMyDbContext();
-					return db.MessageWallLines.Where(x => x.MessageWall == _getWall())
-						.OrderBy(x => x.ID).Count();
-				}
-			}
-
 			public Selector(DialogueTabSession<MsgContext> session, Node ret, MessageWall wall)
 			{
 				(_wall, _session, _ret) = (wall, session, ret);
-				_selectMenu = new InteractiveSelectMenu<MessageWallLine>(_session,
-					new QueryablePageReturner<MessageWallLine>(new MyQuerrier(_session.Context.Factory, () => _wall)));
+				_selectMenu = new StandaloneInteractiveSelectMenu<MessageWallLine>(_session, new CompactQuerryReturner<IPermMessageDbFactory, IPermMessageDb, MessageWallLine>(_session.Context.Factory, x => x.CreateMyDbContextAsync(), async x => x.MessageWallLines.Where(y => y.MessageWall == _wall), async x => new Descriptor(x)));
 				EditButton = new DiscordButtonComponent(ButtonStyle.Primary, "edit", "Изменить");
 				MkNewButton = new DiscordButtonComponent(ButtonStyle.Primary, "create", "Создать");
 			}

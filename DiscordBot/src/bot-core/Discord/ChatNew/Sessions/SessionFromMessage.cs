@@ -26,27 +26,28 @@ namespace Manito.Discord.ChatNew
 
 		public SessionFromMessage(MyClientBundle client, DiscordMessage message, UniversalMessageBuilder bld, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Identifier = new DialogueMsgIdentifier(_message = message, _userId = userId);
+			Identifier = new YesMessageState(_message = message, _userId = userId);
 			_builder = bld;
 			_channel = message.Channel;
 		}
 
 		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, UniversalMessageBuilder bld, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Identifier = new NoMessageDiagIdentifier(channel.Id, userId);
+			Identifier = new NoMessageState(channel.Id, userId);
 			_channel = channel;
 			_builder = bld;
 		}
 
 		public SessionFromMessage(MyClientBundle client, DiscordMessage message, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Identifier = new DialogueMsgIdentifier(_message = message, userId);
+			Identifier = new YesMessageState(_message = message, userId);
+			_builder = new(message);
 			_channel = message.Channel;
 		}
 
 		public SessionFromMessage(MyClientBundle client, DiscordChannel channel, ulong userId, bool isAutomaticallyDeleted = true) : this(userId, client, isAutomaticallyDeleted)
 		{
-			Identifier = new NoMessageDiagIdentifier(channel.Id, userId);
+			Identifier = new NoMessageState(channel.Id, userId);
 			_channel = channel;
 		}
 
@@ -98,7 +99,7 @@ namespace Manito.Discord.ChatNew
 		{
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
-			await OnStatusChange(this, new(new InteractiveInteraction(intr.Interaction, _message), "ConvertMeToComp"));
+			await OnStatusChange(this, new((new InteractiveInteraction(intr.Interaction, _message), _builder), "ConvertMeToComp"));
 
 			return intr;
 		}
@@ -113,20 +114,19 @@ namespace Manito.Discord.ChatNew
 		public async Task SendMessage(UniversalMessageBuilder msg)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
+			_builder = msg;
 			await SendMessageLocal(msg);
 			await Client.Remover.RemoveMessage(Identifier.ChannelId, Identifier.MessageId ?? 0, true);
 		}
 
 		private async Task SendMessageLocal(UniversalMessageBuilder msg)
 		{
-			if (_message != null)
-			{
+			if (_message == null)
+				_message = await _channel.SendMessageAsync(msg);
+			else
 				await _message.ModifyAsync(msg);
-				return;
-			}
 
-			_message = await _channel.SendMessageAsync(msg);
-			Identifier = new DialogueMsgIdentifier(_message, _userId);
+			Identifier = new YesMessageState(_message, _userId);
 		}
 
 		public async Task DoLaterReply()
@@ -154,7 +154,14 @@ namespace Manito.Discord.ChatNew
 			if (OnRemove != null)
 				await OnRemove(this);
 		}
-
+		public async Task<UniversalSession> PopNewLine() => await PopNewLine(await SessionChannel, await Client.Client.GetUserAsync(Identifier.UserId ?? 0));
+		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => PopNewLine(msg.Channel, msg.Author);
+		public async Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr)
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			return new SessionFromMessage(Client, msg, _builder, usr.Id).ToUniversal();
+		}
+		public async Task<UniversalSession> PopNewLine(DiscordUser msg) => await PopNewLine(await (await msg.ConvertToMember(Client.Client.Guilds.FirstOrDefault(x => x.Value.Members.FirstOrDefault(y => y.Key == msg.Id).Value != null).Value)).CreateDmChannelAsync(), msg);
 		public Task<DiscordMessage> SessionMessage => Task.FromResult(_message);
 		public Task<DiscordChannel> SessionChannel => Task.FromResult(_channel);
 

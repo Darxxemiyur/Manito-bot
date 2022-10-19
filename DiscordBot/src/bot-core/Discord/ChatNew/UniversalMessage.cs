@@ -179,6 +179,8 @@ namespace Manito.Discord.ChatNew
 		}
 
 		public static implicit operator UniversalMessageBuilder(string msg) => new UniversalMessageBuilder().SetContent(msg);
+		public static implicit operator UniversalMessageBuilder(DiscordComponent[][] msg) => new UniversalMessageBuilder().SetComponents(msg);
+		public static implicit operator UniversalMessageBuilder(DiscordComponent[] msg) => new UniversalMessageBuilder().SetComponents(msg);
 
 		public static implicit operator UniversalMessageBuilder(DiscordEmbedBuilder msg) => new UniversalMessageBuilder().AddEmbed(msg);
 

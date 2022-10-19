@@ -1,9 +1,15 @@
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Interactivity;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
+using Manito.Discord.ChatNew.Sessions;
+using Manito.Discord.Database;
 
+using Microsoft.EntityFrameworkCore;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
@@ -13,35 +19,46 @@ using System.Threading.Tasks;
 
 namespace Manito.Discord.Client
 {
+	public class BufferedIOBlock
+	{
+		private MyDomain _domain;
+		public class Block
+		{
+			public Block(DiscordComponent button, IDialogueNet net)
+			{
+
+			}
+		}
+		public BufferedIOBlock(MyDomain domain)
+		{
+
+		}
+
+	}
 	/// <summary>
 	/// Single net dialogue based Item selector.
 	/// </summary>
-	public class InteractiveSelectMenu<TItem> : IDialogueNet
+	public class StandaloneInteractiveSelectMenu<TItem> : IDialogueNet
 	{
-		private IDialogueSession _session;
+		private readonly IDialogueSession _session;
+		private IDialogueSession _controls;
 		private const int max = 25;
 		private const int rows = 5;
 
-		private int Page {
-			get => _paginater.Page; set => _paginater.Page = value;
-		}
-
-		private int PageCount => _paginater.GetPages;
-		private int _leftsp;
-		private DiscordWebhookBuilder _msg;
+		private UniversalMessageBuilder _msg;
 		private DiscordComponent[] _btnDef;
 		private DiscordButtonComponent _firstList;
 		private DiscordButtonComponent _prevList;
 		private DiscordButtonComponent _exBtn;
 		private DiscordButtonComponent _nextList;
 		private DiscordButtonComponent _latterList;
-		private string _navPrefix;
-		private string _itmPrefix;
-		private string _othPrefix;
+		private readonly string _navPrefix;
+		private readonly string _itmPrefix;
+		private readonly string _othPrefix;
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
-		private IPageReturner<TItem> _paginater;
+		private readonly IPageReturner<TItem> _paginater;
 
-		public InteractiveSelectMenu(IDialogueSession session, IPageReturner<TItem> paginater)
+		public StandaloneInteractiveSelectMenu(IDialogueSession session, IPageReturner<TItem> paginater)
 		{
 			_session = session;
 			_paginater = paginater;
@@ -54,6 +71,9 @@ namespace Manito.Discord.Client
 
 		private async Task<NextNetworkInstruction> Initiallize(NetworkInstructionArgument args)
 		{
+			_controls = await _session.PopNewLine();
+			_session.OnSessionEnd += (x, y) => _controls.RemoveMessage();
+			_session.OnSessionEnd += (x, y) => _controls.EndSession();
 			_firstList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_firstBtn",
 			 "Перв. стр", false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("◀️")));
 			_prevList = new DiscordButtonComponent(ButtonStyle.Success, $"{_navPrefix}_prevBtn",
@@ -71,18 +91,18 @@ namespace Manito.Discord.Client
 
 		private async Task<NextNetworkInstruction> PrintActions(NetworkInstructionArgument args)
 		{
-			_leftsp = max - _btnDef.Length;
-
-			_msg = new DiscordWebhookBuilder();
+			_msg = new UniversalMessageBuilder();
 			var emb = new DiscordEmbedBuilder();
 
-			_paginater.PerPage = _leftsp;
+			_paginater.PerPage = max;
 
-			var invCount = _paginater.Total;
+			var invCount = await _paginater.GetTotal();
 
-			Page = Page;
+			var page = 0;
+			var pages = await _paginater.GetPages();
+			await _paginater.SetPage(page = await _paginater.GetPage());
 
-			IEnumerable<IItemDescriptor<TItem>> itms = _paginater.ListablePage
+			IEnumerable<IItemDescriptor<TItem>> itms = (await _paginater.GetListablePage())
 				.Select((x, y) => x.SetLocalDisplayedOrder(y));
 
 			var btns = itms?.Where(x => x.HasButton()).Select(x =>
@@ -90,13 +110,13 @@ namespace Manito.Discord.Client
 				$"{_itmPrefix}_{x.GetButtonId()}", x.GetButtonName()))
 				?? Enumerable.Empty<DiscordButtonComponent>();
 
-			btns = btns.Concat(Enumerable.Range(1, _leftsp - btns.Count()).Select(x =>
+			btns = btns.Concat(Enumerable.Range(1, max - btns.Count()).Select(x =>
 				new DiscordButtonComponent(ButtonStyle.Secondary, $"{x}dummy",
 				" ** ** ** ** ** ** ", true)));
 
-			emb.WithFooter($"Всего предметов: {invCount}\nСтраница {Page} из {PageCount}");
+			emb.WithFooter($"Всего предметов: {invCount}\nСтраница {page} из {pages}");
 
-			if (Page <= 1)
+			if (page <= 1)
 			{
 				_firstList.Disable();
 				_prevList.Disable();
@@ -107,7 +127,7 @@ namespace Manito.Discord.Client
 				_prevList.Enable();
 			}
 
-			if (Page >= PageCount)
+			if (page >= pages)
 			{
 				_nextList.Disable();
 				_latterList.Disable();
@@ -118,11 +138,11 @@ namespace Manito.Discord.Client
 				_latterList.Enable();
 			}
 
-			foreach (var btnsr in btns.Concat(_btnDef).Chunk(rows))
+			foreach (var btnsr in btns.Chunk(rows))
 				_msg.AddComponents(btnsr);
 
 			await _session.SendMessage(_msg.AddEmbed(emb));
-
+			await _controls.SendMessage(new UniversalMessageBuilder().AddComponents(_btnDef).AddContent("** **"));
 			return new(WaitForResponse, itms);
 		}
 
@@ -131,17 +151,24 @@ namespace Manito.Discord.Client
 			var inv = (IEnumerable<IItemDescriptor<TItem>>)args.Payload;
 
 			//var resp = await _puller.GetComponentInteraction(_msg.Components);
-			var resp = await _session.GetComponentInteraction();
-
-			if (resp.ButtonId.StartsWith(_itmPrefix))
-				return new(ReturnItem, NextNetworkActions.Continue, (resp, inv));
+			var (diag, resp) = await new MultiSessionAwaiter(_session, _controls).GetComponentInteraction();
+			await diag.DoLaterReply();
 
 			if (resp.ButtonId.StartsWith(_navPrefix))
 				return new(ReturnNoItem, NextNetworkActions.Continue, resp);
 
+			await _controls.RemoveMessage();
+			if (resp.ButtonId.StartsWith(_itmPrefix))
+				return new(ReturnItem, NextNetworkActions.Continue, (resp, inv));
+
+			return new(ExitThing);
+		}
+		private async Task<NextNetworkInstruction> ExitThing(NetworkInstructionArgument arg)
+		{
+			await _controls.EndSession();
+			await _controls.RemoveMessage();
 			return new();
 		}
-
 		private async Task<NextNetworkInstruction> ReturnItem(NetworkInstructionArgument args)
 		{
 			var resp = ((InteractiveInteraction, IEnumerable<IItemDescriptor<TItem>>))args.Payload;
@@ -151,7 +178,7 @@ namespace Manito.Discord.Client
 			var item = resp.Item2.FirstOrDefault(x => resp
 				.Item1.ButtonId.Contains($"_{x.GetButtonId()}"));
 
-			return new(null, NextNetworkActions.Stop, item);
+			return new(item);
 		}
 
 		private async Task<NextNetworkInstruction> ReturnNoItem(NetworkInstructionArgument args)
@@ -159,21 +186,24 @@ namespace Manito.Discord.Client
 			var resp = (InteractiveInteraction)args.Payload;
 
 			if (resp.CompareButton(_exBtn))
-				return new();
+				return new(ExitThing);
 
 			await _session.DoLaterReply();
 
+			var page = await _paginater.GetPage();
 			if (resp.CompareButton(_firstList))
-				Page = 0;
+				page = 0;
 
 			if (resp.CompareButton(_prevList))
-				Page--;
+				page--;
 
 			if (resp.CompareButton(_nextList))
-				Page++;
+				page++;
 
 			if (resp.CompareButton(_latterList))
-				Page = PageCount;
+				page = await _paginater.GetPages();
+
+			await _paginater.SetPage(page);
 
 			return new(PrintActions);
 		}
@@ -210,9 +240,7 @@ namespace Manito.Discord.Client
 
 	public interface IPageReturner<TItem>
 	{
-		IList<IItemDescriptor<TItem>> ListablePage {
-			get;
-		}
+		Task<IList<IItemDescriptor<TItem>>> GetListablePage();
 
 		/// <summary>
 		/// Displayed on pages
@@ -222,52 +250,48 @@ namespace Manito.Discord.Client
 			get; set;
 		}
 
+		Task PassMessage(object obj, string msg) => throw new NotImplementedException();
+
 		/// <summary>
 		/// Total on current page amount
 		/// </summary>
 		/// <value></value>
-		int OnPage {
-			get;
-		}
+		Task<int> GetOnPage();
 
 		/// <summary>
 		/// Total item amount
 		/// </summary>
 		/// <value></value>
-		int Total {
-			get;
-		}
+		Task<int> GetTotal();
 
 		/// <summary>
 		/// Total pages amount
 		/// </summary>
 		/// <value></value>
-		int GetPages {
-			get;
-		}
+		Task<int> GetPages();
 
 		/// <summary>
 		/// Current page. Set, or Get
 		/// </summary>
 		/// <value></value>
-		int Page {
-			get; set;
-		}
+		Task<int> GetPage();
+		Task SetPage(int page);
 	}
 
 	public class EnumerablePageReturner<TItem> : IPageReturner<TItem>
 	{
-		public IList<IItemDescriptor<TItem>> ListablePage => _list
-			.Skip((Page - 1) * PerPage).Take(PerPage).Select(x => _convert(x)).ToList();
+		public async Task<IList<IItemDescriptor<TItem>>> GetListablePage() => _list
+			.Skip((_page - 1) * PerPage).Take(PerPage).Select(x => _convert(x)).ToList();
 
 		public Int32 PerPage { get; set; } = 25;
-		public Int32 OnPage => ListablePage.Count;
-		public Int32 Total => _list.Count;
-		public Int32 GetPages => Math.Max((int)Math.Ceiling((float)Total / PerPage), 1);
+		public async Task<Int32> GetOnPage() => (await GetListablePage()).Count;
+		public async Task<int> GetTotal() => _list.Count;
+		public async Task<int> GetPages() => Math.Max((int)Math.Ceiling((float)await GetTotal() / PerPage), 1);
 		private int _page;
-
-		public int Page {
-			get => _page; set => _page = Math.Clamp(value, 1, GetPages);
+		public async Task<int> GetPage() => Math.Max(_page, 1);
+		public async Task SetPage(int page)
+		{
+			_page = Math.Clamp(page, 1, await GetPages());
 		}
 
 		private List<TItem> _list;
@@ -280,42 +304,63 @@ namespace Manito.Discord.Client
 		}
 	}
 
-	public class QueryablePageReturner<TItem> : IPageReturner<TItem>
+	public delegate Task<TSource> SourceGetter<TFactory, TSource>(TFactory factory) where TFactory : IMyDbFactory where TSource : IMyDatabase;
+	public delegate Task<IQueryable<TItem>> ItemGetter<TFactory, TItem>(TFactory factory);
+	public delegate Task<IItemDescriptor<TItem>> DescriptorGenerator<TItem>(TItem item);
+	public class CompactQuerryReturner<TFactory, TSource, TItem> : IPageReturner<TItem> where TFactory : IMyDbFactory where TSource : IMyDatabase
 	{
-		private IEnumerable<TItem> GetQueryablePage() => Querrier.GetSection(PerPage * (Page - 1), PerPage);
-
-		public IList<IItemDescriptor<TItem>> ListablePage => GetQueryablePage()
-		.ToList().ConvertAll(x => Querrier.Convert(x));
-
-		public QueryablePageReturner(IQuerrier<TItem> querrier)
+		private readonly TFactory _factory;
+		private readonly SourceGetter<TFactory, TSource> _sourceGetter;
+		private readonly ItemGetter<TSource, TItem> _itemGetter;
+		private readonly DescriptorGenerator<TItem> _descriptorGenerator;
+		private readonly AsyncLocker _lock = new();
+		public CompactQuerryReturner(TFactory factory, SourceGetter<TFactory, TSource> sourceGetter, ItemGetter<TSource, TItem> itemGetter, DescriptorGenerator<TItem> descriptorGenerator)
 		{
-			Querrier = querrier;
+			_factory = factory;
+			_sourceGetter = sourceGetter;
+			_itemGetter = itemGetter;
+			_descriptorGenerator = descriptorGenerator;
 		}
 
-		public int GetPages => Math.Max((int)Math.Ceiling((float)Total / PerPage), 1);
-		private int _page;
-
-		public int Page {
-			get => _page; set => _page = Math.Clamp(value, 1, GetPages);
-		}
-
-		public int PerPage { get; set; } = 25;
-		public int OnPage => GetQueryablePage().Count();
-		public int Total => Querrier.GetTotalCount();
-
-		public IQuerrier<TItem> Querrier {
+		public int PerPage {
 			get;
+			set;
 		}
-	}
-
-	public interface IQuerrier<TItem>
-	{
-		IEnumerable<TItem> GetSection(int skip, int take);
-
-		int GetPages(int perPage);
-
-		int GetTotalCount();
-
-		IItemDescriptor<TItem> Convert(TItem item);
+		private int _page = 1;
+		public async Task<IList<IItemDescriptor<TItem>>> GetListablePage()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			await using var db = await _sourceGetter(_factory);
+			var itemsQ = await _itemGetter(db);
+			var items = itemsQ.Skip((_page - 1) * PerPage).Take(PerPage).ToArray();
+			var buffer = new List<IItemDescriptor<TItem>>(items.Length);
+			foreach (var item in items)
+				buffer.Add(await _descriptorGenerator(item));
+			return buffer;
+		}
+		public async Task<int> GetOnPage() => (await GetListablePage()).Count;
+		public async Task<int> GetPage()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			return _page;
+		}
+		public async Task<int> GetPages()
+		{
+			var total = await GetTotal();
+			return Math.Max(1, (int)Math.Ceiling((double)total / PerPage));
+		}
+		public async Task<int> GetTotal()
+		{
+			await using var _ = await _lock.BlockAsyncLock();
+			await using var db = await _sourceGetter(_factory);
+			var itemsQ = await _itemGetter(db);
+			return await itemsQ.CountAsync();
+		}
+		public async Task SetPage(int page)
+		{
+			var pagen = Math.Clamp(page, 1, await GetPages());
+			await using var _ = await _lock.BlockAsyncLock();
+			_page = pagen;
+		}
 	}
 }

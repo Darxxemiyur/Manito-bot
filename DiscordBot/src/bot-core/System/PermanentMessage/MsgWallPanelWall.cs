@@ -246,63 +246,18 @@ namespace Manito.Discord.PermanentMessage
 			}
 
 			private DialogueTabSession<MsgContext> _session;
-			private InteractiveSelectMenu<MessageWall> _selectMenu;
+			private StandaloneInteractiveSelectMenu<MessageWall> _selectMenu;
 			private Node _ret;
 			public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
 			public DiscordButtonComponent CreateButton;
 			public DiscordButtonComponent SelectButton;
-
-			private class MyQuerrier : IQuerrier<MessageWall>
-			{
-				private IPermMessageDbFactory _factory;
-
-				public MyQuerrier(IPermMessageDbFactory factory)
-				{
-					_factory = factory;
-				}
-
-				public IItemDescriptor<MessageWall> Convert(MessageWall item) => new Descriptor(item);
-
-				public Int32 GetPages(Int32 perPage)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					return (int)Math.Ceiling((double)GetTotalCount() / perPage);
-				}
-
-				public IEnumerable<MessageWall> GetSection(Int32 skip, Int32 take)
-				{
-					using var db = _factory.CreateMyDbContext();
-
-					return db.MessageWalls.OrderBy(x => x.ID).Skip(skip).Take(take).ToArray();
-				}
-
-				public Int32 GetTotalCount()
-				{
-					using var db = _factory.CreateMyDbContext();
-					return db.MessageWalls.OrderBy(x => x.ID).Count();
-				}
-			}
 
 			public Selector(DialogueTabSession<MsgContext> session, Node ret)
 			{
 				CreateButton = new DiscordButtonComponent(ButtonStyle.Success, "create", "Создать");
 				SelectButton = new DiscordButtonComponent(ButtonStyle.Primary, "select", "Выбрать");
 				(_session, _ret) = (session, ret);
-				_selectMenu = new InteractiveSelectMenu<MessageWall>(_session,
-					new QueryablePageReturner<MessageWall>(new MyQuerrier(_session.Context.Factory)));
-			}
-
-			public IQueryable<MessageWall> Querryer(Func<IQueryable<MessageWall>, IQueryable<MessageWall>> decorator = default)
-			{
-				using var db = _session.Context.Factory.CreateMyDbContext();
-
-				return db.MessageWalls.OrderBy(x => x.ID);
-			}
-
-			public IQueryable<MessageWall> Decorator(IQueryable<MessageWall> input)
-			{
-				return input.Include(x => x.Msgs);
+				_selectMenu = new StandaloneInteractiveSelectMenu<MessageWall>(_session, new CompactQuerryReturner<IPermMessageDbFactory, IPermMessageDb, MessageWall>(_session.Context.Factory, x => x.CreateMyDbContextAsync(), async x => x.MessageWalls, async x => new Descriptor(x)));
 			}
 
 			private async Task<NextNetworkInstruction> CreateWall(NetworkInstructionArgument args)

@@ -13,6 +13,10 @@ namespace Manito.Discord.Database
 			get;
 		}
 
+		MyDomain Domain {
+			get;
+		}
+
 		IMyDatabase CreateMyDbContext();
 
 		Task<IMyDatabase> CreateMyDbContextAsync();

@@ -7,7 +7,7 @@ using System;
 
 namespace Manito.Discord.ChatNew
 {
-	public class DialogueCommandIdentifier : ISessionState
+	public class NoMessageState : ISessionState
 	{
 		public ulong? UserId {
 			get;
@@ -34,10 +34,10 @@ namespace Manito.Discord.ChatNew
 			get;
 		}
 
-		public DialogueCommandIdentifier(InteractiveInteraction interaction)
+		public NoMessageState(ulong channelId, ulong userId)
 		{
-			UserId = interaction.Interaction.User.Id;
-			ChannelId = interaction.Interaction.ChannelId;
+			UserId = userId;
+			ChannelId = channelId;
 		}
 
 		public bool DoesBelongToUs(InteractiveInteraction interaction) => false;
