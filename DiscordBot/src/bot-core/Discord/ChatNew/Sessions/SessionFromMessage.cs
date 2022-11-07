@@ -59,11 +59,6 @@ namespace Manito.Discord.ChatNew
 			Client.EventsBuffer.MsgDeletion.OnToNextLink += MsgDeletion_OnMessage;
 		}
 
-		~SessionFromMessage()
-		{
-			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
-		}
-
 		private async Task MsgDeletion_OnMessage(DiscordClient arg1, MessageDeleteEventArgs arg2)
 		{
 			if (arg2.Message.Id != Identifier.MessageId)
@@ -100,6 +95,7 @@ namespace Manito.Discord.ChatNew
 			InteractiveInteraction intr = await Client.ActivityTools.WaitForComponentInteraction(x => Identifier.DoesBelongToUs(x), token);
 
 			await OnStatusChange(this, new((new InteractiveInteraction(intr.Interaction, _message), _builder), "ConvertMeToComp"));
+			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
 
 			return intr;
 		}

@@ -22,7 +22,7 @@ namespace Manito.System.Economy
 
 		public Func<DiscordInteraction, Task> Search(DiscordInteraction command)
 		{
-			if (command.Data.Type == ApplicationCommandType.Message)
+			if (command.Data.Type == ApplicationCommandType.Message && command.Data.Name == "Mark for deletion")
 				return MarkToDelete;
 
 			foreach (var item in GetCommands())

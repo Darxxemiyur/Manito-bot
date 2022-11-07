@@ -52,7 +52,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 				result = _prepin.Count > 0 ? _prepin.Pop() : _chain.Dequeue();
 			}
 
-			var revert = new MyTaskSource<T>(token);
+			using var revert = new MyTaskSource<T>(token);
 
 			var either = await Task.WhenAny(result, revert.MyTask);
 
@@ -74,6 +74,7 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			{
 				if (disposing)
 				{
+					_generator.Dispose();
 					_sync.Dispose();
 				}
 
@@ -94,9 +95,9 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 	/// First in First out fetch blocking Async Collection FIFOACollection
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class FIFOACollection : IDisposable
+	public class FIFOFBACollection : IDisposable
 	{
-		public FIFOACollection()
+		public FIFOFBACollection()
 		{
 			_facade = new();
 		}
@@ -132,6 +133,6 @@ namespace Name.Bayfaderix.Darxxemiyur.Common
 			GC.SuppressFinalize(this);
 		}
 
-		~FIFOACollection() => Dispose(false);
+		~FIFOFBACollection() => Dispose(false);
 	}
 }

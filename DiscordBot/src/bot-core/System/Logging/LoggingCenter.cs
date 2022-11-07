@@ -19,7 +19,6 @@ namespace Manito.System.Logging
 	{
 		private readonly FIFOPTACollection<LogLine> _queue;
 		private readonly MyClientBundle _client;
-		private readonly AsyncLocker _lock;
 		private readonly ILoggingDBFactory _factory;
 		private readonly FIFOFBACollection<(string, object)> _relay;
 
@@ -29,7 +28,6 @@ namespace Manito.System.Logging
 			var dc = client.Client;
 			_relay = new();
 			_queue = new();
-			_lock = new();
 
 			dc.PayloadReceived += Dc_PayloadReceived;
 		}
@@ -134,18 +132,15 @@ namespace Manito.System.Logging
 							await db.LogLines.AddRangeAsync(range);
 							await db.SaveChangesAsync();
 							await Task.Delay(TimeSpan.FromSeconds(1));
+							await Task.Run(() => {
+								foreach (var item in range)
+									item.Dispose();
+							});
 						}
 						catch
 						{
 							await _queue.Place(range.Select(x => new LogLine(x)));
 							throw;
-						}
-						finally
-						{
-							await Task.Run(() => {
-								foreach (var item in range)
-									item.Dispose();
-							});
 						}
 					});
 					await _client.Domain.ExecutionThread.AddNew(job);

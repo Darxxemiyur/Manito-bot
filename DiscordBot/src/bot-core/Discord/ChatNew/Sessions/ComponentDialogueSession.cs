@@ -157,6 +157,7 @@ namespace Manito.Discord.ChatNew
 			{
 				await OnStatusChange(this, new SessionInnerMessage((chnl, _innerMsgBuilder, Identifier.UserId ?? 0), "ConvertMeToMsg2"));
 			}
+			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
 		}
 
 		public async Task DoLaterReply()
@@ -252,7 +253,6 @@ namespace Manito.Discord.ChatNew
 
 		~ComponentDialogueSession()
 		{
-			Client.EventsBuffer.MsgDeletion.OnToNextLink -= MsgDeletion_OnMessage;
 		}
 
 		private async Task MsgDeletion_OnMessage(DiscordClient arg1, MessageDeleteEventArgs arg2)

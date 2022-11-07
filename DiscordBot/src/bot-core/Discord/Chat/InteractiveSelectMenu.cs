@@ -175,8 +175,7 @@ namespace Manito.Discord.Client
 
 			await _session.DoLaterReply();
 
-			var item = resp.Item2.FirstOrDefault(x => resp
-				.Item1.ButtonId.Contains($"_{x.GetButtonId()}"));
+			var item = resp.Item2.FirstOrDefault(x => resp.Item1.ButtonId.Contains($"_{x.GetButtonId()}"));
 
 			return new(item);
 		}
