@@ -5,6 +5,7 @@
 		public abstract string FrameName {
 			get;
 		}
+
 		public abstract EditorType EditedBy {
 			get;
 		}

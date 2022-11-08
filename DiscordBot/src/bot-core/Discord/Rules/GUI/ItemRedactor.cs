@@ -3,17 +3,13 @@ using DisCatSharp.Enums;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
-using Manito.Discord.PatternSystems.Common;
 
 using Name.Bayfaderix.Darxxemiyur.Common;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.Rules.GUI
@@ -38,8 +34,11 @@ namespace Manito.Discord.Rules.GUI
 
 			_buttons = TurnToChunkTape(frames.Select((x, y) => (x.FrameName, Sanitizer($"{y}"))).Select(x => new DiscordButtonComponent(ButtonStyle.Primary, x.Item2, x.FrameName)).ToList(), 5, true).ToList();
 		}
+
 		public NodeResultHandler StepResultHandler => Common.DefaultNodeResultHandler;
+
 		private IEnumerable<DiscordButtonComponent[]> TurnToChunkTape(IEnumerable<DiscordButtonComponent> components, int maxPerChunk, bool fillWithEmpty) => fillWithEmpty ? components.AsSaturatedTape(x => _left, x => _right, maxPerChunk, x => new DiscordButtonComponent(ButtonStyle.Secondary, $"dis{x}", "** **", true)).Chunk(maxPerChunk) : components.AsMarkedTape(x => _left, x => _right, maxPerChunk).Chunk(maxPerChunk);
+
 		private async Task<NextNetworkInstruction> StartRedacting(NetworkInstructionArgument args)
 		{
 			var session = _session;
@@ -53,7 +52,6 @@ namespace Manito.Discord.Rules.GUI
 
 				foreach (var bnts in btns)
 					message.AddComponents(bnts);
-
 
 				await session.SendMessage(message);
 
@@ -71,9 +69,9 @@ namespace Manito.Discord.Rules.GUI
 				}
 
 				var btn = btns.SelectMany(x => x).First(x => answer.CompareButton(x));
-
 			}
 		}
+
 		private async Task<NextNetworkInstruction> SelectPressed(NetworkInstructionArgument args)
 		{
 			throw new NotImplementedException();
@@ -85,8 +83,10 @@ namespace Manito.Discord.Rules.GUI
 		}
 
 		public NextNetworkInstruction GetStartingInstruction() => new(StartRedacting);
+
 		public NextNetworkInstruction GetStartingInstruction(object payload) => throw new NotImplementedException();
 	}
+
 	/// <summary>
 	/// Awaits button interaction
 	/// </summary>
@@ -95,8 +95,10 @@ namespace Manito.Discord.Rules.GUI
 		public NumberEditor()
 		{
 		}
+
 		public EditorType Type => EditorType.Number;
 	}
+
 	/// <summary>
 	/// Awaits button interaction
 	/// </summary>
@@ -104,6 +106,7 @@ namespace Manito.Discord.Rules.GUI
 	{
 		public EditorType Type => EditorType.Type;
 	}
+
 	/// <summary>
 	/// Awaits message
 	/// </summary>
@@ -113,6 +116,7 @@ namespace Manito.Discord.Rules.GUI
 		private readonly string innerData;
 		public string Data => innerData;
 		public EditorType Type => EditorType.String;
+
 		public StringEditor(string name, string data)
 		{
 			VariableName = name;

@@ -3,17 +3,12 @@ using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 using DisCatSharp.EventArgs;
 
-using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatAbstract;
-using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
-using Manito.Discord.Orders;
 using Manito.Discord.Rules.GUI;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.Rules
@@ -31,11 +26,9 @@ namespace Manito.Discord.Rules
 			}
 		}
 
-
 		private readonly DiscordEventProxy<DiscordInteraction> _queue;
 		private readonly DialogueNetSessionTab<IRulesDbFactory> _aoTab;
 		private readonly MyDomain _domain;
-
 
 		private IEnumerable<DiscordApplicationCommand> GetCommands()
 		{
@@ -44,6 +37,7 @@ namespace Manito.Discord.Rules
 		}
 
 		private readonly List<DiscordApplicationCommand> _commandList;
+
 		public RulesFilter(MyDomain service, EventBuffer eventBuffer)
 		{
 			_commandList = GetCommands().ToList();
@@ -52,9 +46,11 @@ namespace Manito.Discord.Rules
 			service.MyDiscordClient.AppCommands.Add("RulesFlt", _commandList);
 			eventBuffer.Interact.OnToNextLink += FilterMessage;
 		}
+
 		private Task<bool> IsWorthy(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.DoesHaveAdminPermission(this, user);
 
 		private Task<bool> IsGod(DiscordUser user) => _domain.Filters.AssociationFilter.PermissionChecker.IsGod(user);
+
 		private async Task HandleAsCommand(DiscordInteraction args)
 		{
 			if (args.Data.Name.Equals("rules"))
@@ -74,14 +70,13 @@ namespace Manito.Discord.Rules
 
 			if (!await IsWorthy(args.User))
 			{
-
 			}
 
 			if (args.Data.Name.Equals("rules_edit"))
 			{
-
 			}
 		}
+
 		private async Task FilterMessage(DiscordClient client, InteractionCreateEventArgs args)
 		{
 			if (!_commandList.Any(x => args.Interaction.Data.Name.Contains(x.Name)))

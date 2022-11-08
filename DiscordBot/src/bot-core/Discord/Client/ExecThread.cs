@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 using static Name.Bayfaderix.Darxxemiyur.Common.AsyncJobManager;
 
-
 namespace Manito.Discord.Client
 {
 	public class ExecThread : IModule

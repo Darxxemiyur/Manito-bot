@@ -4,14 +4,13 @@ using DisCatSharp.Enums;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
-using Manito.Discord.PatternSystems.Common;
 
 using Microsoft.EntityFrameworkCore;
 
+using Name.Bayfaderix.Darxxemiyur.Common;
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 

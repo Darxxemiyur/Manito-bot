@@ -13,10 +13,10 @@ namespace Manito.Discord.Config
 		{
 #if DEBUG
 			//DEBUG
-			ClientKey = "OTU4MDk4NDIzMzgxMzY0NzQ2.YkIYsA.P-D1NMIwuFwpiveg5TJXVHAcUUM";
+			ClientKey = "";
 #else
 			//RELEASE
-			ClientKey = "OTgzMzkxMTgwMjYxODUxMTg2.GL1uT4.2p5AxTukTGDyFhfB0gNmgmUd3v1TzuP9joDaYo";
+			ClientKey = "";
 #endif
 		}
 	}

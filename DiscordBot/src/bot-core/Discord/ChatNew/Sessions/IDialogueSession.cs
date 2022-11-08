@@ -1,12 +1,8 @@
 ﻿using DisCatSharp.Entities;
 
-using Manito.Discord.ChatNew.Sessions;
 using Manito.Discord.Client;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Manito.Discord.ChatNew
@@ -61,11 +57,13 @@ namespace Manito.Discord.ChatNew
 		/// </summary>
 		/// <returns></returns>
 		Task<UniversalSession> PopNewLine(DiscordMessage msg);
+
 		/// <summary>
 		/// Creates a new Session related to this channel and user
 		/// </summary>
 		/// <returns></returns>
 		Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr);
+
 		/// <summary>
 		/// Creates a new Session related to this user
 		/// </summary>

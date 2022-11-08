@@ -1,5 +1,4 @@
 using Manito.Discord.Database;
-using Manito.System.Economy.BBB;
 
 using Microsoft.EntityFrameworkCore;
 

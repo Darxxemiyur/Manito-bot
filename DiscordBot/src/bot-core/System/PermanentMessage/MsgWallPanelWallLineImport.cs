@@ -4,7 +4,8 @@ using DisCatSharp.Enums;
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
-using Manito.Discord.PatternSystems.Common;
+
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using Name.Bayfaderix.Darxxemiyur.Node.Network;
 

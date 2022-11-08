@@ -30,6 +30,7 @@ namespace Manito.Discord.Config
 			Address = "localhost";
 			Port = "5432";
 #if DEBUG
+			// The sensetive info display, but it's not in prod so it's fine.
 			Login = "postgres;Include Error Detail=true";
 			Password = "postgres";
 #else

@@ -3,7 +3,6 @@ using Manito.Discord.PermanentMessage;
 using Manito.Discord.Rules;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
-using Manito.System.Economy.BBB;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +46,7 @@ namespace Manito.Discord.Database
 		public DbSet<MessageToRemove> MessagesToRemove {
 			get; set;
 		}
+
 		public DbSet<RulesPoint> Rules {
 			get; set;
 		}

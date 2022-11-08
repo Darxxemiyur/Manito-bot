@@ -2,10 +2,8 @@
 
 using Manito.Discord.Client;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +12,9 @@ namespace Manito.Discord.ChatNew.Sessions
 	public class MultiSessionAwaiter
 	{
 		private IEnumerable<IDialogueSession> _sessions;
+
 		public MultiSessionAwaiter(params IDialogueSession[] sessions) => _sessions = sessions;
+
 		public MultiSessionAwaiter(IEnumerable<IDialogueSession> sessions) => _sessions = sessions;
 
 		/// <summary>

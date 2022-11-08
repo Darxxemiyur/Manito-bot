@@ -3,7 +3,6 @@ using Manito.Discord.PermanentMessage;
 using Manito.Discord.Rules;
 using Manito.Discord.Shop;
 using Manito.System.Economy;
-using Manito.System.Economy.BBB;
 using Manito.System.Logging;
 
 using Microsoft.EntityFrameworkCore;

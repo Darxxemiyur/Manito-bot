@@ -1,6 +1,5 @@
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
-using DisCatSharp.Interactivity;
 
 using Manito.Discord.Chat.DialogueNet;
 using Manito.Discord.ChatNew;
@@ -22,19 +21,19 @@ namespace Manito.Discord.Client
 	public class BufferedIOBlock
 	{
 		private MyDomain _domain;
+
 		public class Block
 		{
 			public Block(DiscordComponent button, IDialogueNet net)
 			{
-
 			}
 		}
+
 		public BufferedIOBlock(MyDomain domain)
 		{
-
 		}
-
 	}
+
 	/// <summary>
 	/// Single net dialogue based Item selector.
 	/// </summary>
@@ -163,12 +162,14 @@ namespace Manito.Discord.Client
 
 			return new(ExitThing);
 		}
+
 		private async Task<NextNetworkInstruction> ExitThing(NetworkInstructionArgument arg)
 		{
 			await _controls.EndSession();
 			await _controls.RemoveMessage();
 			return new();
 		}
+
 		private async Task<NextNetworkInstruction> ReturnItem(NetworkInstructionArgument args)
 		{
 			var resp = ((InteractiveInteraction, IEnumerable<IItemDescriptor<TItem>>))args.Payload;
@@ -274,6 +275,7 @@ namespace Manito.Discord.Client
 		/// </summary>
 		/// <value></value>
 		Task<int> GetPage();
+
 		Task SetPage(int page);
 	}
 
@@ -283,11 +285,17 @@ namespace Manito.Discord.Client
 			.Skip((_page - 1) * PerPage).Take(PerPage).Select(x => _convert(x)).ToList();
 
 		public Int32 PerPage { get; set; } = 25;
+
 		public async Task<Int32> GetOnPage() => (await GetListablePage()).Count;
+
 		public async Task<int> GetTotal() => _list.Count;
+
 		public async Task<int> GetPages() => Math.Max((int)Math.Ceiling((float)await GetTotal() / PerPage), 1);
+
 		private int _page;
+
 		public async Task<int> GetPage() => Math.Max(_page, 1);
+
 		public async Task SetPage(int page)
 		{
 			_page = Math.Clamp(page, 1, await GetPages());
@@ -304,8 +312,11 @@ namespace Manito.Discord.Client
 	}
 
 	public delegate Task<TSource> SourceGetter<TFactory, TSource>(TFactory factory) where TFactory : IMyDbFactory where TSource : IMyDatabase;
+
 	public delegate Task<IQueryable<TItem>> ItemGetter<TFactory, TItem>(TFactory factory);
+
 	public delegate Task<IItemDescriptor<TItem>> DescriptorGenerator<TItem>(TItem item);
+
 	public class CompactQuerryReturner<TFactory, TSource, TItem> : IPageReturner<TItem> where TFactory : IMyDbFactory where TSource : IMyDatabase
 	{
 		private readonly TFactory _factory;
@@ -313,6 +324,7 @@ namespace Manito.Discord.Client
 		private readonly ItemGetter<TSource, TItem> _itemGetter;
 		private readonly DescriptorGenerator<TItem> _descriptorGenerator;
 		private readonly AsyncLocker _lock = new();
+
 		public CompactQuerryReturner(TFactory factory, SourceGetter<TFactory, TSource> sourceGetter, ItemGetter<TSource, TItem> itemGetter, DescriptorGenerator<TItem> descriptorGenerator)
 		{
 			_factory = factory;
@@ -325,7 +337,9 @@ namespace Manito.Discord.Client
 			get;
 			set;
 		}
+
 		private int _page = 1;
+
 		public async Task<IList<IItemDescriptor<TItem>>> GetListablePage()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
@@ -337,17 +351,21 @@ namespace Manito.Discord.Client
 				buffer.Add(await _descriptorGenerator(item));
 			return buffer;
 		}
+
 		public async Task<int> GetOnPage() => (await GetListablePage()).Count;
+
 		public async Task<int> GetPage()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return _page;
 		}
+
 		public async Task<int> GetPages()
 		{
 			var total = await GetTotal();
 			return Math.Max(1, (int)Math.Ceiling((double)total / PerPage));
 		}
+
 		public async Task<int> GetTotal()
 		{
 			await using var _ = await _lock.BlockAsyncLock();
@@ -355,6 +373,7 @@ namespace Manito.Discord.Client
 			var itemsQ = await _itemGetter(db);
 			return await itemsQ.CountAsync();
 		}
+
 		public async Task SetPage(int page)
 		{
 			var pagen = Math.Clamp(page, 1, await GetPages());

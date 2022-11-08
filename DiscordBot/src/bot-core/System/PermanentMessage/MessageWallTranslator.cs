@@ -4,7 +4,7 @@ using DisCatSharp;
 using DisCatSharp.Entities;
 using DisCatSharp.Exceptions;
 
-using Manito.Discord.PatternSystems.Common;
+using Name.Bayfaderix.Darxxemiyur.Common;
 
 using System;
 using System.Collections.Generic;

@@ -128,9 +128,13 @@ namespace Manito.Discord.ChatNew
 		public Task RemoveMessage() => SafeWriter(() => _innerSession.RemoveMessage());
 
 		public Task SendMessage(UniversalMessageBuilder msg) => SafeWriter(() => _innerSession.SendMessage(msg));
+
 		public Task<UniversalSession> PopNewLine() => _innerSession.PopNewLine();
+
 		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => _innerSession.PopNewLine(msg);
+
 		public Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr) => _innerSession.PopNewLine(msg, usr);
+
 		public Task<UniversalSession> PopNewLine(DiscordUser msg) => _innerSession.PopNewLine(msg);
 
 		public Task<DiscordMessage> SessionMessage => _innerSession.SessionMessage;

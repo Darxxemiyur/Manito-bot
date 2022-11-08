@@ -265,16 +265,17 @@ namespace Manito.Discord.ChatNew
 
 		public async Task<UniversalSession> PopNewLine()
 		{
-
-
 			return await PopNewLine(await SessionChannel, await Client.Client.GetUserAsync(Identifier.UserId ?? 0));
 		}
+
 		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => PopNewLine(msg.Channel, msg.Author);
+
 		public async Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return new SessionFromMessage(Client, msg, _innerMsgBuilder, usr.Id).ToUniversal();
 		}
+
 		public async Task<UniversalSession> PopNewLine(DiscordUser msg)
 		{
 			return await PopNewLine(await (await msg.ConvertToMember(Client.Client.Guilds.FirstOrDefault(x => x.Value.Members.FirstOrDefault(y => y.Key == msg.Id).Value != null).Value)).CreateDmChannelAsync(), msg);

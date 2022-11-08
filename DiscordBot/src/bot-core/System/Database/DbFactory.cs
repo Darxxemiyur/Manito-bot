@@ -46,6 +46,7 @@ namespace Manito.Discord.Database
 		public IDesignTimeDbContextFactory<DbContextImplementation> OriginalFactory {
 			get; private set;
 		}
+
 		public MyDomain Domain {
 			get;
 		}
@@ -115,6 +116,7 @@ namespace Manito.Discord.Database
 
 		async Task<ICleaningDb> ICleaningDbFactory.CreateMyDbContextAsync() =>
 			 await CreateMyDbContextAsync();
+
 		IRulesDb IRulesDbFactory.CreateMyDbContext() =>
 			 CreateMyDbContext();
 

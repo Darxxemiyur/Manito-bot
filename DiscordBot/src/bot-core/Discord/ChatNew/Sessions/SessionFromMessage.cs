@@ -150,14 +150,19 @@ namespace Manito.Discord.ChatNew
 			if (OnRemove != null)
 				await OnRemove(this);
 		}
+
 		public async Task<UniversalSession> PopNewLine() => await PopNewLine(await SessionChannel, await Client.Client.GetUserAsync(Identifier.UserId ?? 0));
+
 		public Task<UniversalSession> PopNewLine(DiscordMessage msg) => PopNewLine(msg.Channel, msg.Author);
+
 		public async Task<UniversalSession> PopNewLine(DiscordChannel msg, DiscordUser usr)
 		{
 			await using var _ = await _lock.BlockAsyncLock();
 			return new SessionFromMessage(Client, msg, _builder, usr.Id).ToUniversal();
 		}
+
 		public async Task<UniversalSession> PopNewLine(DiscordUser msg) => await PopNewLine(await (await msg.ConvertToMember(Client.Client.Guilds.FirstOrDefault(x => x.Value.Members.FirstOrDefault(y => y.Key == msg.Id).Value != null).Value)).CreateDmChannelAsync(), msg);
+
 		public Task<DiscordMessage> SessionMessage => Task.FromResult(_message);
 		public Task<DiscordChannel> SessionChannel => Task.FromResult(_channel);
 

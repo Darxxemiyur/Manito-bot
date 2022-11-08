@@ -4,7 +4,6 @@ using DisCatSharp.Enums;
 using Manito.Discord;
 using Manito.Discord.ChatNew;
 using Manito.Discord.Client;
-using Manito.System.Economy.BBB;
 
 using System;
 using System.Collections.Generic;
@@ -86,14 +85,14 @@ namespace Manito.System.Economy
 			 descriptionLocalizations: GetLoc("Проверить диалоговую систему")),
 			 CheckDialogue);
 		}
+
 		private async Task PopulateDatabase(DiscordInteraction args)
 		{
 			var session = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();
 
 			await using var fdb = await _bot.DbFactory.CreateMyDbContextAsync();
-
-
 		}
+
 		private async Task MarkToDelete(DiscordInteraction args)
 		{
 			var rs = new ComponentDialogueSession(_bot.MyDiscordClient, args).ToUniversal();

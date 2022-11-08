@@ -7,6 +7,7 @@ namespace Manito.Discord.Rules.GUI
 		public override string FrameName {
 			get;
 		}
+
 		public override EditorType EditedBy {
 			get;
 		}

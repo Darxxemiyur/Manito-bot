@@ -1,10 +1,9 @@
 ﻿using DisCatSharp.Entities;
+
 using Manito.Discord.Client;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,7 +41,6 @@ namespace Manito.Discord.ChatNew
 		{
 			CancellationTokenSource my = new();
 			var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, my.Token);
-
 
 			var tasks = new List<(InteractionTypes, Task)>();
 
